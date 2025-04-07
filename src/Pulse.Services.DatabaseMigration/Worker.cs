@@ -2,7 +2,7 @@ namespace Pulse.Services.DatabaseMigration
 {
     using Microsoft.EntityFrameworkCore;
 
-    using Pulse.Core.Data;
+    using Pulse.Infrastructure;
 
     public class Worker : BackgroundService
     {
@@ -22,7 +22,7 @@ namespace Pulse.Services.DatabaseMigration
             try
             {
                 using var scope = this._serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<PulseDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                 await dbContext.Database.MigrateAsync(stoppingToken);
                 this._logger.LogInformation("Database migrations applied successfully.");
