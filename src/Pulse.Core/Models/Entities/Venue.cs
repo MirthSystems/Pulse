@@ -39,110 +39,6 @@
         public string? Description { get; set; }
 
         /// <summary>
-        /// This required field helps classify and filter venues for users. (e.g., "pub", "bar", "restaurant")
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of venue categories include:</para>
-        /// <para>- "pub"</para>
-        /// <para>- "restaurant"</para>
-        /// <para>- "comedy_club"</para>
-        /// <para>- "winery"</para>
-        /// </remarks>
-        public string Category { get; set; } = null!;
-
-        /// <summary>
-        /// This required field typically includes the street number and name.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of address line 1 include:</para>
-        /// <para>- "123 Main St" (USA)</para>
-        /// <para>- "10 Downing Street" (UK)</para>
-        /// </remarks>
-        public string AddressLine1 { get; set; } = null!;
-
-        /// <summary>
-        /// This optional field can include additional address details like suite or apartment numbers.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of address line 2 include:</para>
-        /// <para>- "Suite 200" (USA)</para>
-        /// <para>- "Flat 3" (UK)</para>
-        /// </remarks>
-        public string? AddressLine2 { get; set; }
-
-        /// <summary>
-        /// The city or locality where the venue is located.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of cities include:</para>
-        /// <para>- "Springfield" (USA)</para>
-        /// <para>- "Toronto" (Canada)</para>
-        /// </remarks>
-        public string City { get; set; } = null!;
-
-        /// <summary>
-        /// The administrative region where the venue is located.
-        /// This required field can represent a state, province, territory, or other regional division depending on the country.
-        /// For the MVP, this focuses on US states and territories, but it is flexible for international use.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of regions include:</para>
-        /// <para>- "Illinois" (USA)</para>
-        /// <para>- "Puerto Rico" (US Territory)</para>
-        /// <para>- "Ontario" (Canada)</para>
-        /// <para>- "Queensland" (Australia)</para>
-        /// </remarks>
-        public string Region { get; set; } = null!;
-
-        /// <summary>
-        /// The postal or ZIP code of the venue's location.
-        /// This required field is part of the venue's address and supports various international formats.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of postal codes include:</para>
-        /// <para>- "62701" (USA)</para>
-        /// <para>- "M5V 2T6" (Canada)</para>
-        /// <para>- "SW1A 1AA" (UK)</para>
-        /// </remarks>
-        public string ZipCode { get; set; } = null!;
-
-        /// <summary>
-        /// The country where the venue is located.
-        /// This required field is part of the venue's address and helps determine address formatting and timezone derivation.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of countries include:</para>
-        /// <para>- "United States"</para>
-        /// <para>- "Canada"</para>
-        /// <para>- "United Kingdom"</para>
-        /// </remarks>
-        public string Country { get; set; } = null!;
-
-        /// <summary>
-        /// The ISO 3166-1 alpha-2 country code for the venue's location.
-        /// This optional field standardizes country identification and supports geocoding or API integrations.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of country codes include:</para>
-        /// <para>- "US" (United States)</para>
-        /// <para>- "CA" (Canada)</para>
-        /// <para>- "GB" (United Kingdom)</para>
-        /// </remarks>
-        public string? CountryCode { get; set; }
-
-        /// <summary>
-        /// The geographical coordinates (latitude and longitude) of the venue.
-        /// This optional field, leveraging TIGER data for US venues, is used for mapping and deriving the venue's timezone on the frontend.
-        /// </summary>
-        /// <remarks>
-        /// <para>Examples of locations include:</para>
-        /// <para>- Point(-87.6298, 41.8781) for Chicago, IL, USA</para>
-        /// <para>- Point(-0.1276, 51.5074) for London, UK</para>
-        /// </remarks>
-        public Point? Location { get; set; }
-
-        /// <summary>
-        /// The phone number of the venue.
         /// This optional field allows users to contact the venue directly and supports international formats.
         /// </summary>
         /// <remarks>
@@ -153,7 +49,6 @@
         public string? PhoneNumber { get; set; }
 
         /// <summary>
-        /// The website URL of the venue.
         /// This optional field provides a link to the venue's online presence.
         /// </summary>
         /// <remarks>
@@ -164,8 +59,7 @@
         public string? Website { get; set; }
 
         /// <summary>
-        /// The email address of the venue.
-        /// This optional field allows for direct email contact.
+        /// This optional field allows for direct email contact with the venue.
         /// </summary>
         /// <remarks>
         /// <para>Examples of email addresses include:</para>
@@ -175,8 +69,89 @@
         public string? Email { get; set; }
 
         /// <summary>
+        /// This required field captures the primary address information, typically including the street number and name.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "123 Main St" (USA)</para>
+        /// <para>- "10 Downing Street" (UK)</para>
+        /// </remarks>
+        public string AddressLine1 { get; set; } = null!;
+
+        /// <summary>
+        /// This optional field captures additional address details like suite or unit numbers.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "Suite 200" (USA)</para>
+        /// <para>- "Flat 3" (UK)</para>
+        /// </remarks>
+        public string? AddressLine2 { get; set; }
+
+        /// <summary>
+        /// This optional field captures additional address information if needed for complex addresses.
+        /// </summary>
+        public string? AddressLine3 { get; set; }
+
+        /// <summary>
+        /// This optional field captures additional address information if needed for complex addresses.
+        /// </summary>
+        public string? AddressLine4 { get; set; }
+
+        /// <summary>
+        /// The city, town, or locality where the venue is located.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "Springfield" (USA)</para>
+        /// <para>- "Toronto" (Canada)</para>
+        /// </remarks>
+        public string Locality { get; set; } = null!;
+
+        /// <summary>
+        /// The administrative region where the venue is located.
+        /// This required field can represent a state, province, territory, or other regional division depending on the country.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "Illinois" (USA)</para>
+        /// <para>- "Ontario" (Canada)</para>
+        /// <para>- "Queensland" (Australia)</para>
+        /// </remarks>
+        public string Region { get; set; } = null!;
+
+        /// <summary>
+        /// The postal or ZIP code of the venue's location.
+        /// This required field supports various international formats.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "62701" (USA)</para>
+        /// <para>- "M5V 2T6" (Canada)</para>
+        /// <para>- "SW1A 1AA" (UK)</para>
+        /// </remarks>
+        public string Postcode { get; set; } = null!;
+
+        /// <summary>
+        /// The country where the venue is located.
+        /// This required field helps determine address formatting and timezone derivation.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "United States"</para>
+        /// <para>- "Canada"</para>
+        /// <para>- "United Kingdom"</para>
+        /// </remarks>
+        public string Country { get; set; } = null!;
+
+        /// <summary>
+        /// The geographical coordinates (latitude and longitude) of the venue.
+        /// Used for mapping and location-based features.
+        /// </summary>
+        public Point? Location { get; set; }
+
+        /// <summary>
         /// The list of specials associated with the venue.
-        /// This navigation property links to all specials hosted by the venue.
         /// </summary>
         public List<Special> Specials { get; set; } = [];
     }

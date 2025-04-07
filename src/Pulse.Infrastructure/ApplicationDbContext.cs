@@ -1,10 +1,6 @@
 ﻿namespace Pulse.Infrastructure
 {
     using Microsoft.EntityFrameworkCore;
-    using NodaTime;
-
-    using Npgsql.PostgresTypes;
-    using NpgsqlTypes;
 
     using Pulse.Core.Enums;
     using Pulse.Core.Models.Entities;
@@ -31,27 +27,27 @@
                     .HasMaxLength(255);
                 entity.Property(v => v.Description)
                     .HasMaxLength(1000);
-                entity.Property(v => v.Category)
-                    .IsRequired()
-                    .HasMaxLength(50);
                 entity.Property(v => v.AddressLine1)
                     .IsRequired()
                     .HasMaxLength(255);
                 entity.Property(v => v.AddressLine2)
                     .HasMaxLength(255);
-                entity.Property(v => v.City)
+                entity.Property(v => v.AddressLine3)
+                    .HasMaxLength(255);
+                entity.Property(v => v.AddressLine4)
+                    .HasMaxLength(255);
+                entity.Property(v => v.Locality)
                     .IsRequired()
                     .HasMaxLength(100);
                 entity.Property(v => v.Region)
                     .IsRequired()
                     .HasMaxLength(100);
-                entity.Property(v => v.ZipCode)
-                    .IsRequired().HasMaxLength(20);
+                entity.Property(v => v.Postcode)
+                    .IsRequired()
+                    .HasMaxLength(20);
                 entity.Property(v => v.Country)
                     .IsRequired()
                     .HasMaxLength(100);
-                entity.Property(v => v.CountryCode)
-                    .HasMaxLength(2);
                 entity.Property(v => v.Location)
                     .HasColumnType("geography");
                 entity.Property(v => v.PhoneNumber)

@@ -13,7 +13,7 @@ using Pulse.Infrastructure;
 namespace Pulse.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250407005044_InitialCreate")]
+    [Migration("20250407221807_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -105,28 +105,21 @@ namespace Pulse.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("address_line2");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("category");
+                    b.Property<string>("AddressLine3")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("address_line3");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("city");
+                    b.Property<string>("AddressLine4")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("address_line4");
 
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("country");
-
-                    b.Property<string>("CountryCode")
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
-                        .HasColumnName("country_code");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -137,6 +130,12 @@ namespace Pulse.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
+
+                    b.Property<string>("Locality")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("locality");
 
                     b.Property<Point>("Location")
                         .HasColumnType("geography")
@@ -153,6 +152,12 @@ namespace Pulse.Infrastructure.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone_number");
 
+                    b.Property<string>("Postcode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("postcode");
+
                     b.Property<string>("Region")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -163,12 +168,6 @@ namespace Pulse.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("website");
-
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("zip_code");
 
                     b.HasKey("Id")
                         .HasName("pk_venues");

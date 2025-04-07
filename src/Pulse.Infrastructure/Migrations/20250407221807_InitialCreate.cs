@@ -25,18 +25,18 @@ namespace Pulse.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    category = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    address_line1 = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    address_line2 = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    city = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    region = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    zip_code = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    country_code = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: true),
-                    location = table.Column<Point>(type: "geography", nullable: true),
                     phone_number = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     website = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    address_line1 = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    address_line2 = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    address_line3 = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    address_line4 = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    locality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    region = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    postcode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    location = table.Column<Point>(type: "geography", nullable: true)
                 },
                 constraints: table =>
                 {
