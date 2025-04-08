@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-Pulse is a cutting-edge, location-based platform that revolutionizes how users discover and engage with local nightlife venues. By leveraging real-time data, community-sourced "vibe checks," and AI-driven recommendations, Pulse solves the "Night Out Dilemma" - the challenge of finding the right venue with the right atmosphere at the right time. For venues, Pulse provides a direct channel to reach potential customers at the critical decision-making moment, transforming how local businesses market their offerings and drive foot traffic.
+Pulse is a cutting-edge, location-based platform that revolutionizes how users discover and engage with local nightlife venues. By leveraging real-time data, community-sourced "vibe checks," and AI-driven recommendations, Pulse helps users find the perfect venue based on what's happening right now.
 
 ## The Problem
 
@@ -17,7 +17,7 @@ Traditional review and discovery platforms (Yelp, Google Maps, etc.) offer stati
 - A venue's online reputation might not reflect tonight's experience
 - Users often make decisions based on outdated information, leading to disappointing experiences
 
-As expressed in our concept documents: "You're not alone – the ambiance of a venue can make or break your night, and traditional apps can't capture the current vibe. The result? Frustration, FOMO, and wasted time wandering from place to place hoping to stumble on the right spot."
+The ambiance of a venue can make or break your night, and traditional apps can't capture the current vibe. The result? Frustration, FOMO, and wasted time and money.
 
 ## Target Users
 
@@ -70,17 +70,14 @@ For our initial release, we're focusing on delivering these essential features:
     - Sorting options based on popularity, distance, or special type
     - One-tap access to venue details and live activity thread
 
-3. **Comprehensive Tagging System:**
-    - Tags are short, descriptive keywords preceded by a # symbol
-    - Tags serve as dynamic, searchable identifiers that categorize content
-    - Multiple stakeholders can create and apply tags:
-      - **Venue Owners/Managers**: Tag their venue and specials
-      - **App Administrators**: Create featured or trending tags
-      - **Users**: Tag their posts and comments about venues
-    - Tags create connections between users, venues, and specials
-    - Searching or filtering by a tag shows all matching content
-    - Tags appear as interactive elements that users can tap to explore
-    - Popular tags are highlighted to show trending topics or experiences
+3. **Three-Category Classification System:**
+    - Three distinct categorization elements to improve user discovery:
+      - **Venue Types**: Fixed categories for venues (bar, restaurant, cafe, etc.)
+      - **Tags**: Event/promotion identifiers with # symbol for specials (#happyhour, #margaritanight, etc.)
+      - **Vibes**: User-generated atmosphere descriptors with # symbol (#busy, #livemusic, etc.)
+    - Each category serves a specific purpose in the discovery experience
+    - Clear visual distinction between Types, Tags, and Vibes in the UI
+    - Search and filter functionality specific to each category type
 
 4. **Special-Driven Connections:**
     - Specials serve as the primary link between venues and users
@@ -90,32 +87,35 @@ For our initial release, we're focusing on delivering these essential features:
       - Timing details (start time, end time, expiration)
       - Recurrence pattern for regular events
       - Associated venue information
-      - Multiple user-applied and venue-applied tags
+      - Tags for discovery (#wingsnight, #happyhour, etc.)
     - Users discover venues primarily through interesting specials
-    - Active specials appear in search results with their tags
-    - Users can follow tags to receive notifications about matching specials
+    - Active specials appear in search results with their Tags
+    - Users can follow Tags to receive notifications about matching specials
     - Special verification through user activity threads
     - Time-sensitive nature creates urgency and real-time engagement
 
-5. **Multi-Dimensional Tag Application:**
-    - **Venue Tags**: Applied by venue owners to describe their establishment
-      - Examples: #restaurant, #craftbeer, #livejazz, #rooftop, #dancefloor
-      - Help users find venues matching their preferences
-    - **Special Tags**: Applied by venue managers to their promotions and events
+5. **Category-Specific Implementation:**
+    - **Venue Types**: Selected by venue owners from a predefined list
+      - Examples: Bar, Restaurant, Cafe, Lounge, Club, Brewery, Concert Venue
+      - Each venue must select a primary Type and can add up to two secondary Types
+      - Types are used for basic venue categorization and filtering
+      - Displayed prominently on venue profiles and search results
+    - **Tags**: Applied to specials for discovery and promotion
       - Examples: #happyhour, #wingsnight, #liveband, #djset, #karaoke
+      - Tags are preceded by # symbol for visual distinction
       - Connect users with specific experiences they're seeking
-    - **Atmosphere Tags**: Applied by users to describe current conditions
-      - Examples: #crowded, #quiet, #greatservice, #goodvibes, #nocover
+      - Can be followed, searched, and filtered
+    - **Vibes**: Created by users to describe current venue conditions
+      - Examples: #busy, #quiet, #greatservice, #goodvibes, #nocover
+      - Also preceded by # symbol for visual consistency with Tags
       - Help other users know what to expect right now
-    - **Featured Tags**: Curated by app administrators
-      - Examples: #newvenue, #trendingnow, #staffpick, #musttry
-      - Highlight noteworthy options for users
+      - Temporary and tied to the 15-minute expiration of user posts
 
 6. **Live Venue Activity Threads:**
     - Social media-style comment threads attached to each venue
     - Users can post text comments, photos, and short video clips about their current experience
     - All user posts automatically vanish after 15 minutes to ensure information is always current
-    - Users can add tags to their posts describing the current atmosphere
+    - Users can add Vibes to their posts describing the current atmosphere
     - Venue cards show the number of active posts in the thread
     - No historical data - only what's happening right now
     - Example posts:
@@ -124,45 +124,47 @@ For our initial release, we're focusing on delivering these essential features:
         - [Photo of current crowd or performance] "#packed #goodvibes"
         - [10-second video clip of venue atmosphere] "#liveband #jazznight"
 
-7. **Tag-Based Discovery System:**
-    - Users can browse venues and specials through tags
-    - Search by multiple tags to find specific combinations
-    - Filter results by:
-      - Venue tags (type of establishment)
-      - Special tags (type of promotion)
-      - Atmosphere tags (current conditions from user posts)
-      - Distance from user's location
-    - Tag clouds show popular or trending tags in the selected area
-    - Personalized tag suggestions based on user preferences
-    - Save favorite tag combinations for quick searches
-    - Follow specific tags to receive notifications
+7. **Category-Based Discovery System:**
+    - Users can browse venues through a multi-faceted approach:
+      - By Venue Type (find all bars, restaurants, clubs, etc.)
+      - By Tags (find all venues with #happyhour, #livemusic, etc.)
+      - By current Vibes (find venues currently #packed, #mellow, etc.)
+    - Filter results by combining categories:
+      - Type + Tag (e.g., Bars with #happyhour)
+      - Type + Vibe (e.g., Restaurants that are currently #quiet)
+      - Tag + Vibe (e.g., #livemusic venues that are #energetic)
+    - Distance filters can be applied to any search
+    - Popular Tags and Vibes are highlighted to show trending options
+    - Personalized suggestions based on preference history
+    - Save favorite combinations for quick searches
+    - Follow specific Tags to receive notifications
 
 8. **Active Specials Feed:**
     - Stream of currently running specials near the user
     - Time-remaining indicators for limited-time offers
     - Special verification through user comments
-    - Specials grouped by tags for easy browsing
+    - Specials grouped by Tags for easy browsing
     - Specials vanish from the feed when they end
     - New specials are highlighted
 
 9. **Venue Profiles:**
     - Basic information (hours, contact details, photos)
-    - Venue-defined tags 
-    - Current active specials with their tags
-    - Live activity thread showing real-time user comments with tags
-    - Tag-based related venues suggestions
+    - Venue Types (primary and secondary)
+    - Current active specials with their Tags
+    - Live activity thread showing real-time user comments with Vibes
+    - Type-based related venues suggestions
 
 10. **PostgreSQL-Based Recommendation Engine:**
     - Initial version using traditional database algorithms
-    - Recommendations based on tag preferences, user history, and popularity metrics
-    - Tag affinity analysis for better matching
+    - Recommendations based on Type preferences, Tag interests, common Vibes, user history, and popularity metrics
+    - Category affinity analysis for better matching
     - _Note: Advanced AI recommendations planned for future releases_
 
 ### Venue Features:
 
 1. **Venue Management Portal:**
     - Simple web interface for venue owners/managers
-    - Tag management for venue profile
+    - Type selection for venue profile (primary + secondary Types)
     - Special creation and management with:
       - Content description
       - Type categorization (Food, Drink, Entertainment)
@@ -170,7 +172,7 @@ For our initial release, we're focusing on delivering these essential features:
       - End time (optional)
       - Expiration date (for multi-day specials)
       - Recurring schedule options (for regular events)
-      - Multiple custom tags
+      - Tag assignment
     - Photo uploads
     - Ability to monitor (but not delete) user activity threads
     - Tag performance analytics
@@ -178,7 +180,7 @@ For our initial release, we're focusing on delivering these essential features:
 2. **Special Management System:**
     - Create and edit specials with complete timing control
     - Set one-time or recurring specials (daily, weekly, monthly)
-    - Assign multiple tags to each special
+    - Assign Tags to each special
     - Schedule specials in advance
     - Cancel or modify active specials
     - View special performance metrics
@@ -191,18 +193,21 @@ For our initial release, we're focusing on delivering these essential features:
     - Activity thread participation statistics
     - User demographic information (anonymized)
     - Special conversion tracking
+    - Vibe trend analysis
 
 4. **Free Tier Access:**
     - All core features available at no cost for initial adoption
 
 ### Administrative Features:
 
-1. **Tag Management System:**
-    - Monitor tag usage and trends
-    - Feature specific tags for promotion
-    - Consolidate similar tags
-    - Block inappropriate tags
-    - Create seasonal or event-specific featured tags
+1. **Category Management System:**
+    - Maintain the list of available Venue Types
+    - Monitor Tag usage and trends
+    - Track Vibe patterns and popularity
+    - Feature specific Tags for promotion
+    - Consolidate similar Tags and Vibes
+    - Block inappropriate content
+    - Create seasonal or event-specific featured Tags
 
 2. **Content Moderation:**
     - Review reported content
@@ -230,18 +235,21 @@ For our initial release, we're focusing on delivering these essential features:
 - Real-time messaging infrastructure for instant updates
 - Authentication and authorization services
 - Content expiration system for managing ephemeral posts
-- Tag indexing and search optimization
+- Category indexing and search optimization
 - Special scheduling and recurrence handling
 
 ### Database Schema:
 
-- **Venues**: Basic venue information, location data
-- **Specials**: Event details, timing, recurrence, venue association
-- **Tags**: Tag definitions, creation date, creator type
-- **TagAssociations**: Links between tags and venues/specials/posts
-- **UserPosts**: Ephemeral content with 15-minute expiration
+- **Venues**: Basic venue information, location data, primary and secondary Types
+- **VenueTypes**: Predefined list of venue classifications
+- **Specials**: Event details, timing, recurrence, venue association (maintains existing SpecialTypes enum)
+- **Tags**: Tag definitions for specials
+- **SpecialTag**: Associations between Tags and Specials
+- **Vibes**: User-created atmosphere descriptors
+- **UserPosts**: Ephemeral content with 15-minute expiration and associated Vibes
 - **Users**: User accounts and preferences
-- **TagPreferences**: User tag following and filtering preferences
+- **UserPreferences**: User following preferences for Types, Tags, and Vibes
+- **OperatingSchedule**: Venue business hours and days of operation (maintains existing model)
 
 ### Infrastructure:
 
@@ -271,12 +279,12 @@ For our initial release, we're implementing the following constraints to focus d
     - Prevents outdated or misleading information
     - Encourages active, current participation
 
-4. **Open Tagging System:**
-    - No predefined tag hierarchies or exclusive categories
-    - Tags evolve organically through usage
-    - No limit on number of tags per venue, special, or post
+4. **Structured Categorization System:**
+    - Predefined Venue Types for consistent classification
+    - Open Tags and Vibes for flexibility and user expression
+    - Visual distinction between the three category types
     - Basic moderation for inappropriate content
-    - Tag consolidation for common misspellings or variations
+    - Tag/Vibe consolidation for common misspellings or variations
 
 5. **PWA-First Approach:**
     - Focus on web-based Progressive Web App for MVP
@@ -311,7 +319,7 @@ After successful MVP launch and validation, we plan to implement:
 2. **AI-Powered Recommendation Engine:**
     - Upgrade from PostgreSQL to Azure Cognitive Services
     - Advanced personalization based on user behavior and preferences
-    - Tag-based preference learning
+    - Type, Tag, and Vibe preference learning
     - Predictive analytics for venues
 
 3. **Enhanced Social Features:**
@@ -319,19 +327,19 @@ After successful MVP launch and validation, we plan to implement:
     - Follower systems for venue updates
     - Enhanced community moderation tools
 
-4. **Advanced Tagging System:**
-    - Tag suggestions and auto-completion
-    - Tag clusters and relationships
-    - Trending tag analytics
-    - Tag-based journey recommendations
-    - Tag translation for international users
+4. **Advanced Categorization System:**
+    - Tag and Vibe suggestions and auto-completion
+    - Category relationships and affinity mapping
+    - Trending Tag and Vibe analytics
+    - Type/Tag/Vibe journey recommendations
+    - Translation for international users
 
 5. **Premium Venue Tiers:**
     - Featured placement options
     - Push notification capabilities
-    - Advanced tag-based analytics dashboard
-    - Custom tags for premium venues
-    - Promoted tags for special events
+    - Advanced analytics dashboard
+    - Custom Tags for premium venues
+    - Promoted Special placement
 
 6. **Expanded Integrations:**
     - Social media connectivity
@@ -350,16 +358,16 @@ Pulse will follow a freemium model:
     - Basic profile management
     - Standard status updates and event posting
     - Essential analytics
-    - Limited number of special tags
+    - Limited number of special Tags
 
 2. **Premium Tier (Venues):**
     - Featured placement in searches and lists
     - Push notification capabilities to nearby users
-    - Advanced tag-based analytics and insights
+    - Advanced analytics and insights
     - Priority listing for special events
     - Enhanced profile customization
-    - Unlimited special tags
-    - Promoted tag capabilities
+    - Unlimited special Tags
+    - Promoted Tag capabilities
 
 3. **Revenue Projections:**
     - Targeting 10-15% conversion rate from free to premium venues
@@ -373,7 +381,7 @@ For our upcoming playtesting phase, we'll focus on:
 1. **User Experience Testing:**
     - Usability of manual address entry and radius selection
     - User engagement with venue activity threads
-    - Tag usage patterns and effectiveness
+    - Type, Tag, and Vibe usage patterns and effectiveness
     - Satisfaction with 15-minute content expiration
     - Value of real-time versus historical data
     - Overall satisfaction with venue discovery process
@@ -382,7 +390,7 @@ For our upcoming playtesting phase, we'll focus on:
 
 2. **Venue Portal Testing:**
     - Ease of posting updates and specials
-    - Tag selection and management
+    - Type selection and Tag creation
     - Special creation and scheduling
     - Value of provided analytics
     - Time investment required to maintain presence
@@ -394,7 +402,7 @@ For our upcoming playtesting phase, we'll focus on:
     - Real-time update delivery speed
     - Address geocoding accuracy
     - Content expiration system reliability
-    - Tag indexing and search performance
+    - Category indexing and search performance
     - Special recurrence handling accuracy
     - Database query performance for recommendations
     - PWA performance across different devices and browsers
@@ -408,14 +416,14 @@ We'll measure MVP success through these key metrics:
     - Average session time
     - Retention rates (7-day, 30-day)
     - Activity thread participation rate
-    - Tag usage frequency and diversity
+    - Tag and Vibe usage frequency and diversity
     - Posts per venue per hour
     - Special click-through rates
     - Address search vs. opt-in location services usage rates
 
 2. **Venue Performance:**
     - Venue sign-up and retention rates
-    - Frequency of special and tag updates
+    - Frequency of special and Tag updates
     - Tag diversity per venue
     - Special creation frequency
     - Self-reported traffic increase attributed to Pulse
@@ -425,14 +433,12 @@ We'll measure MVP success through these key metrics:
 3. **Platform Health:**
     - System performance and reliability
     - Data freshness (% of venues with active threads)
-    - Tag system health (usefulness, diversity, relevance)
+    - Category system health (usefulness, diversity, relevance)
     - Special timing accuracy
     - User feedback and satisfaction scores
     - Content expiration system accuracy
     - PWA install rate on mobile devices
 
-Pulse represents a significant opportunity to transform the nightlife discovery experience by bringing real-time, community-driven insights to both users and venues. Our MVP focuses on delivering essential functionality that solves the core "Night Out Dilemma" while establishing a foundation for future growth.
+Pulse represents a significant opportunity to transform the nightlife discovery experience by bringing real-time, community-driven insights to both users and venues. Our MVP focuses on delivering essential functionality through a carefully structured Type, Tag, and Vibe categorization system that maintains simplicity while providing powerful discovery options.
 
-By implementing a privacy-first location system, ephemeral content model, and comprehensive tagging approach, we prioritize user privacy, real-time information, and dynamic discovery. This approach balances innovation with practical implementation constraints while still delivering a compelling product that stands apart from static review platforms.
-
-As stated in our vision: "Pulse is more than just a platform—it's a revolution in how local venues and nightlife enthusiasts connect. By harnessing real‑time data, community-sourced insights, and a privacy-respecting approach, Pulse transforms traditional marketing and review systems into a dynamic, interactive experience that benefits both venues and users."
+By implementing a privacy-first location system, ephemeral content model, and three-category classification approach, we prioritize user privacy, real-time information, and intuitive discovery. This approach balances the needs of venues to promote their offerings with users' desire for authentic, current information.
