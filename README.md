@@ -233,10 +233,31 @@ For our initial release, we're focusing on delivering these essential features:
 - .NET Core (C#) API services
 - PostgreSQL database for data storage and initial recommendation engine
 - Real-time messaging infrastructure for instant updates
-- Authentication and authorization services
+- Auth0 integration for authentication and authorization services
+  - Secure user registration and login
+  - Social login options (Google, Facebook, etc.)
+  - JWT token-based authentication
+  - Role-based access control for users, venues, and administrators
+  - Single Sign-On (SSO) capabilities
 - Content expiration system for managing ephemeral posts
 - Category indexing and search optimization
 - Special scheduling and recurrence handling
+
+### Identity and Authentication:
+
+- **Auth0 as Identity Provider:**
+  - Centralized user authentication and management
+  - Secure credential storage and handling
+  - Multi-factor authentication support
+  - User profile management
+  - Password policies and account recovery
+  - Compliance with security best practices
+  - Venue owner verification workflows
+  - Role assignment and management (users, venue owners, administrators)
+  - Authentication API integration with frontend and backend services
+  - User session management and token handling
+
+### Database Schema:
 
 ### Database Schema:
 
@@ -249,7 +270,26 @@ For our initial release, we're focusing on delivering these essential features:
 - **Posts**: Ephemeral user content with 15-minute expiration, includes foreign keys to user and venue
 - **Vibes**: User-created atmosphere descriptors
 - **PostVibe**: Associations between Vibes and Posts
-- **Users**: User accounts and preferences (includes a JSON column for storing user preferences)
+- **Users**: User account data and application-specific information
+  - Primary identifier (generated internally)
+  - Auth0 user identifier (for linking to external identity provider)
+  - Account creation and last login timestamps
+  - Profile completion status
+  - Default location and search radius preferences
+  - Venue type preferences (favorite venue categories like bars, restaurants, etc.)
+  - Tag preferences (interests in specific types of specials)
+  - Vibe preferences (preferred atmosphere characteristics)
+  - Notification settings (which Tags to receive alerts for)
+  - Privacy settings and consent records
+  - Application interaction history
+  - Followed Tags (for updates and recommendations)
+  - Custom feed configuration
+  - Device and push notification tokens
+  - Note: Basic profile info (name, email, profile picture) managed by Auth0
+- **UserVenueTypePreferences**: Junction table linking users to their preferred venue types with preference strength indicators
+- **UserTagPreferences**: Junction table linking users to their preferred tags with preference strength indicators
+- **UserVibePreferences**: Junction table linking users to their preferred vibes with preference strength indicators
+- **UserFollowedTags**: Junction table tracking which tags each user follows for notifications
 
 ### Infrastructure:
 
@@ -257,6 +297,8 @@ For our initial release, we're focusing on delivering these essential features:
 - Containerized deployment with Docker
 - Scalable microservices architecture
 - Real-time data synchronization
+- Auth0 tenant configuration and integration
+- Secure API communication with Auth0
 
 ## MVP Constraints & Limitations
 
@@ -300,7 +342,7 @@ For our initial release, we're implementing the following constraints to focus d
     - Advanced analytics and insights planned for future releases
 
 8. **Limited Integrations:**
-    - No third-party integrations in initial release
+    - No third-party integrations in initial release beyond Auth0
     - Future plans include social media, mapping, and POS system integrations
 
 9. **Manual Verification:**
@@ -350,6 +392,13 @@ After successful MVP launch and validation, we plan to implement:
     - Rollout to additional cities
     - International markets
 
+8. **Enhanced Authentication and User Management:**
+    - Advanced Auth0 Rules and Actions for user onboarding
+    - Custom authentication flows for specific user segments
+    - Enterprise SSO options for venue chains
+    - Expanded user profile capabilities
+    - Identity verification for age restrictions
+
 ## Monetization Strategy
 
 Pulse will follow a freemium model:
@@ -387,6 +436,7 @@ For our upcoming playtesting phase, we'll focus on:
     - Overall satisfaction with venue discovery process
     - User preferences regarding location input methods
     - Special discovery and engagement
+    - Auth0 registration and login experience
 
 2. **Venue Portal Testing:**
     - Ease of posting updates and specials
@@ -396,6 +446,7 @@ For our upcoming playtesting phase, we'll focus on:
     - Time investment required to maintain presence
     - Perceived ROI on engagement
     - Interest in monitoring live activity threads
+    - Auth0-based account management
 
 3. **Technical Validation:**
     - Performance under various load conditions
@@ -406,6 +457,8 @@ For our upcoming playtesting phase, we'll focus on:
     - Special recurrence handling accuracy
     - Database query performance for recommendations
     - PWA performance across different devices and browsers
+    - Auth0 integration reliability and performance
+    - Authentication flow and session management
 
 ## Success Metrics
 
@@ -420,6 +473,7 @@ We'll measure MVP success through these key metrics:
     - Posts per venue per hour
     - Special click-through rates
     - Address search vs. opt-in location services usage rates
+    - Registration completion rates
 
 2. **Venue Performance:**
     - Venue sign-up and retention rates
@@ -438,6 +492,8 @@ We'll measure MVP success through these key metrics:
     - User feedback and satisfaction scores
     - Content expiration system accuracy
     - PWA install rate on mobile devices
+    - Auth0 authentication success rates
+    - Average login time and reliability
 
 Pulse represents a significant opportunity to transform the nightlife discovery experience by bringing real-time, community-driven insights to both users and venues. Our MVP focuses on delivering essential functionality through a carefully structured Type, Tag, and Vibe categorization system that maintains simplicity while providing powerful discovery options.
 
