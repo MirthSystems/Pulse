@@ -4,8 +4,6 @@
 
     using Pulse.Core.Enums;
 
-
-
     /// <summary>
     /// Represents a special event, promotion, or offer at a venue, such as happy hours, live performances, or limited-time discounts.
     /// This entity supports both one-time and recurring specials, with flexible options for defining start times, end times, and expiration dates.
@@ -118,5 +116,7 @@
         /// This navigation property provides access to the venue's details, such as its location for timezone derivation.
         /// </summary>
         public Venue? Venue { get; set; }
+
+        public List<TagSpecial> Tags { get; set; } = [];
     }
 }

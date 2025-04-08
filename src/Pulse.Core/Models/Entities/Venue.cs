@@ -20,6 +20,8 @@
     {
         public int Id { get; set; }
 
+        public int VenueTypeId { get; set; }
+
         /// <summary>
         /// This required field provides the primary identifier for the venue as displayed to users.
         /// </summary>
@@ -184,6 +186,8 @@
         /// </remarks>
         public string Country { get; set; } = null!;
 
+        public VenueType VenueType { get; set; } = null!;
+
         /// <summary>
         /// The geographical coordinates (latitude and longitude) of the venue.
         /// Used for mapping and location-based features.
@@ -213,5 +217,9 @@
         /// <para>For venues open 24 hours, set TimeOfOpen to 00:00 and TimeOfClose to 23:59.</para>
         /// </remarks>
         public List<OperatingSchedule> BusinessHours { get; set; } = [];
+        
+
+        // Add this property for the posts about this venue
+        public List<Post> Posts { get; set; } = [];
     }
 }

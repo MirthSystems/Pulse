@@ -266,7 +266,7 @@ For our initial release, we're focusing on delivering these essential features:
 - **OperatingSchedule**: Venue business hours and days of operation
 - **Specials**: Event details, timing, recurrence, venue association (maintains existing SpecialTypes enum)
 - **Tags**: Tag definitions for specials
-- **SpecialTag**: Associations between Tags and Specials
+- **TagSpecial**: Associations between Tags and Specials
 - **Posts**: Ephemeral user content with 15-minute expiration, includes foreign keys to user and venue
 - **Vibes**: User-created atmosphere descriptors
 - **PostVibe**: Associations between Vibes and Posts
