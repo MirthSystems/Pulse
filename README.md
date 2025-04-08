@@ -241,15 +241,15 @@ For our initial release, we're focusing on delivering these essential features:
 ### Database Schema:
 
 - **Venues**: Basic venue information, location data, primary and secondary Types
-- **VenueTypes**: Predefined list of venue classifications
+- **VenueTypes**: Predefined list of venue classifications (bar, restaurant, cafe, etc.)
+- **OperatingSchedule**: Venue business hours and days of operation
 - **Specials**: Event details, timing, recurrence, venue association (maintains existing SpecialTypes enum)
 - **Tags**: Tag definitions for specials
 - **SpecialTag**: Associations between Tags and Specials
+- **Posts**: Ephemeral user content with 15-minute expiration, includes foreign keys to user and venue
 - **Vibes**: User-created atmosphere descriptors
-- **UserPosts**: Ephemeral content with 15-minute expiration and associated Vibes
-- **Users**: User accounts and preferences
-- **UserPreferences**: User following preferences for Types, Tags, and Vibes
-- **OperatingSchedule**: Venue business hours and days of operation (maintains existing model)
+- **PostVibe**: Associations between Vibes and Posts
+- **Users**: User accounts and preferences (includes a JSON column for storing user preferences)
 
 ### Infrastructure:
 
