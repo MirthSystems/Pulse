@@ -271,7 +271,6 @@ For our initial release, we're focusing on delivering these essential features:
 - **Vibes**: User-created atmosphere descriptors
 - **PostVibe**: Associations between Vibes and Posts
 - **Users**: User account data and application-specific information
-  - Primary identifier (generated internally)
   - Auth0 user identifier (for linking to external identity provider)
   - Account creation and last login timestamps
   - Profile completion status
@@ -286,10 +285,6 @@ For our initial release, we're focusing on delivering these essential features:
   - Custom feed configuration
   - Device and push notification tokens
   - Note: Basic profile info (name, email, profile picture) managed by Auth0
-- **UserVenueTypePreferences**: Junction table linking users to their preferred venue types with preference strength indicators
-- **UserTagPreferences**: Junction table linking users to their preferred tags with preference strength indicators
-- **UserVibePreferences**: Junction table linking users to their preferred vibes with preference strength indicators
-- **UserFollowedTags**: Junction table tracking which tags each user follows for notifications
 
 ### Infrastructure:
 
