@@ -71,76 +71,88 @@ For our initial release, we're focusing on delivering these essential features:
     - One-tap access to venue details and live activity thread
 
 3. **Comprehensive Tagging System:**
-    - **What Are Tags?**
-      - Tags are keywords or phrases preceded by a "#" symbol (e.g., #livemusic)
-      - They serve as content organizers and discovery tools
-      - Tags create connections between similar content and experiences
-      - They function as a flexible, user-driven categorization system
-    
-    - **How Tags Work in Pulse:**
-      - **Tag Creation:** Any word can become a tag by adding a "#" in front of it
-      - **Tag Discoverability:** Tapping/clicking on a tag shows all venues or content with that tag
-      - **Tag Trends:** Popular tags appear in a "Trending" section for quick discovery
-      - **Tag Search:** Users can search directly for specific tags
-      - **Tag Filters:** Users can filter venue lists using multiple tags (e.g., show all #cocktailbar venues with #livemusic and #nodresscode)
-    
-    - **Who Can Create Tags:**
-      - **Regular Users:** Can add tags to their posts and comments
-      - **Venue Managers:** Can tag their venue profiles and special offerings
-      - **Venue Owners:** Have additional tagging permissions for multiple venues
-      - **App Administrators:** Can create featured or official tags and curate tag collections
-    
-    - **Types of Tags in the System:**
-      - **Venue Characteristic Tags:** Describe the venue type (#bar, #restaurant, #dancehall, #brewery)
-      - **Atmosphere Tags:** Describe the current vibe (#quiet, #crowded, #intimate, #energetic)
-      - **Special Offering Tags:** Highlight promotions (#happyhour, #twodollartuesday, #ladiesnight)
-      - **Food & Drink Tags:** Describe available options (#craftbeer, #cocktails, #veganfriendly)
-      - **Music & Entertainment Tags:** Describe performances (#liveband, #karaoke, #jazznight, #dj)
-      - **Practical Tags:** Provide useful information (#nodresscode, #wheelchair, #petfriendly)
-    
-    - **Tag Implementation:**
-      - Tags appear as tappable/clickable elements in the interface
-      - Tag colors or styles may vary by category for visual distinction
-      - Auto-suggestion appears when typing a "#" to show popular or related tags
-      - Recent and saved tags are easily accessible when posting
+    - Tags are short, descriptive keywords preceded by a # symbol
+    - Tags serve as dynamic, searchable identifiers that categorize content
+    - Multiple stakeholders can create and apply tags:
+      - **Venue Owners/Managers**: Tag their venue and specials
+      - **App Administrators**: Create featured or trending tags
+      - **Users**: Tag their posts and comments about venues
+    - Tags create connections between users, venues, and specials
+    - Searching or filtering by a tag shows all matching content
+    - Tags appear as interactive elements that users can tap to explore
+    - Popular tags are highlighted to show trending topics or experiences
 
-4. **Live Venue Activity Threads:**
+4. **Special-Driven Connections:**
+    - Specials serve as the primary link between venues and users
+    - Each special includes:
+      - Description (e.g., "Half-Price Wings Happy Hour")
+      - Type categorization (Food, Drink, Entertainment)
+      - Timing details (start time, end time, expiration)
+      - Recurrence pattern for regular events
+      - Associated venue information
+      - Multiple user-applied and venue-applied tags
+    - Users discover venues primarily through interesting specials
+    - Active specials appear in search results with their tags
+    - Users can follow tags to receive notifications about matching specials
+    - Special verification through user activity threads
+    - Time-sensitive nature creates urgency and real-time engagement
+
+5. **Multi-Dimensional Tag Application:**
+    - **Venue Tags**: Applied by venue owners to describe their establishment
+      - Examples: #restaurant, #craftbeer, #livejazz, #rooftop, #dancefloor
+      - Help users find venues matching their preferences
+    - **Special Tags**: Applied by venue managers to their promotions and events
+      - Examples: #happyhour, #wingsnight, #liveband, #djset, #karaoke
+      - Connect users with specific experiences they're seeking
+    - **Atmosphere Tags**: Applied by users to describe current conditions
+      - Examples: #crowded, #quiet, #greatservice, #goodvibes, #nocover
+      - Help other users know what to expect right now
+    - **Featured Tags**: Curated by app administrators
+      - Examples: #newvenue, #trendingnow, #staffpick, #musttry
+      - Highlight noteworthy options for users
+
+6. **Live Venue Activity Threads:**
     - Social media-style comment threads attached to each venue
     - Users can post text comments, photos, and short video clips about their current experience
     - All user posts automatically vanish after 15 minutes to ensure information is always current
-    - Users can add tags to their posts describing the current atmosphere (#nodresscode #hiphopmix)
+    - Users can add tags to their posts describing the current atmosphere
     - Venue cards show the number of active posts in the thread
     - No historical data - only what's happening right now
     - Example posts:
         - "Just got in with no line! Great music playing right now #nodresscode #hiphopmix"
         - "Happy hour special is amazing, got 2-for-1 drinks #cheapdrinks #tequilatuesday"
-        - [Photo of current crowd] "#packed #goodvibes"
+        - [Photo of current crowd or performance] "#packed #goodvibes"
         - [10-second video clip of venue atmosphere] "#liveband #jazznight"
 
-5. **Active Specials Feed:**
-    - Focus on currently running specials and promotions
+7. **Tag-Based Discovery System:**
+    - Users can browse venues and specials through tags
+    - Search by multiple tags to find specific combinations
+    - Filter results by:
+      - Venue tags (type of establishment)
+      - Special tags (type of promotion)
+      - Atmosphere tags (current conditions from user posts)
+      - Distance from user's location
+    - Tag clouds show popular or trending tags in the selected area
+    - Personalized tag suggestions based on user preferences
+    - Save favorite tag combinations for quick searches
+    - Follow specific tags to receive notifications
+
+8. **Active Specials Feed:**
+    - Stream of currently running specials near the user
     - Time-remaining indicators for limited-time offers
     - Special verification through user comments
-    - Specials tagged by venue managers for easy discovery (#wingsnight, #cocktailspecial)
-    - Users filter by special tags to find specific offers
+    - Specials grouped by tags for easy browsing
     - Specials vanish from the feed when they end
+    - New specials are highlighted
 
-6. **Venue Profiles:**
+9. **Venue Profiles:**
     - Basic information (hours, contact details, photos)
-    - Venue-defined tags managed by venue staff (#restaurant, #sportsbar, #cocktaillounge)
-    - Current active specials and events with their own tags
-    - Live activity thread showing real-time user comments with user-added tags
+    - Venue-defined tags 
+    - Current active specials with their tags
+    - Live activity thread showing real-time user comments with tags
+    - Tag-based related venues suggestions
 
-7. **Tag-Based Filtering and Discovery:**
-    - **Multi-Tag Search:** Find venues matching multiple criteria (e.g., #craftbeer AND #livemusic)
-    - **Tag Exclusion:** Filter out certain experiences (e.g., show venues EXCEPT #crowded)
-    - **Tag Combinations:** Save favorite tag combinations for quick searching
-    - **Trending Tags:** Discover what's popular right now based on tag usage
-    - **Tag Recommendations:** System suggests tags based on preferences and behavior
-    - **Distance Filtering:** Combine tag filters with proximity to location
-    - **Tag Exploration:** Browse venues by popular tag categories
-
-8. **PostgreSQL-Based Recommendation Engine:**
+10. **PostgreSQL-Based Recommendation Engine:**
     - Initial version using traditional database algorithms
     - Recommendations based on tag preferences, user history, and popularity metrics
     - Tag affinity analysis for better matching
@@ -149,52 +161,54 @@ For our initial release, we're focusing on delivering these essential features:
 ### Venue Features:
 
 1. **Venue Management Portal:**
-    - **Tag Management:**
-      - Define primary venue tags that appear on the venue profile (#cocktailbar, #livemusic)
-      - Create and manage tags for recurring specials (#tuesdaytrivia, #wingsnight)
-      - Add temporary tags for special events (#newbeertapping, #celebrityappearance)
-      - View tag performance metrics
-      - Receive tag suggestions based on similar venues
-    
-    - **Special Creation with Tags:**
-      - Add appropriate tags when creating specials or promotions
-      - Select from previously used tags or create new ones
-      - Special-specific tags are searchable and appear in filters
-    
-    - **Profile Management:**
-      - Update basic venue information
-      - Upload photos
-      - Set operating hours
-    
-    - **Activity Monitoring:**
-      - View (but not delete) the live activity thread
-      - See which tags users are applying to your venue
+    - Simple web interface for venue owners/managers
+    - Tag management for venue profile
+    - Special creation and management with:
+      - Content description
+      - Type categorization (Food, Drink, Entertainment)
+      - Start date and time
+      - End time (optional)
+      - Expiration date (for multi-day specials)
+      - Recurring schedule options (for regular events)
+      - Multiple custom tags
+    - Photo uploads
+    - Ability to monitor (but not delete) user activity threads
+    - Tag performance analytics
 
-2. **Tag-Based Analytics:**
-    - Track performance of venue's primary tags in searches
-    - Measure engagement with specific tagged specials
-    - Compare tag performance against similar venues
-    - Identify trending tags relevant to your venue type
-    - Discover new potential tags based on user behavior
+2. **Special Management System:**
+    - Create and edit specials with complete timing control
+    - Set one-time or recurring specials (daily, weekly, monthly)
+    - Assign multiple tags to each special
+    - Schedule specials in advance
+    - Cancel or modify active specials
+    - View special performance metrics
+    - Suggestions for effective tagging
 
-3. **Free Tier Access:**
+3. **Basic Analytics:**
+    - Profile view counts
+    - Engagement metrics on specials
+    - Tag performance analytics
+    - Activity thread participation statistics
+    - User demographic information (anonymized)
+    - Special conversion tracking
+
+4. **Free Tier Access:**
     - All core features available at no cost for initial adoption
-    - Limited number of managed tags in the free tier
 
-### Admin Features:
+### Administrative Features:
 
 1. **Tag Management System:**
-    - Create official or featured tags
-    - Merge similar tags to prevent fragmentation
     - Monitor tag usage and trends
-    - Flag inappropriate tags for review
-    - Create tag collections for special events or seasons
+    - Feature specific tags for promotion
+    - Consolidate similar tags
+    - Block inappropriate tags
+    - Create seasonal or event-specific featured tags
 
-2. **Tag Moderation Tools:**
-    - Filter out offensive or inappropriate tags
-    - Promote beneficial tags to wider visibility
-    - Standardize common misspellings or variations
-    - Create tag guidelines and best practices
+2. **Content Moderation:**
+    - Review reported content
+    - Verify venue accounts
+    - Monitor user activity for policy violations
+    - Manage content expiration system
 
 ## Technical Architecture
 
@@ -213,36 +227,28 @@ For our initial release, we're focusing on delivering these essential features:
 
 - .NET Core (C#) API services
 - PostgreSQL database for data storage and initial recommendation engine
-- Tag indexing and search optimization system
 - Real-time messaging infrastructure for instant updates
 - Authentication and authorization services
 - Content expiration system for managing ephemeral posts
+- Tag indexing and search optimization
+- Special scheduling and recurrence handling
 
-### Tag System Implementation:
+### Database Schema:
 
-- **Database Structure:**
-  - Tag entity with many-to-many relationships to venues, posts, and specials
-  - Weighted relationships to track tag relevance and frequency
-  - Timestamp tracking for trend analysis
-  - Tag categories for organization and filtering
-
-- **Search Optimization:**
-  - Indexed tag storage for fast retrieval
-  - Full-text search capabilities
-  - Tag suggestion algorithms
-  - Tag relevance scoring
-
-- **Tag Analytics Engine:**
-  - Usage tracking and metrics
-  - Trend identification
-  - Tag association patterns
-  - Engagement measurement by tag
+- **Venues**: Basic venue information, location data
+- **Specials**: Event details, timing, recurrence, venue association
+- **Tags**: Tag definitions, creation date, creator type
+- **TagAssociations**: Links between tags and venues/specials/posts
+- **UserPosts**: Ephemeral content with 15-minute expiration
+- **Users**: User accounts and preferences
+- **TagPreferences**: User tag following and filtering preferences
 
 ### Infrastructure:
 
 - Azure cloud hosting and services
 - Containerized deployment with Docker
 - Scalable microservices architecture
+- Real-time data synchronization
 
 ## MVP Constraints & Limitations
 
@@ -265,12 +271,12 @@ For our initial release, we're implementing the following constraints to focus d
     - Prevents outdated or misleading information
     - Encourages active, current participation
 
-4. **Initial Tag Limitations:**
-    - No hierarchical tag structure in MVP
-    - Limited tag moderation capabilities
-    - Basic tag analytics only
-    - Free tier venues limited to 10 managed tags
-    - Tag recommendations based on simple algorithms
+4. **Open Tagging System:**
+    - No predefined tag hierarchies or exclusive categories
+    - Tags evolve organically through usage
+    - No limit on number of tags per venue, special, or post
+    - Basic moderation for inappropriate content
+    - Tag consolidation for common misspellings or variations
 
 5. **PWA-First Approach:**
     - Focus on web-based Progressive Web App for MVP
@@ -281,11 +287,15 @@ For our initial release, we're implementing the following constraints to focus d
     - Using traditional database queries for initial recommendations
     - Full AI implementation with Azure Cognitive Services planned for V2
 
-7. **Limited Integrations:**
+7. **Basic Analytics:**
+    - Essential metrics only for MVP
+    - Advanced analytics and insights planned for future releases
+
+8. **Limited Integrations:**
     - No third-party integrations in initial release
     - Future plans include social media, mapping, and POS system integrations
 
-8. **Manual Verification:**
+9. **Manual Verification:**
     - Venue accounts manually verified by our team
     - Automated verification system planned for scale
 
@@ -298,33 +308,30 @@ After successful MVP launch and validation, we plan to implement:
     - Enhanced performance and device integration
     - Expanded offline capabilities
 
-2. **Advanced Tag System:**
-    - **Hierarchical Tags:** Create parent-child relationships between tags
-    - **Tag Clusters:** Automatically group related tags
-    - **Tag Intelligence:** AI-powered tag suggestions and associations
-    - **Tag Verification:** Official verification for certain tags
-    - **Tag Campaigns:** Time-limited promotional tag collections
-    - **Tag Analytics:** Advanced performance metrics and insights
-    - **Tag Targeting:** Allow venues to target users based on tag preferences
-
-3. **AI-Powered Recommendation Engine:**
+2. **AI-Powered Recommendation Engine:**
     - Upgrade from PostgreSQL to Azure Cognitive Services
-    - Advanced personalization based on tag preferences
-    - Tag-based user profiling
+    - Advanced personalization based on user behavior and preferences
+    - Tag-based preference learning
     - Predictive analytics for venues
 
-4. **Enhanced Social Features:**
+3. **Enhanced Social Features:**
     - Friend connections and group planning
     - Follower systems for venue updates
     - Enhanced community moderation tools
-    - Tag-based user matching
+
+4. **Advanced Tagging System:**
+    - Tag suggestions and auto-completion
+    - Tag clusters and relationships
+    - Trending tag analytics
+    - Tag-based journey recommendations
+    - Tag translation for international users
 
 5. **Premium Venue Tiers:**
     - Featured placement options
     - Push notification capabilities
     - Advanced tag-based analytics dashboard
-    - Custom and exclusive tags for premium venues
-    - Tag promotion capabilities
+    - Custom tags for premium venues
+    - Promoted tags for special events
 
 6. **Expanded Integrations:**
     - Social media connectivity
@@ -334,7 +341,6 @@ After successful MVP launch and validation, we plan to implement:
 7. **Geographic Expansion:**
     - Rollout to additional cities
     - International markets
-    - Localized tag systems for different regions
 
 ## Monetization Strategy
 
@@ -344,16 +350,16 @@ Pulse will follow a freemium model:
     - Basic profile management
     - Standard status updates and event posting
     - Essential analytics
-    - Limited number of venue tags (10)
+    - Limited number of special tags
 
 2. **Premium Tier (Venues):**
     - Featured placement in searches and lists
     - Push notification capabilities to nearby users
     - Advanced tag-based analytics and insights
-    - Unlimited venue tags
-    - Tag promotion capabilities
     - Priority listing for special events
     - Enhanced profile customization
+    - Unlimited special tags
+    - Promoted tag capabilities
 
 3. **Revenue Projections:**
     - Targeting 10-15% conversion rate from free to premium venues
@@ -365,30 +371,31 @@ Pulse will follow a freemium model:
 For our upcoming playtesting phase, we'll focus on:
 
 1. **User Experience Testing:**
-    - Tag creation and discovery usability
-    - Comprehension of the tagging system
+    - Usability of manual address entry and radius selection
     - User engagement with venue activity threads
     - Tag usage patterns and effectiveness
     - Satisfaction with 15-minute content expiration
     - Value of real-time versus historical data
     - Overall satisfaction with venue discovery process
     - User preferences regarding location input methods
+    - Special discovery and engagement
 
 2. **Venue Portal Testing:**
-    - Ease of tag management and creation
-    - Understanding of tag benefits and strategies
-    - Value of provided tag analytics
+    - Ease of posting updates and specials
+    - Tag selection and management
+    - Special creation and scheduling
+    - Value of provided analytics
     - Time investment required to maintain presence
     - Perceived ROI on engagement
     - Interest in monitoring live activity threads
 
 3. **Technical Validation:**
-    - Tag indexing and search performance
-    - Tag suggestion accuracy
     - Performance under various load conditions
     - Real-time update delivery speed
     - Address geocoding accuracy
     - Content expiration system reliability
+    - Tag indexing and search performance
+    - Special recurrence handling accuracy
     - Database query performance for recommendations
     - PWA performance across different devices and browsers
 
@@ -402,37 +409,30 @@ We'll measure MVP success through these key metrics:
     - Retention rates (7-day, 30-day)
     - Activity thread participation rate
     - Tag usage frequency and diversity
-    - Tag clicks and follows
     - Posts per venue per hour
+    - Special click-through rates
     - Address search vs. opt-in location services usage rates
 
 2. **Venue Performance:**
     - Venue sign-up and retention rates
     - Frequency of special and tag updates
     - Tag diversity per venue
-    - Tag engagement rates
+    - Special creation frequency
     - Self-reported traffic increase attributed to Pulse
     - Interest in premium features
     - Special engagement rates
 
-3. **Tag System Health:**
-    - Number of active tags in the system
-    - Tag creation rate
-    - Tag usage distribution
-    - Tag search frequency
-    - Tag click-through rates
-    - Tag overlap analysis
-    - Tag lifecycle measurements
-
-4. **Platform Health:**
+3. **Platform Health:**
     - System performance and reliability
     - Data freshness (% of venues with active threads)
+    - Tag system health (usefulness, diversity, relevance)
+    - Special timing accuracy
     - User feedback and satisfaction scores
     - Content expiration system accuracy
     - PWA install rate on mobile devices
 
 Pulse represents a significant opportunity to transform the nightlife discovery experience by bringing real-time, community-driven insights to both users and venues. Our MVP focuses on delivering essential functionality that solves the core "Night Out Dilemma" while establishing a foundation for future growth.
 
-By implementing a privacy-first location system, ephemeral content model, and comprehensive tagging approach, we prioritize user privacy, real-time information, and organic discovery. This approach balances innovation with practical implementation constraints while still delivering a compelling product that stands apart from static review platforms.
+By implementing a privacy-first location system, ephemeral content model, and comprehensive tagging approach, we prioritize user privacy, real-time information, and dynamic discovery. This approach balances innovation with practical implementation constraints while still delivering a compelling product that stands apart from static review platforms.
 
 As stated in our vision: "Pulse is more than just a platform—it's a revolution in how local venues and nightlife enthusiasts connect. By harnessing real‑time data, community-sourced insights, and a privacy-respecting approach, Pulse transforms traditional marketing and review systems into a dynamic, interactive experience that benefits both venues and users."
