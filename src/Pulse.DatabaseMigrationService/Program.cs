@@ -1,5 +1,6 @@
 namespace Pulse.DatabaseMigrationService
 {
+    using Pulse.Infrastructure;
     using Pulse.Infrastructure.Extensions;
     public class Program
     {
@@ -13,6 +14,7 @@ namespace Pulse.DatabaseMigrationService
                 throw new InvalidOperationException("Connection string is not configured.");
             }
 
+            builder.Services.AddScoped<DatabaseSeeder>();
             builder.Services.AddPulseInfrastructure(connectionString);
 
             builder.Services.AddHostedService<Worker>();

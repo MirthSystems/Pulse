@@ -21,11 +21,16 @@ namespace Pulse.DatabaseMigrationService
 
             try
             {
-                using var scope = this._serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    await dbContext.Database.MigrateAsync(stoppingToken);
 
-                await dbContext.Database.MigrateAsync(stoppingToken);
-                this._logger.LogInformation("Database migrations applied successfully.");
+                    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+                    await seeder.SeedAsync();
+                }
+
+                this._logger.LogInformation("Database migration and seeding completed successfully.");
             }
             catch (Exception ex)
             {
