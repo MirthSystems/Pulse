@@ -21,7 +21,7 @@ namespace Pulse.DatabaseMigrationService
 
             try
             {
-                using (var scope = _serviceProvider.CreateScope())
+                using (var scope = this._serviceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     await dbContext.Database.MigrateAsync(stoppingToken);
