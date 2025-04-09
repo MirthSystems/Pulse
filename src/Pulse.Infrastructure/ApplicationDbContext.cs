@@ -7,16 +7,16 @@
 
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<Venue> Venues { get; set; } = null!;
-        public DbSet<VenueType> VenueTypes { get; set; } = null!;
-        public DbSet<Special> Specials { get; set; } = null!;
-        public DbSet<OperatingSchedule> BusinessHours { get; set; } = null!;
-        public DbSet<Tag> Tags { get; set; } = null!;
-        public DbSet<TagToSpecialLink> TagToSpecialLinks { get; set; } = null!;
-        public DbSet<ApplicationUser> Users { get; set; } = null!;
-        public DbSet<Post> Posts { get; set; } = null!;
-        public DbSet<Vibe> Vibes { get; set; } = null!;
-        public DbSet<VibeToPostLink> VibeToPostLinks { get; set; } = null!;
+        public DbSet<Venue> Venues { get; set; }
+        public DbSet<VenueType> VenueTypes { get; set; }
+        public DbSet<Special> Specials { get; set; }
+        public DbSet<OperatingSchedule> BusinessHours { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<TagToSpecialLink> TagToSpecialLinks { get; set; }
+        public DbSet<ApplicationUser> Users { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Vibe> Vibes { get; set; }
+        public DbSet<VibeToPostLink> VibeToPostLinks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
