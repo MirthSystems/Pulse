@@ -12,11 +12,11 @@
         public DbSet<Special> Specials { get; set; } = null!;
         public DbSet<OperatingSchedule> BusinessHours { get; set; } = null!;
         public DbSet<Tag> Tags { get; set; } = null!;
-        public DbSet<TagSpecial> TagSpecials { get; set; } = null!;
+        public DbSet<TagToSpecialLink> TagToSpecialLinks { get; set; } = null!;
         public DbSet<ApplicationUser> Users { get; set; } = null!;
         public DbSet<Post> Posts { get; set; } = null!;
         public DbSet<Vibe> Vibes { get; set; } = null!;
-        public DbSet<PostVibe> PostVibes { get; set; } = null!;
+        public DbSet<VibeToPostLink> VibeToPostLinks { get; set; } = null!;
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -213,12 +213,10 @@
             });
             #endregion
 
-            #region TagSpecial Configuration
-            modelBuilder.Entity<TagSpecial>(entity =>
+            #region TagToSpecialLink Configuration
+            modelBuilder.Entity<TagToSpecialLink>(entity =>
             {
                 entity.HasKey(ts => new { ts.TagId, ts.SpecialId });
-
-                entity.ToTable("tags_specials");
 
                 entity.HasOne(ts => ts.Tag)
                     .WithMany(t => t.Specials)
@@ -348,12 +346,10 @@
             });
             #endregion
 
-            #region PostVibe Configuration
-            modelBuilder.Entity<PostVibe>(entity =>
+            #region VibeToPostLink Configuration
+            modelBuilder.Entity<VibeToPostLink>(entity =>
             {
                 entity.HasKey(pv => new { pv.PostId, pv.VibeId });
-
-                entity.ToTable("posts_vibes");
 
                 entity.HasOne(pv => pv.Post)
                     .WithMany(p => p.Vibes)

@@ -28,6 +28,6 @@
         /// <summary>
         /// List of venues of this type
         /// </summary>
-        public List<Venue> Venues { get; set; } = [];
+        public virtual List<Venue> Venues { get; set; } = [];
     }
 }

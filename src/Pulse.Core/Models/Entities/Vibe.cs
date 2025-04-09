@@ -31,6 +31,6 @@
         /// <summary>
         /// Posts that use this vibe
         /// </summary>
-        public List<PostVibe> Posts { get; set; } = [];
+        public virtual List<VibeToPostLink> Posts { get; set; } = [];
     }
 }

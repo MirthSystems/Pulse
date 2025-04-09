@@ -31,6 +31,6 @@
         /// <summary>
         /// Specials that use this tag
         /// </summary>
-        public List<TagSpecial> Specials { get; set; } = [];
+        public virtual List<TagToSpecialLink> Specials { get; set; } = [];
     }
 }

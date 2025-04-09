@@ -115,8 +115,8 @@
         /// The venue associated with the special.
         /// This navigation property provides access to the venue's details, such as its location for timezone derivation.
         /// </summary>
-        public Venue? Venue { get; set; }
+        public virtual Venue? Venue { get; set; }
 
-        public List<TagSpecial> Tags { get; set; } = [];
+        public virtual List<TagToSpecialLink> Tags { get; set; } = [];
     }
 }

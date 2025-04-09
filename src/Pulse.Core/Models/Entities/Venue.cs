@@ -1,14 +1,7 @@
 ﻿namespace Pulse.Core.Models.Entities
 {
-    using System.Net;
-
-    using Microsoft.EntityFrameworkCore.ChangeTracking;
 
     using NetTopologySuite.Geometries;
-
-    using NodaTime;
-
-    using Pulse.Core.Enums;
 
 
     /// <summary>
@@ -186,7 +179,7 @@
         /// </remarks>
         public string Country { get; set; } = null!;
 
-        public VenueType VenueType { get; set; } = null!;
+        public virtual VenueType VenueType { get; set; } = null!;
 
         /// <summary>
         /// The geographical coordinates (latitude and longitude) of the venue.
@@ -206,7 +199,7 @@
         /// <summary>
         /// The list of specials associated with the venue.
         /// </summary>
-        public List<Special> Specials { get; set; } = [];
+        public virtual List<Special> Specials { get; set; } = [];
 
         /// <summary>
         /// The business hours for this venue, typically one schedule for each day of the week.
@@ -216,10 +209,8 @@
         /// <para>For days when the venue is closed, set IsClosed = true.</para>
         /// <para>For venues open 24 hours, set TimeOfOpen to 00:00 and TimeOfClose to 23:59.</para>
         /// </remarks>
-        public List<OperatingSchedule> BusinessHours { get; set; } = [];
-        
+        public virtual List<OperatingSchedule> BusinessHours { get; set; } = [];
 
-        // Add this property for the posts about this venue
-        public List<Post> Posts { get; set; } = [];
+        public virtual List<Post> Posts { get; set; } = [];
     }
 }

@@ -72,6 +72,6 @@
         /// <summary>
         /// The venue this operating schedule entry is associated with.
         /// </summary>
-        public Venue Venue { get; set; } = null!;
+        public virtual Venue Venue { get; set; } = null!;
     }
 }

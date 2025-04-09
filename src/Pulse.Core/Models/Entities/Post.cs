@@ -53,13 +53,13 @@
         /// </remarks>
         public bool IsExpired { get; set; }
 
-        public ApplicationUser User { get; set; } = null!;
+        public virtual ApplicationUser User { get; set; } = null!;
 
-        public Venue Venue { get; set; } = null!;
+        public virtual Venue Venue { get; set; } = null!;
 
         /// <summary>
         /// Vibes associated with this post
         /// </summary>
-        public List<PostVibe> Vibes { get; set; } = [];
+        public virtual List<VibeToPostLink> Vibes { get; set; } = [];
     }
 }

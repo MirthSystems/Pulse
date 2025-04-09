@@ -62,6 +62,6 @@
         /// <summary>
         /// Posts created by this user
         /// </summary>
-        public List<Post> Posts { get; set; } = [];
+        public virtual List<Post> Posts { get; set; } = [];
     }
 }
