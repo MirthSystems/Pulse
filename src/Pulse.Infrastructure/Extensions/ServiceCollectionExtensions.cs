@@ -4,6 +4,8 @@
 
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Pulse.Core.Contracts;
+    using Pulse.Infrastructure.Services;
 
     public static class ServiceCollectionExtensions
     {
@@ -22,6 +24,11 @@
                     npg.UseNetTopologySuite();
                 }).UseSnakeCaseNamingConvention();
             });
+
+            services.AddScoped<IVenueService, VenueService>();
+            services.AddScoped<ISpecialService, SpecialService>();
+            services.AddScoped<ILocationService, LocationService>();
+
             return services;
         }
     }

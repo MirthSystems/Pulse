@@ -3,6 +3,7 @@ namespace Pulse.Clients.Web
     using Microsoft.AspNetCore.Components.Web;
     using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
     using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.FluentUI.AspNetCore.Components;
 
     public class Program
