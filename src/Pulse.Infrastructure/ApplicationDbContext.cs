@@ -218,6 +218,8 @@
             {
                 entity.HasKey(ts => new { ts.TagId, ts.SpecialId });
 
+                entity.ToTable("tags_specials");
+
                 entity.HasOne(ts => ts.Tag)
                     .WithMany(t => t.Specials)
                     .HasForeignKey(ts => ts.TagId)
@@ -350,6 +352,8 @@
             modelBuilder.Entity<PostVibe>(entity =>
             {
                 entity.HasKey(pv => new { pv.PostId, pv.VibeId });
+
+                entity.ToTable("posts_vibes");
 
                 entity.HasOne(pv => pv.Post)
                     .WithMany(p => p.Vibes)
