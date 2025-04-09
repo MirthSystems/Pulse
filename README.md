@@ -257,7 +257,36 @@ For our initial release, we're focusing on delivering these essential features:
   - Authentication API integration with frontend and backend services
   - User session management and token handling
 
-### Database Schema:
+### Authentication & Authorization Model:
+
+The application uses a two-tiered approach to user permissions:
+
+- **Application-Level Authorization (via Auth0):**
+  - **System Administrator**: Full access to all application features
+    - All venue management capabilities
+    - User administration
+    - System configuration
+    - Content moderation
+    - Analytics access
+  - **Venue Manager**: Access to manage venues through the global system
+    - Create and manage venue information
+    - Create specials for their venues
+    - View analytics for their venues
+    - Limited user management for their venues
+  - **Application User**: Basic authenticated user permissions
+    - Create posts about venues
+    - View venues and specials
+    - Delete their own posts
+    - Follow tags and receive notifications
+
+- **Venue-Specific Authorization (Database-Level):**
+  - **manage:venue**: Edit venue details, hours, and basic information
+  - **manage:specials**: Create and manage special offers and events
+  - **respond:posts**: Respond to customer posts about the venue
+  - **invite:users**: Add other users as venue managers
+  - **manage:users**: Control permissions for venue users
+
+This hybrid approach allows granular control over which users can manage specific venues, independent of their global application roles.
 
 ### Database Schema:
 
@@ -266,24 +295,20 @@ For our initial release, we're focusing on delivering these essential features:
 - **OperatingSchedule**: Venue business hours and days of operation
 - **Specials**: Event details, timing, recurrence, venue association (maintains existing SpecialTypes enum)
 - **Tags**: Tag definitions for specials
-- **TagSpecial**: Associations between Tags and Specials
+- **TagToSpecialLink**: Associations between Tags and Specials
 - **Posts**: Ephemeral user content with 15-minute expiration, includes foreign keys to user and venue
 - **Vibes**: User-created atmosphere descriptors
-- **PostVibe**: Associations between Vibes and Posts
-- **Users**: User account data and application-specific information
-  - Auth0 user identifier (for linking to external identity provider)
+- **VibeToPostLink**: Associations between Vibes and Posts
+- **VenuePermission**: Permissions that can be granted to users for specific venues
+- **VenueUser**: Associates users with venues they can manage
+- **VenueUserToPermissionLink**: Links venue users with specific permissions
+- **ApplicationUser**: User account data and application-specific information
+  - Id: Auto-incrementing primary key in our database
+  - ExternalId: Auth0 identifier for linking to external identity provider
   - Account creation and last login timestamps
-  - Profile completion status
   - Default location and search radius preferences
-  - Venue type preferences (favorite venue categories like bars, restaurants, etc.)
-  - Tag preferences (interests in specific types of specials)
-  - Vibe preferences (preferred atmosphere characteristics)
-  - Notification settings (which Tags to receive alerts for)
-  - Privacy settings and consent records
-  - Application interaction history
-  - Followed Tags (for updates and recommendations)
-  - Custom feed configuration
-  - Device and push notification tokens
+  - Location services opt-in status
+  - Profile status (active/inactive)
   - Note: Basic profile info (name, email, profile picture) managed by Auth0
 
 ### Infrastructure:
