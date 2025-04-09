@@ -226,7 +226,7 @@ For our initial release, we're focusing on delivering these essential features:
   - Responsive design for all screen sizes
 - Future native mobile applications planned post-MVP (iOS & Android)
 - Web portal for venue management
-- Technologies: HTML, CSS, JavaScript frameworks
+- Technologies: Blazor WASM, HTML, CSS, JavaScript frameworks
 
 ### Backend:
 

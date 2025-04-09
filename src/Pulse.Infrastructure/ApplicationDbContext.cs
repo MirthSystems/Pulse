@@ -17,6 +17,9 @@
         public DbSet<Post> Posts { get; set; }
         public DbSet<Vibe> Vibes { get; set; }
         public DbSet<VibeToPostLink> VibeToPostLinks { get; set; }
+        public DbSet<VenuePermission> VenuePermissions { get; set; }
+        public DbSet<VenueUser> VenueUsers { get; set; }
+        public DbSet<VenueUserToPermissionLink> VenueUserToPermissionLinks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -240,7 +243,7 @@
 
                 entity.ToTable("users");
 
-                entity.Property(u => u.ProviderId)
+                entity.Property(u => u.ExternalId)
                     .IsRequired()
                     .HasMaxLength(128);
 
@@ -261,14 +264,17 @@
                     .IsRequired()
                     .HasDefaultValue(false);
 
-                entity.HasIndex(u => u.ProviderId)
-                    .IsUnique();
+                entity.Property(u => u.IsActive)
+                    .IsRequired()
+                    .HasDefaultValue(true);
 
-                entity.HasIndex(u => u.DefaultSearchLocation)
-                    .HasMethod("GIST");
+                entity.HasIndex(u => u.ExternalId)
+                    .IsUnique();
 
                 entity.HasIndex(u => u.CreatedAt);
                 entity.HasIndex(u => u.LastLoginAt);
+                entity.HasIndex(u => u.DefaultSearchLocation)
+                    .HasMethod("GIST");
             });
             #endregion
 
@@ -363,6 +369,93 @@
 
                 entity.HasIndex(pv => pv.PostId);
                 entity.HasIndex(pv => pv.VibeId);
+            });
+            #endregion
+
+            #region VenuePermission Configuration
+            modelBuilder.Entity<VenuePermission>(entity =>
+            {
+                entity.HasKey(vp => vp.Id);
+
+                entity.Property(vp => vp.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(vp => vp.Description)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.HasIndex(vp => vp.Name)
+                    .IsUnique();
+            });
+            #endregion
+
+            #region VenueUser Configuration
+            modelBuilder.Entity<VenueUser>(entity =>
+            {
+                entity.HasKey(vu => vu.Id);
+
+                entity.Property(vu => vu.UserId)
+                    .IsRequired();
+
+                entity.Property(vu => vu.VenueId)
+                    .IsRequired();
+
+                entity.Property(vu => vu.IsVerifiedOwner)
+                    .IsRequired()
+                    .HasDefaultValue(false);
+
+                entity.Property(vu => vu.CreatedAt)
+                    .IsRequired();
+
+                entity.HasOne(vu => vu.User)
+                    .WithMany()
+                    .HasForeignKey(vu => vu.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(vu => vu.Venue)
+                    .WithMany()
+                    .HasForeignKey(vu => vu.VenueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(vu => vu.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(vu => vu.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(vu => new { vu.UserId, vu.VenueId })
+                    .IsUnique();
+
+                entity.HasIndex(vu => vu.UserId);
+                entity.HasIndex(vu => vu.VenueId);
+            });
+            #endregion
+
+            #region VenueUserToPermissionLink Configuration
+            modelBuilder.Entity<VenueUserToPermissionLink>(entity =>
+            {
+                entity.HasKey(vup => new { vup.VenueUserId, vup.VenuePermissionId });
+
+                entity.Property(vup => vup.GrantedAt)
+                    .IsRequired();
+
+                entity.HasOne(vup => vup.VenueUser)
+                    .WithMany(vu => vu.Permissions)
+                    .HasForeignKey(vup => vup.VenueUserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(vup => vup.Permission)
+                    .WithMany(vp => vp.VenueUsers)
+                    .HasForeignKey(vup => vup.VenuePermissionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(vup => vup.GrantedByUser)
+                    .WithMany()
+                    .HasForeignKey(vup => vup.GrantedByUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(vup => vup.VenueUserId);
+                entity.HasIndex(vup => vup.VenuePermissionId);
             });
             #endregion
         }

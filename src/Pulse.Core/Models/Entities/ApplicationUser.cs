@@ -9,12 +9,15 @@
     /// </summary>
     public class ApplicationUser
     {
+        /// <summary>
+        /// Primary key identifier for this user in our database
+        /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// User identifier for linking to the external identity provider
+        /// User identifier from the external identity provider (Auth0)
         /// </summary>
-        public string ProviderId { get; set; } = null!;
+        public string ExternalId { get; set; } = null!;
 
         /// <summary>
         /// When this user account was created
@@ -58,6 +61,11 @@
         /// Whether the user has opted in to location services
         /// </summary>
         public bool OptedInToLocationServices { get; set; } = false;
+
+        /// <summary>
+        /// Whether the user account is active in our application
+        /// </summary>
+        public bool IsActive { get; set; } = true;
 
         /// <summary>
         /// Posts created by this user
