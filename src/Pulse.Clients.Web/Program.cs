@@ -1,4 +1,4 @@
-namespace Pulse.Web
+namespace Pulse.Clients.Web
 {
     using Microsoft.AspNetCore.Components.Web;
     using Microsoft.AspNetCore.Components.WebAssembly.Hosting;

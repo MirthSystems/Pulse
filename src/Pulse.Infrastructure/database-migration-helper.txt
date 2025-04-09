@@ -1,4 +1,4 @@
 ﻿dotnet ef migrations add <MigrationName> `
   --project .\Pulse.Infrastructure.csproj `
-  --startup-project ..\Pulse.Services.DatabaseMigration\Pulse.Services.DatabaseMigration.csproj `
+  --startup-project ..\Pulse.DatabaseMigrationService\Pulse.DatabaseMigrationService.csproj `
   --output-dir Migrations

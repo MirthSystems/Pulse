@@ -1,4 +1,4 @@
-namespace Pulse.Services.DatabaseMigration
+namespace Pulse.DatabaseMigrationService
 {
     using Microsoft.EntityFrameworkCore;
 

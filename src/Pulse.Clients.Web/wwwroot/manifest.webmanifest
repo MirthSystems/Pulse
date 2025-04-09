@@ -1,6 +1,6 @@
 {
-  "name": "Pulse.Web",
-  "short_name": "Pulse.Web",
+  "name": "Pulse.Clients.Web",
+  "short_name": "Pulse.Clients.Web",
   "id": "./",
   "start_url": "./",
   "display": "standalone",

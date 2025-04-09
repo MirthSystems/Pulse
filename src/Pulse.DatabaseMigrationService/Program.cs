@@ -1,9 +1,6 @@
-namespace Pulse.Services.DatabaseMigration
+namespace Pulse.DatabaseMigrationService
 {
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
     using Pulse.Infrastructure.Extensions;
-
     public class Program
     {
         public static void Main(string[] args)

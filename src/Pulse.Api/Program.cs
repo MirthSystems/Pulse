@@ -1,13 +1,13 @@
-namespace Pulse.Server
-{
-    using Microsoft.OpenApi.Models;
-
+namespace Pulse.Api
+{ 
     using NodaTime;
+
+    using Pulse.Api.Extensions;
     using Pulse.Infrastructure.Extensions;
 
-    public class Program
+    internal class Program
     {
-        public static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -17,39 +17,31 @@ namespace Pulse.Server
                 throw new InvalidOperationException("Connection string is not configured.");
             }
 
-            // Add services to the container.
             builder.Services.AddPulseInfrastructure(connectionString);
             builder.Services.AddSingleton<IClock>(SystemClock.Instance);
+
+            builder.Services.AddAuthentication().AddJwtBearer();
+            builder.Services.AddAuthorization();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo 
-                { 
-                    Title = "Pulse API", 
-                    Version = "v1" }
-                );
-            });
+            builder.Services.AddSwaggerService();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseStaticFiles();
                 app.MapOpenApi();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "Pulse API V1"));
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
-
-
             app.MapControllers();
+            app.MapFallbackToFile("index.html");
 
             app.Run();
         }
