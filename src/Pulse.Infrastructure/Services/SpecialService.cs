@@ -175,7 +175,7 @@
                         };
 
                         _context.Tags.Add(newTag);
-                        await _context.SaveChangesAsync(); // Save to get the ID
+                        await _context.SaveChangesAsync();
                         tagEntities.Add(newTag);
                     }
                 }
