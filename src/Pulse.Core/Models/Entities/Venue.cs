@@ -9,9 +9,9 @@
     /// This entity captures essential details about the venue, including its location, contact information, and associated specials.
     /// Designed to handle addresses from all countries, with fields flexible enough to accommodate various international address formats.
     /// </summary>
-    public class Venue
+    public class Venue : EntityBase
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public int VenueTypeId { get; set; }
 
@@ -179,8 +179,6 @@
         /// </remarks>
         public string Country { get; set; } = null!;
 
-        public virtual VenueType VenueType { get; set; } = null!;
-
         /// <summary>
         /// The geographical coordinates (latitude and longitude) of the venue.
         /// Used for mapping and location-based features.
@@ -196,6 +194,8 @@
         /// </remarks>
         public Point? Location { get; set; }
 
+        public virtual VenueType VenueType { get; set; } = null!;
+
         /// <summary>
         /// The list of specials associated with the venue.
         /// </summary>
@@ -210,7 +210,5 @@
         /// <para>For venues open 24 hours, set TimeOfOpen to 00:00 and TimeOfClose to 23:59.</para>
         /// </remarks>
         public virtual List<OperatingSchedule> BusinessHours { get; set; } = [];
-
-        public virtual List<Post> Posts { get; set; } = [];
     }
 }

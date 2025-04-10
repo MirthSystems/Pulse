@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Pulse.Infrastructure\Pulse.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>

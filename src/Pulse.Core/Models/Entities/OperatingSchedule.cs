@@ -5,14 +5,14 @@
     /// <summary>
     /// Represents the operating schedule for a venue on a specific day of the week.
     /// </summary>
-    public class OperatingSchedule
+    public class OperatingSchedule : EntityBase
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// The venue this operating schedule entry belongs to.
         /// </summary>
-        public int VenueId { get; set; }
+        public long VenueId { get; set; }
 
         /// <summary>
         /// The day of the week this schedule applies to.

@@ -10,11 +10,11 @@
     /// All date and time properties are stored as local values (without timezone), with the expectation that the frontend will handle timezone calculations
     /// based on the venue's location and the user's location.
     /// </summary>
-    public class Special
+    public class Special : EntityBase
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public int VenueId { get; set; }
+        public long VenueId { get; set; }
 
         /// <summary>
         /// A brief description of the special.
@@ -90,7 +90,7 @@
 
         /// <summary>
         /// Determines whether the special repeats over time.
-        /// If false, the special is a one-time event. If true, it recurs according to the RecurringSchedule.
+        /// If false, the special is a one-time event. If true, it recurs according to the RecurringPeriod.
         /// </summary>
         /// <remarks>
         /// <para>Examples include:</para>
@@ -100,23 +100,43 @@
         public bool IsRecurring { get; set; }
 
         /// <summary>
-        /// A cron expression defining the recurrence pattern for the special, or null if not recurring.
-        /// This optional field is interpreted in the venue's timezone on the frontend, based on the venue's location.
+        /// A period defining the recurrence pattern for the special, or null if not recurring.
+        /// This optional field defines how frequently the special repeats (daily, weekly, monthly, etc.).
+        /// Used in conjunction with StartTime and EndTime to determine when a special is active.
+        /// </summary>
+        /// <remarks>
+        /// <para>Common examples for venue specials:</para>
+        /// <para>- Every day: Period.FromDays(1)</para>
+        /// <para>- Weekly: Period.FromDays(7)</para>
+        /// <para>- Monthly: Period.FromMonths(1)</para>
+        /// <para>- Every 2 weeks: Period.FromDays(14)</para>
+        /// </remarks>
+        public Period? RecurringPeriod { get; set; }
+
+        /// <summary>
+        /// The day(s) of the week when this special is active, if recurring.
+        /// This is a bitmask where each bit represents a day of the week (1=Sunday, 2=Monday, 4=Tuesday, etc.).
+        /// A value of 0 means the special follows the strict interval regardless of day.
+        /// Combine values with bitwise OR to select multiple days.
         /// </summary>
         /// <remarks>
         /// <para>Examples include:</para>
-        /// <para>- Thursdays at 5 PM: "0 0 17 ? * THU"</para>
-        /// <para>- Daily at noon: "0 0 12 * * ?"</para>
-        /// <para>- Weekdays at 1 PM: "0 0 13 * * 1-5"</para>
+        /// <para>- Every day: 0 (follows interval only)</para>
+        /// <para>- Weekdays only: 62 (2+4+8+16+32 = Mon+Tue+Wed+Thu+Fri)</para>
+        /// <para>- Weekends only: 65 (1+64 = Sun+Sat)</para>
+        /// <para>- Mondays and Wednesdays: 10 (2+8 = Mon+Wed)</para>
         /// </remarks>
-        public string? RecurringSchedule { get; set; }
+        public int? ActiveDaysOfWeek { get; set; }
 
         /// <summary>
         /// The venue associated with the special.
         /// This navigation property provides access to the venue's details, such as its location for timezone derivation.
         /// </summary>
-        public virtual Venue? Venue { get; set; }
+        public virtual Venue Venue { get; set; } = null!;
 
+        /// <summary>
+        /// Tags associated with this special
+        /// </summary>
         public virtual List<TagToSpecialLink> Tags { get; set; } = [];
     }
 }

@@ -4,8 +4,9 @@
 
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using NodaTime;
     using Pulse.Core.Contracts;
-    using Pulse.Infrastructure.Services;
+    using Pulse.Infrastructure.Repositories;
 
     public static class ServiceCollectionExtensions
     {
@@ -16,6 +17,8 @@
                 throw new InvalidOperationException("Connection string is not configured.");
             }
 
+            services.AddSingleton<IClock>(SystemClock.Instance);
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(postgresConnectionString, npg =>
@@ -25,9 +28,14 @@
                 }).UseSnakeCaseNamingConvention();
             });
 
-            services.AddScoped<IVenueService, VenueService>();
-            services.AddScoped<ISpecialService, SpecialService>();
-            services.AddScoped<ILocationService, LocationService>();
+            services.AddScoped<IVenueRepository, VenueRepository>();
+            services.AddScoped<IVenueTypeRepository, VenueTypeRepository>();
+            services.AddScoped<ISpecialRepository, SpecialRepository>();
+            services.AddScoped<IOperatingScheduleRepository, OperatingScheduleRepository>();
+            services.AddScoped<ITagRepository, TagRepository>();
+            services.AddScoped<ITagToSpecialLinkRepository, TagToSpecialLinkRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

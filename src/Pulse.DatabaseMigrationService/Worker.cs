@@ -25,9 +25,6 @@ namespace Pulse.DatabaseMigrationService
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     await dbContext.Database.MigrateAsync(stoppingToken);
-
-                    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-                    await seeder.SeedAsync();
                 }
 
                 this._logger.LogInformation("Database migration and seeding completed successfully.");

@@ -13,22 +13,50 @@
         public DbSet<OperatingSchedule> BusinessHours { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TagToSpecialLink> TagToSpecialLinks { get; set; }
-        public DbSet<ApplicationUser> Users { get; set; }
-        public DbSet<Post> Posts { get; set; }
-        public DbSet<Vibe> Vibes { get; set; }
-        public DbSet<VibeToPostLink> VibeToPostLinks { get; set; }
-        public DbSet<VenuePermission> VenuePermissions { get; set; }
-        public DbSet<VenueUser> VenueUsers { get; set; }
-        public DbSet<VenueUserToPermissionLink> VenueUserToPermissionLinks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("address_standardizer");
+            modelBuilder.HasPostgresExtension("address_standardizer_data_us");
+            modelBuilder.HasPostgresExtension("fuzzystrmatch");
+            modelBuilder.HasPostgresExtension("plpgsql");
             modelBuilder.HasPostgresExtension("postgis");
+            modelBuilder.HasPostgresExtension("postgis_raster");
+            modelBuilder.HasPostgresExtension("postgis_sfcgal");
+            modelBuilder.HasPostgresExtension("postgis_tiger_geocoder");
+            modelBuilder.HasPostgresExtension("postgis_topology");
 
             modelBuilder.HasPostgresEnum<SpecialTypes>();
             modelBuilder.HasPostgresEnum<DayOfWeek>();
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(EntityBase).IsAssignableFrom(entityType.ClrType))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(nameof(EntityBase.CreatedAt))
+                        .IsRequired();
+
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(nameof(EntityBase.CreatedByUserId))
+                        .HasMaxLength(128);
+
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(nameof(EntityBase.UpdatedAt));
+
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(nameof(EntityBase.UpdatedByUserId))
+                        .HasMaxLength(128);
+
+                    modelBuilder.Entity(entityType.ClrType)
+                        .HasIndex(nameof(EntityBase.CreatedAt));
+
+                    modelBuilder.Entity(entityType.ClrType)
+                        .HasIndex(nameof(EntityBase.CreatedByUserId));
+                }
+            }
 
             #region Venue Configuration
             modelBuilder.Entity<Venue>(entity =>
@@ -177,8 +205,10 @@
                 entity.Property(s => s.IsRecurring)
                     .IsRequired();
 
-                entity.Property(s => s.RecurringSchedule)
-                    .HasMaxLength(50);
+                entity.Property(s => s.RecurringPeriod)
+                    .HasColumnType("interval");
+
+                entity.Property(s => s.ActiveDaysOfWeek);
 
                 entity.HasOne(s => s.Venue)
                     .WithMany(v => v.Specials)
@@ -206,9 +236,6 @@
                     .IsRequired()
                     .HasDefaultValue(0);
 
-                entity.Property(t => t.CreatedAt)
-                    .IsRequired();
-
                 entity.HasIndex(t => t.Name)
                     .IsUnique();
 
@@ -233,229 +260,6 @@
 
                 entity.HasIndex(ts => ts.TagId);
                 entity.HasIndex(ts => ts.SpecialId);
-            });
-            #endregion
-
-            #region ApplicationUser Configuration
-            modelBuilder.Entity<ApplicationUser>(entity =>
-            {
-                entity.HasKey(u => u.Id);
-
-                entity.ToTable("users");
-
-                entity.Property(u => u.ExternalId)
-                    .IsRequired()
-                    .HasMaxLength(128);
-
-                entity.Property(u => u.CreatedAt)
-                    .IsRequired();
-
-                entity.Property(u => u.DefaultSearchLocationString)
-                    .HasMaxLength(255);
-
-                entity.Property(u => u.DefaultSearchLocation)
-                    .HasColumnType("geography");
-
-                entity.Property(u => u.DefaultSearchRadius)
-                    .IsRequired()
-                    .HasDefaultValue(5.0);
-
-                entity.Property(u => u.OptedInToLocationServices)
-                    .IsRequired()
-                    .HasDefaultValue(false);
-
-                entity.Property(u => u.IsActive)
-                    .IsRequired()
-                    .HasDefaultValue(true);
-
-                entity.HasIndex(u => u.ExternalId)
-                    .IsUnique();
-
-                entity.HasIndex(u => u.CreatedAt);
-                entity.HasIndex(u => u.LastLoginAt);
-                entity.HasIndex(u => u.DefaultSearchLocation)
-                    .HasMethod("GIST");
-            });
-            #endregion
-
-            #region Post Configuration
-            modelBuilder.Entity<Post>(entity =>
-            {
-                entity.HasKey(p => p.Id);
-
-                entity.Property(p => p.UserId)
-                    .IsRequired();
-
-                entity.Property(p => p.VenueId)
-                    .IsRequired();
-
-                entity.Property(p => p.TextContent)
-                    .HasMaxLength(280);
-
-                entity.Property(p => p.ImageUrl)
-                    .HasMaxLength(512);
-
-                entity.Property(p => p.VideoUrl)
-                    .HasMaxLength(512);
-
-                entity.Property(p => p.CreatedAt)
-                    .IsRequired();
-
-                entity.Property(p => p.ExpiresAt)
-                    .IsRequired();
-
-                entity.Property(p => p.IsExpired)
-                    .IsRequired()
-                    .HasDefaultValue(false);
-
-                entity.HasOne(p => p.User)
-                    .WithMany(u => u.Posts)
-                    .HasForeignKey(p => p.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(p => p.Venue)
-                    .WithMany(v => v.Posts)
-                    .HasForeignKey(p => p.VenueId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasIndex(p => p.UserId);
-                entity.HasIndex(p => p.VenueId);
-                entity.HasIndex(p => p.CreatedAt);
-                entity.HasIndex(p => p.ExpiresAt);
-                entity.HasIndex(p => p.IsExpired);
-
-                entity.HasIndex(p => new { p.VenueId, p.IsExpired });
-                entity.HasIndex(p => new { p.VenueId, p.ExpiresAt });
-            });
-            #endregion
-
-            #region Vibe Configuration
-            modelBuilder.Entity<Vibe>(entity =>
-            {
-                entity.HasKey(v => v.Id);
-
-                entity.Property(v => v.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                entity.Property(v => v.UsageCount)
-                    .IsRequired()
-                    .HasDefaultValue(0);
-
-                entity.Property(v => v.CreatedAt)
-                    .IsRequired();
-
-                entity.HasIndex(v => v.Name)
-                    .IsUnique();
-
-                entity.HasIndex(v => v.UsageCount);
-            });
-            #endregion
-
-            #region VibeToPostLink Configuration
-            modelBuilder.Entity<VibeToPostLink>(entity =>
-            {
-                entity.HasKey(pv => new { pv.PostId, pv.VibeId });
-
-                entity.HasOne(pv => pv.Post)
-                    .WithMany(p => p.Vibes)
-                    .HasForeignKey(pv => pv.PostId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(pv => pv.Vibe)
-                    .WithMany(v => v.Posts)
-                    .HasForeignKey(pv => pv.VibeId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasIndex(pv => pv.PostId);
-                entity.HasIndex(pv => pv.VibeId);
-            });
-            #endregion
-
-            #region VenuePermission Configuration
-            modelBuilder.Entity<VenuePermission>(entity =>
-            {
-                entity.HasKey(vp => vp.Id);
-
-                entity.Property(vp => vp.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                entity.Property(vp => vp.Description)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.HasIndex(vp => vp.Name)
-                    .IsUnique();
-            });
-            #endregion
-
-            #region VenueUser Configuration
-            modelBuilder.Entity<VenueUser>(entity =>
-            {
-                entity.HasKey(vu => vu.Id);
-
-                entity.Property(vu => vu.UserId)
-                    .IsRequired();
-
-                entity.Property(vu => vu.VenueId)
-                    .IsRequired();
-
-                entity.Property(vu => vu.IsVerifiedOwner)
-                    .IsRequired()
-                    .HasDefaultValue(false);
-
-                entity.Property(vu => vu.CreatedAt)
-                    .IsRequired();
-
-                entity.HasOne(vu => vu.User)
-                    .WithMany()
-                    .HasForeignKey(vu => vu.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(vu => vu.Venue)
-                    .WithMany()
-                    .HasForeignKey(vu => vu.VenueId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(vu => vu.CreatedByUser)
-                    .WithMany()
-                    .HasForeignKey(vu => vu.CreatedByUserId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasIndex(vu => new { vu.UserId, vu.VenueId })
-                    .IsUnique();
-
-                entity.HasIndex(vu => vu.UserId);
-                entity.HasIndex(vu => vu.VenueId);
-            });
-            #endregion
-
-            #region VenueUserToPermissionLink Configuration
-            modelBuilder.Entity<VenueUserToPermissionLink>(entity =>
-            {
-                entity.HasKey(vup => new { vup.VenueUserId, vup.VenuePermissionId });
-
-                entity.Property(vup => vup.GrantedAt)
-                    .IsRequired();
-
-                entity.HasOne(vup => vup.VenueUser)
-                    .WithMany(vu => vu.Permissions)
-                    .HasForeignKey(vup => vup.VenueUserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(vup => vup.Permission)
-                    .WithMany(vp => vp.VenueUsers)
-                    .HasForeignKey(vup => vup.VenuePermissionId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(vup => vup.GrantedByUser)
-                    .WithMany()
-                    .HasForeignKey(vup => vup.GrantedByUserId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasIndex(vup => vup.VenueUserId);
-                entity.HasIndex(vup => vup.VenuePermissionId);
             });
             #endregion
         }

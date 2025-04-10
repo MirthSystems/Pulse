@@ -6,3 +6,8 @@
 dotnet ef migrations remove `
   --project .\Pulse.Infrastructure.csproj `
   --startup-project ..\Pulse.DatabaseMigrationService\Pulse.DatabaseMigrationService.csproj
+
+dotnet ef migrations add UpdateSpecialRecurringScheduleStringToInterval `
+  --project .\Pulse.Infrastructure.csproj `
+  --startup-project ..\Pulse.DatabaseMigrationService\Pulse.DatabaseMigrationService.csproj `
+  --output-dir Migrations
