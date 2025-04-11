@@ -137,7 +137,6 @@
         {
             try
             {
-                // Build formatted address from components
                 var formattedAddress = LocationHelper.FormatAddress(
                     addressLine, locality, region, postcode, country);
 
@@ -170,7 +169,6 @@
             // Create cache key from coordinates (round to 3 decimal places for reasonable cache hits)
             var cacheKey = $"{Math.Round(point.X, 3)},{Math.Round(point.Y, 3)}";
 
-            // Check cache first
             lock (_cacheLock)
             {
                 if (_timezoneCache.TryGetValue(cacheKey, out var cachedTimezone))
@@ -184,22 +182,19 @@
             {
                 _logger.LogInformation("Getting timezone for location: ({Longitude}, {Latitude})", point.X, point.Y);
 
-                // Create GeoPosition (latitude first, longitude second for Azure Maps API)
-                var position = new Azure.Core.GeoJson.GeoPosition(point.Y, point.X);
+                var position = new GeoPosition(point.Y, point.X);
 
-                // Call Azure Maps to get timezone info
                 var options = new GetTimeZoneOptions();
                 var response = await _timeZoneClient.GetTimeZoneByCoordinatesAsync(position, options);
 
                 if (response?.Value == null || response.Value.TimeZones.Count == 0)
                 {
                     _logger.LogWarning("No timezone found for location: ({Longitude}, {Latitude})", point.X, point.Y);
-                    return "Etc/UTC"; // Fall back to UTC
+                    return "Etc/UTC";
                 }
 
                 var timezone = response.Value.TimeZones[0].Id;
 
-                // Cache the result
                 lock (_cacheLock)
                 {
                     _timezoneCache[cacheKey] = timezone;
@@ -210,7 +205,7 @@
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting timezone for location: ({Longitude}, {Latitude})", point.X, point.Y);
-                return "Etc/UTC"; // Fall back to UTC
+                return "Etc/UTC";
             }
         }
 
@@ -228,20 +223,16 @@
 
             try
             {
-                // Get timezone for the location
                 var timezoneId = await GetTimezoneForPointAsync(point);
 
-                // Get DateTimeZone from IANA ID
                 var timeZone = _dateTimeZoneProvider.GetZoneOrNull(timezoneId) ?? DateTimeZone.Utc;
 
-                // Convert UTC instant to local date and time
                 var zonedDateTime = instant.InZone(timeZone);
                 return zonedDateTime.LocalDateTime;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error converting time for location: ({Longitude}, {Latitude})", point.X, point.Y);
-                // Fall back to UTC
                 return instant.InUtc().LocalDateTime;
             }
         }
@@ -260,19 +251,17 @@
 
                 _logger.LogInformation("Standardizing address using Azure Maps: {Address}", address);
 
-                // Use Azure Maps to standardize the address through geocoding and formatting
                 var geocodingResult = await GeocodeAddressAsync(address);
 
                 if (!geocodingResult.Success || geocodingResult.Address == null)
-                    return address; // Return original if standardization fails
+                    return address;
 
-                // Use the formatted address from the geocoding result
                 return geocodingResult.Address.FormattedAddress ?? address;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error standardizing address: {Address}", address);
-                return address; // Return original address if standardization fails
+                return address;
             }
         }
     }

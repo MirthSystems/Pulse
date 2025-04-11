@@ -21,6 +21,11 @@
         private const double KmToMilesFactor = 0.621371;
 
         /// <summary>
+        /// Conversion factor from meters to miles (1 mile = 1609.344 meters)
+        /// </summary>
+        public const double MetersPerMile = 1609.344;
+
+        /// <summary>
         /// Ensures that a point has SRID set to 4326 (WGS84)
         /// </summary>
         /// <param name="point">Geographic point to validate</param>
@@ -45,6 +50,26 @@
         public static double DegreesToRadians(double degrees)
         {
             return degrees * Math.PI / 180.0;
+        }
+
+        /// <summary>
+        /// Converts meters to miles
+        /// </summary>
+        /// <param name="meters">Distance in meters</param>
+        /// <returns>Distance in miles</returns>
+        public static double MetersToMiles(double meters)
+        {
+            return meters / MetersPerMile;
+        }
+
+        /// <summary>
+        /// Converts miles to meters
+        /// </summary>
+        /// <param name="miles">Distance in miles</param>
+        /// <returns>Distance in meters</returns>
+        public static double MilesToMeters(double miles)
+        {
+            return miles * MetersPerMile;
         }
 
         /// <summary>
@@ -120,30 +145,6 @@
                 parts.Add(country.Trim());
 
             return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
-        }
-
-        /// <summary>
-        /// Converts NTS Point to Azure GeoPosition
-        /// </summary>
-        /// <param name="point">NTS Point (longitude, latitude)</param>
-        /// <returns>Azure GeoPosition (latitude, longitude)</returns>
-        /// <exception cref="ArgumentNullException">Thrown when point is null</exception>
-        public static GeoPosition PointToGeoPosition(Point point)
-        {
-            if (point == null)
-                throw new ArgumentNullException(nameof(point));
-
-            return new GeoPosition(point.Y, point.X);
-        }
-
-        /// <summary>
-        /// Converts Azure GeoPosition to NTS Point
-        /// </summary>
-        /// <param name="position">Azure GeoPosition (latitude, longitude)</param>
-        /// <returns>NTS Point (longitude, latitude) with SRID 4326</returns>
-        public static Point GeoPositionToPoint(GeoPosition position)
-        {
-            return new Point(position.Longitude, position.Latitude) { SRID = 4326 };
         }
     }
 }
