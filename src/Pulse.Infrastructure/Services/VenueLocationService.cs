@@ -24,27 +24,32 @@
         private readonly ILocationService _locationService;
         private readonly IClock _clock;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VenueLocationService"/> class.
+        /// </summary>
+        /// <param name="logger">Logger for diagnostic information</param>
+        /// <param name="venueRepository">Repository for venue data access</param>
+        /// <param name="locationService">Service for location operations</param>
+        /// <param name="clock">Clock for current time</param>
         public VenueLocationService(
             ILogger<VenueLocationService> logger,
             IVenueRepository venueRepository,
             ILocationService locationService,
             IClock clock)
         {
-            _logger = logger;
-            _venueRepository = venueRepository;
-            _locationService = locationService;
-            _clock = clock;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _venueRepository = venueRepository ?? throw new ArgumentNullException(nameof(venueRepository));
+            _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
+            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
         /// <inheritdoc />
-        public async Task<bool> GeocodeVenueAsync(Venue venue, CancellationToken cancellationToken = default)
+        public async Task<bool> GeocodeVenueAsync(Venue venue)
         {
             try
             {
                 if (venue == null)
-                {
                     throw new ArgumentNullException(nameof(venue));
-                }
 
                 _logger.LogInformation("Geocoding venue: {VenueName}", venue.Name);
 
@@ -54,8 +59,7 @@
                     venue.Locality,
                     venue.Region,
                     venue.Postcode,
-                    venue.Country,
-                    cancellationToken);
+                    venue.Country);
 
                 if (!geocodingResult.Success || geocodingResult.Point == null)
                 {
@@ -93,18 +97,15 @@
         /// <inheritdoc />
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesNearAddressAsync(
             string address,
-            double radiusMiles,
-            CancellationToken cancellationToken = default)
+            double radiusMiles)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(address))
-                {
                     throw new ArgumentException("Address cannot be empty", nameof(address));
-                }
 
                 // Geocode the address to get coordinates
-                var geocodingResult = await _locationService.GeocodeAddressAsync(address, cancellationToken);
+                var geocodingResult = await _locationService.GeocodeAddressAsync(address);
 
                 if (!geocodingResult.Success || geocodingResult.Point == null)
                 {
@@ -118,8 +119,7 @@
                 return await FindVenuesNearPointAsync(
                     geocodingResult.Point.Y,  // Latitude
                     geocodingResult.Point.X,  // Longitude
-                    radiusMiles,
-                    cancellationToken);
+                    radiusMiles);
             }
             catch (Exception ex)
             {
@@ -132,8 +132,7 @@
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesNearPointAsync(
             double latitude,
             double longitude,
-            double radiusMiles,
-            CancellationToken cancellationToken = default)
+            double radiusMiles)
         {
             try
             {
@@ -147,9 +146,9 @@
                     radiusMiles);
 
                 // Get current time for the location
-                var localTime = await GetLocalTimeAtPointAsync(searchPoint, cancellationToken);
+                var localTime = await GetLocalTimeAtPointAsync(searchPoint);
 
-                // Get venues within the radius
+                // Get venues within the radius - using spatial PostGIS query
                 var venues = await _venueRepository.FindNearbyAsync(searchPoint, radiusMiles);
 
                 // Calculate exact distances and create DTOs
@@ -180,18 +179,15 @@
         /// <inheritdoc />
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsNearAddressAsync(
             string address,
-            double radiusMiles,
-            CancellationToken cancellationToken = default)
+            double radiusMiles)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(address))
-                {
                     throw new ArgumentException("Address cannot be empty", nameof(address));
-                }
 
                 // Geocode the address to get coordinates
-                var geocodingResult = await _locationService.GeocodeAddressAsync(address, cancellationToken);
+                var geocodingResult = await _locationService.GeocodeAddressAsync(address);
 
                 if (!geocodingResult.Success || geocodingResult.Point == null)
                 {
@@ -205,8 +201,7 @@
                 return await FindVenuesWithActiveSpecialsNearPointAsync(
                     geocodingResult.Point.Y,  // Latitude
                     geocodingResult.Point.X,  // Longitude
-                    radiusMiles,
-                    cancellationToken);
+                    radiusMiles);
             }
             catch (Exception ex)
             {
@@ -219,8 +214,7 @@
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsNearPointAsync(
             double latitude,
             double longitude,
-            double radiusMiles,
-            CancellationToken cancellationToken = default)
+            double radiusMiles)
         {
             try
             {
@@ -235,9 +229,9 @@
 
                 // Get current time at the search location for evaluating "active" specials
                 var now = _clock.GetCurrentInstant();
-                var localTime = await _locationService.ConvertToLocalTimeAsync(now, searchPoint, cancellationToken);
+                var localTime = await _locationService.ConvertToLocalTimeAsync(now, searchPoint);
 
-                // Get venues with active specials within the radius
+                // Get venues with active specials within the radius - using spatial PostGIS query with prefiltering
                 var venues = await _venueRepository.FindNearbyWithActiveSpecialsAsync(searchPoint, radiusMiles);
 
                 // Calculate exact distances and create DTOs
@@ -265,20 +259,23 @@
             }
         }
 
-        public async Task<LocalDateTime> GetLocalTimeAtPointAsync(Point point, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Gets the local time at a specific geographic point.
+        /// </summary>
+        /// <param name="point">Geographic point</param>
+        /// <returns>Local date and time at the specified location</returns>
+        public async Task<LocalDateTime> GetLocalTimeAtPointAsync(Point point)
         {
             try
             {
                 if (point == null)
-                {
                     throw new ArgumentNullException(nameof(point));
-                }
 
                 // Get current UTC time
                 var currentInstant = _clock.GetCurrentInstant();
 
                 // Convert to location's local time
-                return await _locationService.ConvertToLocalTimeAsync(currentInstant, point, cancellationToken);
+                return await _locationService.ConvertToLocalTimeAsync(currentInstant, point);
             }
             catch (Exception ex)
             {

@@ -21,7 +21,13 @@ namespace Pulse.Api
                 throw new InvalidOperationException("Connection string is not configured.");
             }
 
-            builder.Services.AddPulseInfrastructure(connectionString);
+            var azureMapsSubscriptionKey = builder.Configuration["AzureMaps:SubscriptionKey"];
+            if (string.IsNullOrEmpty(azureMapsSubscriptionKey))
+            {
+                throw new InvalidOperationException("Azure Maps subscription key is not configured.");
+            }
+
+            builder.Services.AddPulseInfrastructure(connectionString, azureMapsSubscriptionKey);
             builder.Services.AddSingleton<IClock>(SystemClock.Instance);
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

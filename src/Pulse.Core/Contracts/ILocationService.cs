@@ -8,26 +8,26 @@
     using System;
 
     /// <summary>
-    /// Service for location-based operations including geocoding, timezone calculations, and distance calculations
+    /// Service for geographic location operations
     /// </summary>
     public interface ILocationService
     {
         /// <summary>
-        /// Geocodes an address to obtain coordinates and timezone information
+        /// Geocodes a string address to geographic coordinates and timezone
         /// </summary>
-        /// <param name="address">Address string to geocode</param>
-        /// <returns>GeocodingResult with coordinates and address information</returns>
+        /// <param name="address">The address to geocode</param>
+        /// <returns>A geocoding result with coordinates and timezone information</returns>
         Task<GeocodingResult> GeocodeAddressAsync(string address);
 
         /// <summary>
-        /// Geocodes address components to obtain coordinates and timezone information
+        /// Geocodes address components to geographic coordinates and timezone
         /// </summary>
-        /// <param name="addressLine">Primary address line</param>
-        /// <param name="locality">City or locality</param>
-        /// <param name="region">State, province, or region</param>
+        /// <param name="addressLine">Street address</param>
+        /// <param name="locality">City or town</param>
+        /// <param name="region">State or province</param>
         /// <param name="postcode">Postal code</param>
         /// <param name="country">Country</param>
-        /// <returns>GeocodingResult with coordinates and address information</returns>
+        /// <returns>A geocoding result with coordinates and timezone information</returns>
         Task<GeocodingResult> GeocodeAddressComponentsAsync(
             string addressLine,
             string locality,
@@ -36,25 +36,25 @@
             string country);
 
         /// <summary>
-        /// Determines the timezone for a geographic point
+        /// Gets the IANA timezone identifier for a geographic point
         /// </summary>
         /// <param name="point">Geographic point (longitude, latitude)</param>
-        /// <returns>Timezone ID in IANA format (e.g., "America/New_York")</returns>
+        /// <returns>IANA timezone identifier (e.g., "America/New_York")</returns>
         Task<string> GetTimezoneForPointAsync(Point point);
 
         /// <summary>
-        /// Converts a UTC instant to local time at a specific geographic point
+        /// Converts a UTC instant to local date and time for a specific geographic location
         /// </summary>
-        /// <param name="instant">UTC instant</param>
-        /// <param name="point">Geographic point (longitude, latitude)</param>
-        /// <returns>Local date and time</returns>
+        /// <param name="instant">The UTC instant to convert</param>
+        /// <param name="point">Geographic point to determine timezone</param>
+        /// <returns>Local date and time for the specified location</returns>
         Task<LocalDateTime> ConvertToLocalTimeAsync(Instant instant, Point point);
 
         /// <summary>
-        /// Standardizes an address using Azure Maps
+        /// Standardizes an address using Azure Maps geocoding service
         /// </summary>
-        /// <param name="address">Raw address string</param>
-        /// <returns>Standardized address string</returns>
+        /// <param name="address">Raw address to standardize</param>
+        /// <returns>Standardized address or original if standardization fails</returns>
         Task<string> StandardizeAddressAsync(string address);
     }
 }

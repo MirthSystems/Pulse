@@ -24,7 +24,6 @@
     using Azure;
     using Azure.Core.GeoJson;
     using Pulse.Core.Utilities;
-    using Pulse.Core.Models.Options;
 
     /// <summary>
     /// Implementation of location service using Azure Maps
@@ -39,92 +38,67 @@
 
         // Cache for timezone lookups to reduce API calls
         private readonly Dictionary<string, string> _timezoneCache = new();
+        private readonly object _cacheLock = new();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LocationService"/> class using Azure Maps subscription key.
+        /// </summary>
+        /// <param name="azureMapsSubscriptionKey">Azure Maps subscription key</param>
+        /// <param name="clock">NodaTime clock for time calculations</param>
+        /// <param name="dateTimeZoneProvider">Provider for timezone data</param>
+        /// <param name="logger">Logger for diagnostic information</param>
+        /// <exception cref="ArgumentException">Thrown when Azure Maps subscription key is invalid or missing</exception>
         public LocationService(
             string azureMapsSubscriptionKey,
             IClock clock,
             IDateTimeZoneProvider dateTimeZoneProvider,
             ILogger<LocationService> logger)
         {
-            _logger = logger;
-            _clock = clock;
-            _dateTimeZoneProvider = dateTimeZoneProvider;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+            _dateTimeZoneProvider = dateTimeZoneProvider ?? throw new ArgumentNullException(nameof(dateTimeZoneProvider));
 
             if (string.IsNullOrEmpty(azureMapsSubscriptionKey))
-            {
                 throw new ArgumentException("Azure Maps subscription key is required", nameof(azureMapsSubscriptionKey));
-            }
 
             var credential = new AzureKeyCredential(azureMapsSubscriptionKey);
             _searchClient = new MapsSearchClient(credential);
             _timeZoneClient = new MapsTimeZoneClient(credential);
         }
 
+        /// <summary>
+        /// Geocodes a string address to geographic coordinates and timezone.
+        /// </summary>
+        /// <param name="address">The address to geocode</param>
+        /// <returns>A geocoding result with coordinates and timezone information</returns>
         public async Task<GeocodingResult> GeocodeAddressAsync(string address)
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                return new GeocodingResult
-                {
-                    Success = false,
-                    ErrorMessage = "Address cannot be empty"
-                };
+                _logger.LogWarning("Geocoding attempt with empty address");
+                return new GeocodingResult { Success = false, ErrorMessage = "Address cannot be empty" };
             }
 
             try
             {
                 _logger.LogInformation("Geocoding address: {Address}", address);
 
-                // Call Azure Maps to geocode the address
-                var response = await _searchClient.GetGeocodingAsync(query: address);
+                // Call Azure Maps Search API to geocode the address
+                var response = await _searchClient.GetGeocodingAsync(address);
 
                 // Check if we have valid results
-                if (response?.Value == null)
+                if (response?.Value == null || response.Value.Features.Count == 0)
                 {
                     _logger.LogWarning("No geocoding results found for address: {Address}", address);
-                    return new GeocodingResult
-                    {
-                        Success = false,
-                        ErrorMessage = "No results found for the address"
-                    };
+                    return new GeocodingResult { Success = false, ErrorMessage = "No results found for the address" };
                 }
 
-                // Access the first result - we need to inspect the actual structure of GeocodingResponse
-                // Since GeocodingResponse doesn't have a Results property, we need to access the correct property
-                if (response.Value.Summary?.NumResults <= 0)
-                {
-                    _logger.LogWarning("No geocoding results found for address: {Address}", address);
-                    return new GeocodingResult
-                    {
-                        Success = false,
-                        ErrorMessage = "No results found for the address"
-                    };
-                }
+                // Get the most relevant result (first one)
+                var feature = response.Value.Features[0];
 
-                // Get the first result from the appropriate collection
-                // Note: We need to check the actual structure of GeocodingResponse to find the right collection
-                var searchResult = response.Value.Summary?.NumResults > 0 ? response.Value.Addresses[0] : null;
-
-                if (searchResult == null)
-                {
-                    _logger.LogWarning("No valid result in geocoding response for address: {Address}", address);
-                    return new GeocodingResult
-                    {
-                        Success = false,
-                        ErrorMessage = "No valid result in geocoding response"
-                    };
-                }
-
-                // Extract position data
-                var position = new GeoPosition(
-                    searchResult.Position.Latitude,
-                    searchResult.Position.Longitude);
-
-                // Create point using longitude (x) and latitude (y)
-                var point = new Point(position.Longitude, position.Latitude)
-                {
-                    SRID = 4326 // WGS 84
-                };
+                // Create point from coordinates (longitude first, latitude second)
+                var coordinates = feature.Geometry.Coordinates;
+                var point = new Point(coordinates[0], coordinates[1]) { SRID = 4326 };
 
                 // Get timezone for the location
                 var timezoneId = await GetTimezoneForPointAsync(point);
@@ -133,22 +107,27 @@
                 {
                     Point = point,
                     TimezoneId = timezoneId,
-                    Address = searchResult.Address,
-                    ConfidenceScore = searchResult.Score,
+                    Address = feature.Properties.Address,
+                    Confidence = feature.Properties.Confidence,
                     Success = true
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error geocoding address: {Address}", address);
-                return new GeocodingResult
-                {
-                    Success = false,
-                    ErrorMessage = $"Failed to geocode address: {ex.Message}"
-                };
+                return new GeocodingResult { Success = false, ErrorMessage = $"Failed to geocode address: {ex.Message}" };
             }
         }
 
+        /// <summary>
+        /// Geocodes address components to geographic coordinates and timezone.
+        /// </summary>
+        /// <param name="addressLine">Street address</param>
+        /// <param name="locality">City or town</param>
+        /// <param name="region">State or province</param>
+        /// <param name="postcode">Postal code</param>
+        /// <param name="country">Country</param>
+        /// <returns>A geocoding result with coordinates and timezone information</returns>
         public async Task<GeocodingResult> GeocodeAddressComponentsAsync(
             string addressLine,
             string locality,
@@ -160,17 +139,15 @@
             {
                 // Build formatted address from components
                 var formattedAddress = LocationHelper.FormatAddress(
-                    addressLine,
-                    locality,
-                    region,
-                    postcode,
-                    country);
+                    addressLine, locality, region, postcode, country);
 
                 return await GeocodeAddressAsync(formattedAddress);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error geocoding address components");
+                _logger.LogError(ex, "Error geocoding address components: {AddressLine}, {Locality}, {Region}, {Postcode}, {Country}",
+                    addressLine, locality, region, postcode, country);
+
                 return new GeocodingResult
                 {
                     Success = false,
@@ -179,62 +156,75 @@
             }
         }
 
+        /// <summary>
+        /// Gets the IANA timezone identifier for a geographic point.
+        /// </summary>
+        /// <param name="point">Geographic point (longitude, latitude)</param>
+        /// <returns>IANA timezone identifier (e.g., "America/New_York")</returns>
+        /// <exception cref="ArgumentNullException">Thrown when point is null</exception>
         public async Task<string> GetTimezoneForPointAsync(Point point)
         {
             if (point == null)
-            {
                 throw new ArgumentNullException(nameof(point));
-            }
 
             // Create cache key from coordinates (round to 3 decimal places for reasonable cache hits)
             var cacheKey = $"{Math.Round(point.X, 3)},{Math.Round(point.Y, 3)}";
 
             // Check cache first
-            if (_timezoneCache.TryGetValue(cacheKey, out var cachedTimezone))
+            lock (_cacheLock)
             {
-                return cachedTimezone;
+                if (_timezoneCache.TryGetValue(cacheKey, out var cachedTimezone))
+                {
+                    _logger.LogDebug("Timezone cache hit for location: ({Longitude}, {Latitude})", point.X, point.Y);
+                    return cachedTimezone;
+                }
             }
 
             try
             {
                 _logger.LogInformation("Getting timezone for location: ({Longitude}, {Latitude})", point.X, point.Y);
 
-                // Create GeoPosition for Azure Maps
-                var position = new GeoPosition(point.Y, point.X);
+                // Create GeoPosition (latitude first, longitude second for Azure Maps API)
+                var position = new Azure.Core.GeoJson.GeoPosition(point.Y, point.X);
 
                 // Call Azure Maps to get timezone info
                 var options = new GetTimeZoneOptions();
-                var response = await Task.FromResult(_timeZoneClient.GetTimeZoneByCoordinates(position, options));
+                var response = await _timeZoneClient.GetTimeZoneByCoordinatesAsync(position, options);
 
                 if (response?.Value == null || response.Value.TimeZones.Count == 0)
                 {
                     _logger.LogWarning("No timezone found for location: ({Longitude}, {Latitude})", point.X, point.Y);
-                    // Fall back to UTC
-                    return "Etc/UTC";
+                    return "Etc/UTC"; // Fall back to UTC
                 }
 
                 var timezone = response.Value.TimeZones[0].Id;
 
                 // Cache the result
-                _timezoneCache[cacheKey] = timezone;
+                lock (_cacheLock)
+                {
+                    _timezoneCache[cacheKey] = timezone;
+                }
 
                 return timezone;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting timezone for location: ({Longitude}, {Latitude})", point.X, point.Y);
-                // Fall back to UTC
-                return "Etc/UTC";
+                return "Etc/UTC"; // Fall back to UTC
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Converts a UTC instant to local date and time for a specific geographic location.
+        /// </summary>
+        /// <param name="instant">The UTC instant to convert</param>
+        /// <param name="point">Geographic point to determine timezone</param>
+        /// <returns>Local date and time for the specified location</returns>
+        /// <exception cref="ArgumentNullException">Thrown when point is null</exception>
         public async Task<LocalDateTime> ConvertToLocalTimeAsync(Instant instant, Point point)
         {
             if (point == null)
-            {
                 throw new ArgumentNullException(nameof(point));
-            }
 
             try
             {
@@ -256,15 +246,17 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Standardizes an address using Azure Maps geocoding service.
+        /// </summary>
+        /// <param name="address">Raw address to standardize</param>
+        /// <returns>Standardized address or original if standardization fails</returns>
         public async Task<string> StandardizeAddressAsync(string address)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(address))
-                {
                     return string.Empty;
-                }
 
                 _logger.LogInformation("Standardizing address using Azure Maps: {Address}", address);
 
@@ -272,9 +264,7 @@
                 var geocodingResult = await GeocodeAddressAsync(address);
 
                 if (!geocodingResult.Success || geocodingResult.Address == null)
-                {
                     return address; // Return original if standardization fails
-                }
 
                 // Use the formatted address from the geocoding result
                 return geocodingResult.Address.FormattedAddress ?? address;

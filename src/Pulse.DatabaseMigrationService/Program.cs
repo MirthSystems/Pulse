@@ -14,7 +14,7 @@ namespace Pulse.DatabaseMigrationService
                 throw new InvalidOperationException("Connection string is not configured.");
             }
 
-            builder.Services.AddPulseInfrastructure(connectionString);
+            builder.Services.AddPulseDatabase(connectionString);
 
             builder.Services.AddHostedService<Worker>();
 

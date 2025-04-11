@@ -1,6 +1,7 @@
 ﻿namespace Pulse.Core.Utilities
 {
     using Azure.Core.GeoJson;
+    using Azure.Maps.Search.Models;
 
     using NetTopologySuite.Geometries;
 
@@ -24,6 +25,7 @@
         /// </summary>
         /// <param name="point">Geographic point to validate</param>
         /// <returns>Point with SRID set to 4326</returns>
+        /// <exception cref="ArgumentNullException">Thrown when point is null</exception>
         public static Point EnsureSrid(Point point)
         {
             if (point == null)
@@ -51,6 +53,7 @@
         /// <param name="point1">First point (longitude, latitude)</param>
         /// <param name="point2">Second point (longitude, latitude)</param>
         /// <returns>Distance in miles</returns>
+        /// <exception cref="ArgumentNullException">Thrown when either point is null</exception>
         public static double CalculateDistanceInMiles(Point point1, Point point2)
         {
             if (point1 == null || point2 == null)
@@ -99,24 +102,24 @@
             var parts = new List<string>();
 
             if (!string.IsNullOrWhiteSpace(address))
-                parts.Add(address);
+                parts.Add(address.Trim());
 
             var cityState = new List<string>();
             if (!string.IsNullOrWhiteSpace(locality))
-                cityState.Add(locality);
+                cityState.Add(locality.Trim());
             if (!string.IsNullOrWhiteSpace(region))
-                cityState.Add(region);
+                cityState.Add(region.Trim());
 
             if (cityState.Any())
                 parts.Add(string.Join(", ", cityState));
 
             if (!string.IsNullOrWhiteSpace(postcode))
-                parts.Add(postcode);
+                parts.Add(postcode.Trim());
 
             if (!string.IsNullOrWhiteSpace(country))
-                parts.Add(country);
+                parts.Add(country.Trim());
 
-            return string.Join(", ", parts);
+            return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         }
 
         /// <summary>
@@ -124,6 +127,7 @@
         /// </summary>
         /// <param name="point">NTS Point (longitude, latitude)</param>
         /// <returns>Azure GeoPosition (latitude, longitude)</returns>
+        /// <exception cref="ArgumentNullException">Thrown when point is null</exception>
         public static GeoPosition PointToGeoPosition(Point point)
         {
             if (point == null)
@@ -136,7 +140,7 @@
         /// Converts Azure GeoPosition to NTS Point
         /// </summary>
         /// <param name="position">Azure GeoPosition (latitude, longitude)</param>
-        /// <returns>NTS Point (longitude, latitude)</returns>
+        /// <returns>NTS Point (longitude, latitude) with SRID 4326</returns>
         public static Point GeoPositionToPoint(GeoPosition position)
         {
             return new Point(position.Longitude, position.Latitude) { SRID = 4326 };

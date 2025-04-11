@@ -25,9 +25,9 @@
         public Address? Address { get; set; }
 
         /// <summary>
-        /// Confidence score of the geocoding result (0-1)
+        /// Confidence level of the geocoding result
         /// </summary>
-        public double ConfidenceScore { get; set; }
+        public ConfidenceEnum? Confidence { get; set; }
 
         /// <summary>
         /// Whether the geocoding was successful
