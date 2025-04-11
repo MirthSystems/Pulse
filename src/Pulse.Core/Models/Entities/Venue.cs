@@ -1,7 +1,10 @@
 ﻿namespace Pulse.Core.Models.Entities
 {
+    using Azure.Maps.Search.Models;
 
     using NetTopologySuite.Geometries;
+
+    using Pulse.Core.Utilities;
 
 
     /// <summary>
@@ -210,5 +213,40 @@
         /// <para>For venues open 24 hours, set TimeOfOpen to 00:00 and TimeOfClose to 23:59.</para>
         /// </remarks>
         public virtual List<OperatingSchedule> BusinessHours { get; set; } = [];
+
+        /// <summary>
+        /// Gets a formatted address string for this venue
+        /// </summary>
+        /// <returns>Formatted address string</returns>
+        public string GetFormattedAddress()
+        {
+            return LocationHelper.FormatAddress(
+                this.AddressLine1,
+                this.Locality,
+                this.Region,
+                this.Postcode,
+                this.Country);
+        }
+
+        /// <summary>
+        /// Updates venue address fields from Azure Maps search address
+        /// </summary>
+        /// <param name="address">Azure Maps search address</param>
+        public void UpdateFromMapsAddress(Address address)
+        {
+            if (address == null)
+                throw new ArgumentNullException(nameof(address));
+
+            this.AddressLine1 = address.AddressLine ?? string.Empty;
+            this.Locality = address.Locality ?? string.Empty;
+
+            if (address.AdminDistricts != null && address.AdminDistricts.Any())
+                this.Region = address.AdminDistricts.FirstOrDefault()?.Name ?? string.Empty;
+            else
+                this.Region = string.Empty;
+
+            this.Postcode = address.PostalCode ?? string.Empty;
+            this.Country = address.CountryRegion.Name ?? string.Empty;
+        }
     }
 }
