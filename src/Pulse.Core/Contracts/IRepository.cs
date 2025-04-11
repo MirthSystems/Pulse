@@ -49,5 +49,32 @@
         /// </summary>
         /// <param name="entity">Entity to remove</param>
         Task DeleteAsync(TEntity entity);
+
+        /// <summary>
+        /// Counts entities matching a predicate
+        /// </summary>
+        /// <param name="predicate">Filter expression</param>
+        /// <returns>Count of matching entities</returns>
+        Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate);
+
+        /// <summary>
+        /// Adds multiple entities in a batch operation
+        /// </summary>
+        /// <param name="entities">Entities to add</param>
+        /// <param name="userId">ID of the user performing the action</param>
+        Task AddRangeAsync(IEnumerable<TEntity> entities, string userId);
+
+        /// <summary>
+        /// Updates multiple entities in a batch operation
+        /// </summary>
+        /// <param name="entities">Entities to update</param>
+        /// <param name="userId">ID of the user performing the action</param>
+        Task UpdateRangeAsync(IEnumerable<TEntity> entities, string userId);
+
+        /// <summary>
+        /// Removes multiple entities in a batch operation
+        /// </summary>
+        /// <param name="entities">Entities to remove</param>
+        Task DeleteRangeAsync(IEnumerable<TEntity> entities);
     }
 }

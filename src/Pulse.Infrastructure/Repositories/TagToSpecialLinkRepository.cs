@@ -1,5 +1,7 @@
 ﻿namespace Pulse.Infrastructure.Repositories
 {
+    using System.Linq.Expressions;
+
     using Microsoft.EntityFrameworkCore;
     using NodaTime;
     using Pulse.Core.Contracts;
@@ -11,6 +13,22 @@
         protected readonly DbSet<TagToSpecialLink> _dbSet;
         protected readonly IClock _clock;
 
+        private static readonly Func<ApplicationDbContext, long, Task<List<TagToSpecialLink>>> _getBySpecialIdQuery =
+            EF.CompileAsyncQuery((ApplicationDbContext context, long specialId) =>
+                context.TagToSpecialLinks
+                    .AsNoTracking()
+                    .Include(tsl => tsl.Tag)
+                    .Where(tsl => tsl.SpecialId == specialId)
+                    .ToList());
+
+        private static readonly Func<ApplicationDbContext, long, Task<List<TagToSpecialLink>>> _getByTagIdQuery =
+            EF.CompileAsyncQuery((ApplicationDbContext context, long tagId) =>
+                context.TagToSpecialLinks
+                    .AsNoTracking()
+                    .Include(tsl => tsl.Special)
+                    .Where(tsl => tsl.TagId == tagId)
+                    .ToList());
+
         public TagToSpecialLinkRepository(ApplicationDbContext context, IClock clock)
         {
             _context = context;
@@ -21,18 +39,22 @@
         public async Task<TagToSpecialLink?> GetByIdAsync((long TagId, long SpecialId) id)
         {
             return await _dbSet
+                .AsNoTracking()
                 .FirstOrDefaultAsync(tsl => tsl.TagId == id.TagId && tsl.SpecialId == id.SpecialId);
         }
 
         public async Task<IEnumerable<TagToSpecialLink>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<TagToSpecialLink>> FindAsync(
-            System.Linq.Expressions.Expression<Func<TagToSpecialLink, bool>> predicate)
+            Expression<Func<TagToSpecialLink, bool>> predicate)
         {
             return await _dbSet
+                .AsNoTracking()
                 .Where(predicate)
                 .ToListAsync();
         }
@@ -51,6 +73,7 @@
             entity.UpdatedAt = _clock.GetCurrentInstant();
             entity.UpdatedByUserId = userId;
 
+            _context.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
             await Task.CompletedTask;
         }
@@ -63,18 +86,12 @@
 
         public async Task<IEnumerable<TagToSpecialLink>> GetBySpecialIdAsync(long specialId)
         {
-            return await _dbSet
-                .Include(tsl => tsl.Tag)
-                .Where(tsl => tsl.SpecialId == specialId)
-                .ToListAsync();
+            return await _getBySpecialIdQuery(_context, specialId);
         }
 
         public async Task<IEnumerable<TagToSpecialLink>> GetByTagIdAsync(long tagId)
         {
-            return await _dbSet
-                .Include(tsl => tsl.Special)
-                .Where(tsl => tsl.TagId == tagId)
-                .ToListAsync();
+            return await _getByTagIdQuery(_context, tagId);
         }
 
         public async Task<TagToSpecialLink> AddLinkAsync(long tagId, long specialId, string userId)
@@ -93,13 +110,9 @@
 
         public async Task RemoveLinkAsync(long tagId, long specialId)
         {
-            var link = await _dbSet
-                .FirstOrDefaultAsync(tsl => tsl.TagId == tagId && tsl.SpecialId == specialId);
-
-            if (link != null)
-            {
-                _dbSet.Remove(link);
-            }
+            await _dbSet
+                .Where(tsl => tsl.TagId == tagId && tsl.SpecialId == specialId)
+                .ExecuteDeleteAsync();
         }
     }
 }

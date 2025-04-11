@@ -1,5 +1,7 @@
 ﻿namespace Pulse.Core.Utilities
 {
+    using System.Runtime.CompilerServices;
+
     using NodaTime;
 
     using Pulse.Core.Models.Entities;
@@ -9,58 +11,114 @@
     /// </summary>
     public static class SpecialHelper
     {
+        private static readonly Dictionary<DayOfWeek, int> _dayOfWeekBits = new()
+        {
+            { DayOfWeek.Sunday, 1 << (int)DayOfWeek.Sunday },
+            { DayOfWeek.Monday, 1 << (int)DayOfWeek.Monday },
+            { DayOfWeek.Tuesday, 1 << (int)DayOfWeek.Tuesday },
+            { DayOfWeek.Wednesday, 1 << (int)DayOfWeek.Wednesday },
+            { DayOfWeek.Thursday, 1 << (int)DayOfWeek.Thursday },
+            { DayOfWeek.Friday, 1 << (int)DayOfWeek.Friday },
+            { DayOfWeek.Saturday, 1 << (int)DayOfWeek.Saturday }
+        };
+
         /// <summary>
         /// Determines if a special is currently active based on its properties and recurrence pattern
         /// </summary>
         /// <param name="special">The special to check</param>
         /// <param name="currentInstant">The current instant to check against</param>
         /// <returns>True if the special is active, false otherwise</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsActive(Special special, Instant currentInstant)
         {
-            // Convert to UTC DateTime for consistent comparison
+            if (special == null)
+            {
+                return false;
+            }
+
             var dateTime = currentInstant.ToDateTimeUtc();
             var currentDate = LocalDate.FromDateTime(dateTime);
             var currentTime = LocalTime.FromTimeOnly(new TimeOnly(dateTime.Hour, dateTime.Minute));
             var dayOfWeek = dateTime.DayOfWeek;
 
-            // One-time specials
-            if (!special.IsRecurring)
+            if (special.StartDate > currentDate ||
+                (special.ExpirationDate != null && special.ExpirationDate < currentDate))
             {
-                return special.StartDate <= currentDate &&
-                    (special.ExpirationDate == null || special.ExpirationDate >= currentDate) &&
-                    special.StartTime <= currentTime &&
-                    (special.EndTime == null || special.EndTime >= currentTime);
+                return false;
             }
 
-            // Recurring specials
-            if (special.IsRecurring && special.RecurringPeriod != null)
+            if (special.StartTime > currentTime ||
+                (special.EndTime != null && special.EndTime < currentTime))
             {
-                // Basic check for start/end dates
-                if (special.StartDate > currentDate ||
-                    (special.ExpirationDate != null && special.ExpirationDate < currentDate))
+                return false;
+            }
+
+            if (!special.IsRecurring)
+            {
+                return true;
+            }
+
+            if (special.ActiveDaysOfWeek.HasValue && special.ActiveDaysOfWeek.Value != 0)
+            {
+                int dayBit = _dayOfWeekBits[dayOfWeek];
+
+                if ((special.ActiveDaysOfWeek.Value & dayBit) == 0)
                 {
                     return false;
                 }
-
-                // Check active days of week if specified
-                if (special.ActiveDaysOfWeek.HasValue && special.ActiveDaysOfWeek.Value != 0)
-                {
-                    // Calculate bit position for current day (Sunday=0 to Saturday=6 in .NET)
-                    int dayBit = 1 << ((int)dayOfWeek);
-
-                    // Check if current day's bit is set in the bitmask
-                    if ((special.ActiveDaysOfWeek.Value & dayBit) == 0)
-                    {
-                        return false;
-                    }
-                }
-
-                // Check time of day
-                return special.StartTime <= currentTime &&
-                    (special.EndTime == null || special.EndTime >= currentTime);
             }
 
-            return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Determines if multiple specials are active at the given instant
+        /// </summary>
+        /// <param name="specials">Collection of specials to check</param>
+        /// <param name="currentInstant">The current instant to check against</param>
+        /// <returns>Collection of active specials</returns>
+        public static IEnumerable<Special> GetActiveSpecials(IEnumerable<Special> specials, Instant currentInstant)
+        {
+            if (specials == null)
+            {
+                yield break;
+            }
+
+            var dateTime = currentInstant.ToDateTimeUtc();
+            var currentDate = LocalDate.FromDateTime(dateTime);
+            var currentTime = LocalTime.FromTimeOnly(new TimeOnly(dateTime.Hour, dateTime.Minute));
+            var dayOfWeek = dateTime.DayOfWeek;
+            int dayBit = _dayOfWeekBits[dayOfWeek];
+
+            foreach (var special in specials)
+            {
+                if (special == null)
+                {
+                    continue;
+                }
+
+                if (special.StartDate > currentDate ||
+                    (special.ExpirationDate != null && special.ExpirationDate < currentDate))
+                {
+                    continue;
+                }
+
+                if (special.StartTime > currentTime ||
+                    (special.EndTime != null && special.EndTime < currentTime))
+                {
+                    continue;
+                }
+
+                if (special.IsRecurring &&
+                    special.ActiveDaysOfWeek.HasValue &&
+                    special.ActiveDaysOfWeek.Value != 0 &&
+                    (special.ActiveDaysOfWeek.Value & dayBit) == 0)
+                {
+                    continue;
+                }
+
+                yield return special;
+            }
         }
 
         /// <summary>
@@ -68,19 +126,17 @@
         /// </summary>
         public static class DayBits
         {
-            // Pre-calculated bitmasks for each day of week
-            public const int Sunday = 1 << (int)DayOfWeek.Sunday;       // 1
-            public const int Monday = 1 << (int)DayOfWeek.Monday;       // 2
-            public const int Tuesday = 1 << (int)DayOfWeek.Tuesday;     // 4
-            public const int Wednesday = 1 << (int)DayOfWeek.Wednesday; // 8
-            public const int Thursday = 1 << (int)DayOfWeek.Thursday;   // 16
-            public const int Friday = 1 << (int)DayOfWeek.Friday;       // 32
-            public const int Saturday = 1 << (int)DayOfWeek.Saturday;   // 64
+            public const int Sunday = 1 << (int)DayOfWeek.Sunday;
+            public const int Monday = 1 << (int)DayOfWeek.Monday;
+            public const int Tuesday = 1 << (int)DayOfWeek.Tuesday;
+            public const int Wednesday = 1 << (int)DayOfWeek.Wednesday;
+            public const int Thursday = 1 << (int)DayOfWeek.Thursday;
+            public const int Friday = 1 << (int)DayOfWeek.Friday;
+            public const int Saturday = 1 << (int)DayOfWeek.Saturday;
 
-            // Common combinations
-            public const int Weekdays = Monday | Tuesday | Wednesday | Thursday | Friday;   // 62
-            public const int Weekend = Sunday | Saturday;                                  // 65
-            public const int AllDays = Weekdays | Weekend;                                // 127
+            public const int Weekdays = Monday | Tuesday | Wednesday | Thursday | Friday;
+            public const int Weekend = Sunday | Saturday;
+            public const int AllDays = Weekdays | Weekend;
         }
 
         /// <summary>

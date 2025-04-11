@@ -5,9 +5,6 @@
 
     using Pulse.Core.Contracts;
 
-    /// <summary>
-    /// Implementation of the Unit of Work pattern to coordinate operations across repositories
-    /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
@@ -53,6 +50,37 @@
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving changes to database");
+                throw;
+            }
+        }
+
+        public async Task<TResult> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> operation)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var result = await operation();
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task ExecuteInTransactionAsync(Func<Task> operation)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await operation();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
                 throw;
             }
         }

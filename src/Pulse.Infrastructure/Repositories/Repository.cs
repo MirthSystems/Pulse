@@ -18,6 +18,10 @@
         protected readonly DbSet<TEntity> _dbSet;
         protected readonly IClock _clock;
 
+        private static readonly Func<ApplicationDbContext, TKey, Task<TEntity?>> _getByIdQuery =
+            EF.CompileAsyncQuery((ApplicationDbContext context, TKey id) =>
+                context.Set<TEntity>().Find(id));
+
         public Repository(ApplicationDbContext context, IClock clock)
         {
             _context = context;
@@ -25,22 +29,22 @@
             _clock = clock;
         }
 
-        public async Task<TEntity?> GetByIdAsync(TKey id)
+        public virtual async Task<TEntity?> GetByIdAsync(TKey id)
         {
-            return await _dbSet.FindAsync(id);
+            return await _getByIdQuery(_context, id);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+        public virtual async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            return await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
         }
 
-        public async Task<TEntity> AddAsync(TEntity entity, string userId)
+        public virtual async Task<TEntity> AddAsync(TEntity entity, string userId)
         {
             if (entity is EntityBase entityBase)
             {
@@ -52,21 +56,63 @@
             return entity;
         }
 
-        public async Task UpdateAsync(TEntity entity, string userId)
+        public virtual async Task UpdateAsync(TEntity entity, string userId)
         {
             if (entity is EntityBase entityBase)
             {
                 entityBase.UpdatedAt = _clock.GetCurrentInstant();
                 entityBase.UpdatedByUserId = userId;
+
+                _context.Attach(entity);
+                _context.Entry(entity).State = EntityState.Modified;
             }
 
-            _context.Entry(entity).State = EntityState.Modified;
             await Task.CompletedTask;
         }
 
-        public async Task DeleteAsync(TEntity entity)
+        public virtual async Task DeleteAsync(TEntity entity)
         {
             _dbSet.Remove(entity);
+            await Task.CompletedTask;
+        }
+
+        public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.CountAsync(predicate);
+        }
+
+        public virtual async Task AddRangeAsync(IEnumerable<TEntity> entities, string userId)
+        {
+            foreach (var entity in entities)
+            {
+                if (entity is EntityBase entityBase)
+                {
+                    entityBase.CreatedAt = _clock.GetCurrentInstant();
+                    entityBase.CreatedByUserId = userId;
+                }
+            }
+
+            await _dbSet.AddRangeAsync(entities);
+        }
+
+        public virtual async Task UpdateRangeAsync(IEnumerable<TEntity> entities, string userId)
+        {
+            foreach (var entity in entities)
+            {
+                if (entity is EntityBase entityBase)
+                {
+                    entityBase.UpdatedAt = _clock.GetCurrentInstant();
+                    entityBase.UpdatedByUserId = userId;
+                }
+            }
+
+            _dbSet.UpdateRange(entities);
+            await Task.CompletedTask;
+        }
+
+        public virtual async Task DeleteRangeAsync(IEnumerable<TEntity> entities)
+        {
+            _dbSet.RemoveRange(entities);
             await Task.CompletedTask;
         }
     }
