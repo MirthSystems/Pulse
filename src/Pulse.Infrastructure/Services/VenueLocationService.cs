@@ -94,7 +94,12 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds venues near a specified address
+        /// </summary>
+        /// <param name="address">The address to search from</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <returns>Collection of venues with distance information</returns>
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesNearAddressAsync(
             string address,
             double radiusMiles)
@@ -128,7 +133,13 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds venues near a specified geographic point
+        /// </summary>
+        /// <param name="latitude">Latitude of the search point</param>
+        /// <param name="longitude">Longitude of the search point</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <returns>Collection of venues with distance information</returns>
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesNearPointAsync(
             double latitude,
             double longitude,
@@ -176,7 +187,12 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds venues with active specials near a specified address
+        /// </summary>
+        /// <param name="address">The address to search from</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <returns>Collection of venues with active specials and distance information</returns>
         public async Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsNearAddressAsync(
             string address,
             double radiusMiles)
