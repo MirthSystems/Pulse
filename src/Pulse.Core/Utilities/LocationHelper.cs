@@ -11,16 +11,6 @@
     public static class LocationHelper
     {
         /// <summary>
-        /// Earth radius in kilometers
-        /// </summary>
-        private const double EarthRadiusKm = 6371.0;
-
-        /// <summary>
-        /// Conversion factor from kilometers to miles
-        /// </summary>
-        private const double KmToMilesFactor = 0.621371;
-
-        /// <summary>
         /// Conversion factor from meters to miles (1 mile = 1609.344 meters)
         /// </summary>
         public const double MetersPerMile = 1609.344;
@@ -43,26 +33,6 @@
         }
 
         /// <summary>
-        /// Converts degrees to radians
-        /// </summary>
-        /// <param name="degrees">Angle in degrees</param>
-        /// <returns>Angle in radians</returns>
-        public static double DegreesToRadians(double degrees)
-        {
-            return degrees * Math.PI / 180.0;
-        }
-
-        /// <summary>
-        /// Converts meters to miles
-        /// </summary>
-        /// <param name="meters">Distance in meters</param>
-        /// <returns>Distance in miles</returns>
-        public static double MetersToMiles(double meters)
-        {
-            return meters / MetersPerMile;
-        }
-
-        /// <summary>
         /// Converts miles to meters
         /// </summary>
         /// <param name="miles">Distance in miles</param>
@@ -70,42 +40,6 @@
         public static double MilesToMeters(double miles)
         {
             return miles * MetersPerMile;
-        }
-
-        /// <summary>
-        /// Calculates the distance between two geographic points using the Haversine formula
-        /// </summary>
-        /// <param name="point1">First point (longitude, latitude)</param>
-        /// <param name="point2">Second point (longitude, latitude)</param>
-        /// <returns>Distance in miles</returns>
-        /// <exception cref="ArgumentNullException">Thrown when either point is null</exception>
-        public static double CalculateDistanceInMiles(Point point1, Point point2)
-        {
-            if (point1 == null || point2 == null)
-                throw new ArgumentNullException(point1 == null ? nameof(point1) : nameof(point2));
-
-            // Ensure SRID is set to 4326 (WGS84)
-            point1 = EnsureSrid(point1);
-            point2 = EnsureSrid(point2);
-
-            // Calculate distance using the Haversine formula
-            var lat1 = DegreesToRadians(point1.Y);
-            var lon1 = DegreesToRadians(point1.X);
-            var lat2 = DegreesToRadians(point2.Y);
-            var lon2 = DegreesToRadians(point2.X);
-
-            double dLat = lat2 - lat1;
-            double dLon = lon2 - lon1;
-
-            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                       Math.Cos(lat1) * Math.Cos(lat2) *
-                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            double distanceKm = EarthRadiusKm * c;
-
-            // Convert to miles
-            return distanceKm * KmToMilesFactor;
         }
 
         /// <summary>
