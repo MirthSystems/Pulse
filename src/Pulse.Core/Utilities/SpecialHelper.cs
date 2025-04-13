@@ -42,13 +42,13 @@
             var dayOfWeek = dateTime.DayOfWeek;
 
             if (special.StartDate > currentDate ||
-                (special.ExpirationDate != null && special.ExpirationDate < currentDate))
+               (special.ExpirationDate != null && special.ExpirationDate < currentDate))
             {
                 return false;
             }
 
             if (special.StartTime > currentTime ||
-                (special.EndTime != null && special.EndTime < currentTime))
+               (special.EndTime != null && special.EndTime < currentTime))
             {
                 return false;
             }

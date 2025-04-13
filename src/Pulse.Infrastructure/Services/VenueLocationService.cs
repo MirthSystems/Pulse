@@ -48,23 +48,20 @@
             try
             {
                 if (venue == null)
+                {
                     throw new ArgumentNullException(nameof(venue));
+                }
 
                 _logger.LogInformation("Geocoding venue: {VenueName}", venue.Name);
 
                 var geocodingResult = await _locationService.GeocodeAddressComponentsAsync(
-                    venue.AddressLine1,
-                    venue.Locality,
-                    venue.Region,
-                    venue.Postcode,
-                    venue.Country);
+                    venue.AddressLine1, venue.Locality, venue.Region, venue.Postcode, venue.Country);
 
                 if (!geocodingResult.Success || geocodingResult.Point == null)
                 {
                     _logger.LogWarning(
                         "Failed to geocode venue {VenueName}: {ErrorMessage}",
-                        venue.Name,
-                        geocodingResult.ErrorMessage);
+                        venue.Name, geocodingResult.ErrorMessage);
                     return false;
                 }
 
@@ -77,9 +74,7 @@
 
                 _logger.LogInformation(
                     "Successfully geocoded venue {VenueName} to ({Longitude}, {Latitude})",
-                    venue.Name,
-                    geocodingResult.Point.X,
-                    geocodingResult.Point.Y);
+                    venue.Name, geocodingResult.Point.X, geocodingResult.Point.Y);
 
                 return true;
             }
@@ -103,7 +98,9 @@
             try
             {
                 if (string.IsNullOrWhiteSpace(address))
+                {
                     throw new ArgumentException("Address cannot be empty", nameof(address));
+                }
 
                 var geocodingResult = await _locationService.GeocodeAddressAsync(address);
 
@@ -116,9 +113,7 @@
                 }
 
                 return await FindVenuesNearPointAsync(
-                    geocodingResult.Point.Y,
-                    geocodingResult.Point.X,
-                    radiusMiles);
+                    geocodingResult.Point.Y, geocodingResult.Point.X, radiusMiles);
             }
             catch (Exception ex)
             {
@@ -145,9 +140,7 @@
 
                 _logger.LogInformation(
                     "Finding venues near point ({Longitude}, {Latitude}) within {Radius} miles",
-                    longitude,
-                    latitude,
-                    radiusMiles);
+                    longitude, latitude, radiusMiles);
 
                 var localTime = await GetLocalTimeAtPointAsync(searchPoint);
 
@@ -165,8 +158,7 @@
                 _logger.LogError(
                     ex,
                     "Error finding venues near point ({Longitude}, {Latitude})",
-                    longitude,
-                    latitude);
+                    longitude, latitude);
                 return Enumerable.Empty<VenueWithDistance>();
             }
         }
@@ -184,7 +176,9 @@
             try
             {
                 if (string.IsNullOrWhiteSpace(address))
+                {
                     throw new ArgumentException("Address cannot be empty", nameof(address));
+                }
 
                 var geocodingResult = await _locationService.GeocodeAddressAsync(address);
 
@@ -197,9 +191,7 @@
                 }
 
                 return await FindVenuesWithActiveSpecialsNearPointAsync(
-                    geocodingResult.Point.Y,
-                    geocodingResult.Point.X,
-                    radiusMiles);
+                    geocodingResult.Point.Y, geocodingResult.Point.X, radiusMiles);
             }
             catch (Exception ex)
             {
@@ -219,17 +211,13 @@
 
                 _logger.LogInformation(
                     "Finding venues with active specials near point ({Longitude}, {Latitude}) within {Radius} miles",
-                    longitude,
-                    latitude,
-                    radiusMiles);
+                    longitude, latitude, radiusMiles);
 
                 var now = _clock.GetCurrentInstant();
                 var localTime = await _locationService.ConvertToLocalTimeAsync(now, searchPoint);
 
                 var venues = await _unitOfWork.Venues.FindVenuesWithActiveSpecialsNearbyAsync(
-                    searchPoint,
-                    radiusMiles,
-                    now);
+                    searchPoint, radiusMiles, now);
 
                 foreach (var venue in venues)
                 {
@@ -259,7 +247,9 @@
             try
             {
                 if (point == null)
+                {
                     throw new ArgumentNullException(nameof(point));
+                }
 
                 var currentInstant = _clock.GetCurrentInstant();
 

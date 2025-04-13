@@ -24,10 +24,14 @@
         public static Point EnsureSrid(Point point)
         {
             if (point == null)
+            {
                 throw new ArgumentNullException(nameof(point));
+            }
 
             if (point.SRID != 4326)
+            {
                 return new Point(point.X, point.Y) { SRID = 4326 };
+            }
 
             return point;
         }
@@ -61,22 +65,34 @@
             var parts = new List<string>();
 
             if (!string.IsNullOrWhiteSpace(address))
+            {
                 parts.Add(address.Trim());
+            }
 
             var cityState = new List<string>();
             if (!string.IsNullOrWhiteSpace(locality))
+            {
                 cityState.Add(locality.Trim());
+            }
             if (!string.IsNullOrWhiteSpace(region))
+            {
                 cityState.Add(region.Trim());
+            }
 
             if (cityState.Any())
+            {
                 parts.Add(string.Join(", ", cityState));
+            }
 
             if (!string.IsNullOrWhiteSpace(postcode))
+            {
                 parts.Add(postcode.Trim());
+            }
 
             if (!string.IsNullOrWhiteSpace(country))
+            {
                 parts.Add(country.Trim());
+            }
 
             return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         }

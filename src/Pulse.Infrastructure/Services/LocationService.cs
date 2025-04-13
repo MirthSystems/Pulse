@@ -54,12 +54,14 @@
             IDateTimeZoneProvider dateTimeZoneProvider,
             ILogger<LocationService> logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-            _dateTimeZoneProvider = dateTimeZoneProvider ?? throw new ArgumentNullException(nameof(dateTimeZoneProvider));
+            _logger = logger;
+            _clock = clock;
+            _dateTimeZoneProvider = dateTimeZoneProvider;
 
             if (string.IsNullOrEmpty(azureMapsSubscriptionKey))
+            {
                 throw new ArgumentException("Azure Maps subscription key is required", nameof(azureMapsSubscriptionKey));
+            }
 
             var credential = new AzureKeyCredential(azureMapsSubscriptionKey);
             _searchClient = new MapsSearchClient(credential);
@@ -164,7 +166,9 @@
         public async Task<string> GetTimezoneForPointAsync(Point point)
         {
             if (point == null)
+            {
                 throw new ArgumentNullException(nameof(point));
+            }
 
             // Create cache key from coordinates (round to 3 decimal places for reasonable cache hits)
             var cacheKey = $"{Math.Round(point.X, 3)},{Math.Round(point.Y, 3)}";
@@ -219,7 +223,9 @@
         public async Task<LocalDateTime> ConvertToLocalTimeAsync(Instant instant, Point point)
         {
             if (point == null)
+            {
                 throw new ArgumentNullException(nameof(point));
+            }
 
             try
             {
@@ -247,7 +253,9 @@
             try
             {
                 if (string.IsNullOrWhiteSpace(address))
+                {
                     return string.Empty;
+                }
 
                 _logger.LogInformation("Standardizing address using Azure Maps: {Address}", address);
 
