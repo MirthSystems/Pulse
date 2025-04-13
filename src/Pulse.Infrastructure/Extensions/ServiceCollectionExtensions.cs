@@ -12,6 +12,7 @@
     using NodaTime.TimeZones;
 
     using Pulse.Core.Contracts;
+    using Pulse.Infrastructure.Profiles;
     using Pulse.Infrastructure.Repositories;
     using Pulse.Infrastructure.Services;
 
@@ -41,6 +42,8 @@
             services.AddSingleton<IDateTimeZoneProvider>(new DateTimeZoneCache(TzdbDateTimeZoneSource.Default));
 
             services.AddPulseDatabase(postgresConnectionString);
+
+            services.AddAutoMapper(typeof(MappingProfile));
 
             services.AddScoped<IVenueRepository, VenueRepository>();
             services.AddScoped<IVenueTypeRepository, VenueTypeRepository>();

@@ -16,7 +16,7 @@ namespace Pulse.Clients.Web
 
             builder.Services.AddScoped(sp => new HttpClient 
             { 
-                BaseAddress = new Uri("https://localhost:7253") 
+                BaseAddress = new Uri("https://localhost:7253")
             });
 
             builder.Services.AddFluentUIComponents();
