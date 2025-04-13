@@ -1,0 +1,391 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.ComponentModel.DataAnnotations
+@using Pulse.Core.Enums
+@using Pulse.Core.Models.Entities
+@using Pulse.Core.Utilities
+@inject HttpClient Http
+@inject IDialogService DialogService
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+    <FluentMessageBar MessageIntent="MessageIntent.Info" Title="Special Information" Visible="@IsNew">
+        Create a special promotion or event for this venue. Specials can be one-time or recurring.
+    </FluentMessageBar>
+
+    <EditForm Model="@specialModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+            <FluentGrid Columns="2" ColumnGap="16" RowGap="16" Style="width: 100%;">
+                <!-- Basic Information -->
+                <FluentTextField Label="Title *" @bind-Value="specialModel.Content" Required Placeholder="e.g., Happy Hour, Live Music, etc."
+                                 Style="grid-column: span 2;" />
+
+                <FluentSelect TOption="string"
+                              Label="Type *"
+                              Items="specialTypeOptions"
+                              @bind-Value="selectedSpecialTypeId"
+                              Required />
+
+                <FluentCheckbox Label="Recurring Special" @bind-Value="specialModel.IsRecurring" />
+
+                <!-- Timing -->
+                <div style="grid-column: span 2;">
+                    <FluentDivider>Schedule</FluentDivider>
+                </div>
+
+                <FluentDatePicker Label="Start Date *" @bind-Value="startDateDisplay" Required />
+
+                @if (specialModel.IsRecurring)
+                {
+                    <FluentDatePicker Label="End Date (optional)" @bind-Value="endDateDisplay" />
+
+                    <div style="grid-column: span 2;">
+                        <FluentLabel>Active Days</FluentLabel>
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" Style="margin-top: 8px;">
+                            @foreach (var day in Enum.GetValues<DayOfWeek>())
+                            {
+                                var dayValue = day;
+                                <FluentCheckbox Label="@GetDayAbbreviation(day)"
+                                                @bind-Value="dayChecks[day]"
+                                                @onchange="() => ToggleDay(dayValue)" />
+                            }
+                        </FluentStack>
+
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12" Style="margin-top: 8px;">
+                            <FluentButton Appearance="Appearance.Lightweight" Size="ButtonSize.Small"
+                                          @onclick="SelectWeekdays">Weekdays</FluentButton>
+                            <FluentButton Appearance="Appearance.Lightweight" Size="ButtonSize.Small"
+                                          @onclick="SelectWeekend">Weekend</FluentButton>
+                            <FluentButton Appearance="Appearance.Lightweight" Size="ButtonSize.Small"
+                                          @onclick="SelectAllDays">All Days</FluentButton>
+                            <FluentButton Appearance="Appearance.Lightweight" Size="ButtonSize.Small"
+                                          @onclick="ClearAllDays">Clear</FluentButton>
+                        </FluentStack>
+                    </div>
+
+                    <FluentSelect TOption="string"
+                                  Label="Recurrence Pattern"
+                                  Items="recurrenceOptions"
+                                  @bind-Value="selectedRecurrenceId"
+                                  Placeholder="Select recurrence pattern" />
+                }
+                else
+                {
+                    <div></div> <!-- Empty cell for grid alignment -->
+                }
+
+                <FluentTimePicker Label="Start Time *" @bind-Value="startTimeDisplay" Required />
+                <FluentTimePicker Label="End Time (optional)" @bind-Value="endTimeDisplay" />
+
+                <!-- Tags -->
+                <div style="grid-column: span 2;">
+                    <FluentDivider>Tags</FluentDivider>
+                </div>
+
+                <div style="grid-column: span 2;">
+                    <FluentLabel>Tags (Coming Soon)</FluentLabel>
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" Style="margin-top: 8px; flex-wrap: wrap;">
+                        <FluentBadge>#happyhour</FluentBadge>
+                        <FluentBadge>#livemusic</FluentBadge>
+                        <FluentBadge>#food</FluentBadge>
+                        <FluentBadge>#drinks</FluentBadge>
+                        <FluentBadge>#brunch</FluentBadge>
+                        <FluentButton Appearance="Appearance.Lightweight"
+                                      IconStart="@(new Icons.Regular.Size16.Add())"
+                                      Size="ButtonSize.Small">Add Tag</FluentButton>
+                    </FluentStack>
+                </div>
+            </FluentGrid>
+
+            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End" HorizontalGap="8">
+                <FluentButton Appearance="Appearance.Neutral" OnClick="@OnCancel">Cancel</FluentButton>
+                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Loading="@isSaving">
+                    @(IsNew ? "Create Special" : "Save Changes")
+                </FluentButton>
+            </FluentStack>
+
+            <ValidationSummary />
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <FluentMessageBar MessageIntent="MessageIntent.Error" Title="Error">@errorMessage</FluentMessageBar>
+            }
+        </FluentStack>
+    </EditForm>
+</FluentStack>
+
+@code {
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+    [Parameter] public SpecialEditDialogParameters Parameters { get; set; } = new();
+
+    // Using conversions for DateTime to/from NodaTime
+    private NewSpecialRequest specialModel = new();
+    private List<string> specialTypeOptions = new();
+    private List<string> recurrenceOptions = new();
+    private Dictionary<string, SpecialTypes> specialTypesMap = new();
+    private Dictionary<string, Period> recurrencePeriodsMap = new();
+    private Dictionary<DayOfWeek, bool> dayChecks = new();
+    private int activeDaysBits = 0;
+    private string selectedSpecialTypeId = "0";
+    private string selectedRecurrenceId = "0";
+    private bool isSaving;
+    private string? errorMessage;
+
+    // DateTime display values for Fluent UI components
+    private DateTime startDateDisplay = DateTime.Today;
+    private DateTime? endDateDisplay;
+    private DateTime startTimeDisplay = DateTime.Today.AddHours(17); // 5:00 PM default
+    private DateTime? endTimeDisplay = DateTime.Today.AddHours(19);  // 7:00 PM default
+
+    public bool IsNew => Parameters.IsNew;
+
+    protected override void OnInitialized()
+    {
+        // Initialize special type mapping
+        specialTypeOptions = new List<string>();
+        specialTypesMap = new Dictionary<string, SpecialTypes>();
+
+        foreach (SpecialTypes type in Enum.GetValues<SpecialTypes>())
+        {
+            string id = ((int)type).ToString();
+            specialTypeOptions.Add(id);
+            specialTypesMap[id] = type;
+        }
+
+        // Initialize recurrence options using SpecialHelper.RecurrencePeriods
+        recurrenceOptions = new List<string>();
+        recurrencePeriodsMap = new Dictionary<string, Period>();
+
+        // Add recurrence options
+        recurrencePeriodsMap["daily"] = SpecialHelper.RecurrencePeriods.Daily;
+        recurrencePeriodsMap["weekly"] = SpecialHelper.RecurrencePeriods.Weekly;
+        recurrencePeriodsMap["biweekly"] = SpecialHelper.RecurrencePeriods.BiWeekly;
+        recurrencePeriodsMap["monthly"] = SpecialHelper.RecurrencePeriods.Monthly;
+        recurrencePeriodsMap["quarterly"] = SpecialHelper.RecurrencePeriods.Quarterly;
+        recurrencePeriodsMap["yearly"] = SpecialHelper.RecurrencePeriods.Yearly;
+
+        foreach (var key in recurrencePeriodsMap.Keys)
+        {
+            recurrenceOptions.Add(key);
+        }
+
+        // Initialize day checks
+        foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
+        {
+            dayChecks[day] = false;
+        }
+
+        if (!IsNew && Parameters.Special != null)
+        {
+            // Load existing special data for update
+            specialModel = new NewSpecialRequest
+                {
+                    Content = Parameters.Special.Content,
+                    Type = Parameters.Special.Type,
+                    StartDate = Parameters.Special.StartDate,
+                    StartTime = Parameters.Special.StartTime,
+                    EndTime = Parameters.Special.EndTime,
+                    ExpirationDate = Parameters.Special.ExpirationDate,
+                    IsRecurring = Parameters.Special.IsRecurring,
+                    RecurringPeriod = Parameters.Special.RecurringPeriod,
+                    ActiveDaysOfWeek = Parameters.Special.ActiveDaysOfWeek,
+                    VenueId = Parameters.VenueId,
+                    TagIds = Parameters.Special.Tags?.Select(t => t.Id).ToList()
+                };
+
+            // Set selected type
+            selectedSpecialTypeId = ((int)Parameters.Special.Type).ToString();
+
+            // Convert NodaTime to DateTime for UI
+            startDateDisplay = DateTimeConverter.ToDateTime(Parameters.Special.StartDate);
+            endDateDisplay = DateTimeConverter.ToDateTime(Parameters.Special.ExpirationDate);
+            startTimeDisplay = DateTimeConverter.ToDateTime(Parameters.Special.StartTime);
+            endTimeDisplay = DateTimeConverter.ToDateTime(Parameters.Special.EndTime);
+
+            // Set recurrence
+            if (Parameters.Special.RecurringPeriod != null)
+            {
+                // Try to find matching period
+                string? matchingKey = recurrencePeriodsMap.FirstOrDefault(
+                    x => x.Value.ToString() == Parameters.Special.RecurringPeriod.ToString()
+                ).Key;
+
+                if (matchingKey != null)
+                {
+                    selectedRecurrenceId = matchingKey;
+                }
+            }
+
+            // Set active days
+            if (Parameters.Special.ActiveDaysOfWeek.HasValue)
+            {
+                activeDaysBits = Parameters.Special.ActiveDaysOfWeek.Value;
+
+                foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
+                {
+                    int dayBit = 1 << (int)day;
+                    dayChecks[day] = (activeDaysBits & dayBit) != 0;
+                }
+            }
+        }
+        else
+        {
+            // Set defaults for new special
+            specialModel = new NewSpecialRequest
+                {
+                    Content = "",
+                    Type = SpecialTypes.Food,
+                    StartDate = LocalDate.FromDateTime(DateTime.Today),
+                    StartTime = LocalTime.FromTimeOnly(new TimeOnly(17, 0)), // 5:00 PM
+                    IsRecurring = false,
+                    VenueId = Parameters.VenueId
+                };
+
+            // Default to "Food" type
+            selectedSpecialTypeId = ((int)SpecialTypes.Food).ToString();
+        }
+    }
+
+    private void OnCancel()
+    {
+        Dialog.Cancel();
+    }
+
+    private void ToggleDay(DayOfWeek day)
+    {
+        int dayBit = 1 << (int)day;
+
+        if (dayChecks[day])
+        {
+            activeDaysBits |= dayBit;
+        }
+        else
+        {
+            activeDaysBits &= ~dayBit;
+        }
+
+        specialModel.ActiveDaysOfWeek = activeDaysBits;
+    }
+
+    private string GetDayAbbreviation(DayOfWeek day)
+    {
+        return day.ToString()[..3];
+    }
+
+    private void SelectWeekdays()
+    {
+        activeDaysBits = SpecialHelper.DayBits.Weekdays;
+        UpdateDayChecksFromActiveDays();
+        specialModel.ActiveDaysOfWeek = activeDaysBits;
+    }
+
+    private void SelectWeekend()
+    {
+        activeDaysBits = SpecialHelper.DayBits.Weekend;
+        UpdateDayChecksFromActiveDays();
+        specialModel.ActiveDaysOfWeek = activeDaysBits;
+    }
+
+    private void SelectAllDays()
+    {
+        activeDaysBits = SpecialHelper.DayBits.AllDays;
+        UpdateDayChecksFromActiveDays();
+        specialModel.ActiveDaysOfWeek = activeDaysBits;
+    }
+
+    private void ClearAllDays()
+    {
+        activeDaysBits = 0;
+        UpdateDayChecksFromActiveDays();
+        specialModel.ActiveDaysOfWeek = activeDaysBits;
+    }
+
+    private void UpdateDayChecksFromActiveDays()
+    {
+        foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
+        {
+            int dayBit = 1 << (int)day;
+            dayChecks[day] = (activeDaysBits & dayBit) != 0;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Update the model with values from the UI DateTime controls
+        specialModel.StartDate = DateTimeConverter.ToLocalDate(startDateDisplay);
+        specialModel.ExpirationDate = DateTimeConverter.ToLocalDate(endDateDisplay);
+        specialModel.StartTime = DateTimeConverter.ToLocalTime(startTimeDisplay);
+        specialModel.EndTime = DateTimeConverter.ToLocalTime(endTimeDisplay);
+
+        if (string.IsNullOrEmpty(selectedSpecialTypeId))
+        {
+            errorMessage = "Please select a special type";
+            return;
+        }
+
+        specialModel.Type = specialTypesMap[selectedSpecialTypeId];
+
+        if (specialModel.IsRecurring && !string.IsNullOrEmpty(selectedRecurrenceId))
+        {
+            specialModel.RecurringPeriod = recurrencePeriodsMap[selectedRecurrenceId];
+        }
+
+        // Set venue ID and active days
+        specialModel.VenueId = Parameters.VenueId;
+        specialModel.ActiveDaysOfWeek = activeDaysBits;
+
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            HttpResponseMessage response;
+
+            if (IsNew)
+            {
+                // Create new special
+                response = await Http.PostAsJsonAsync("api/admin/specials", specialModel);
+            }
+            else
+            {
+                // Map to update request
+                var updateRequest = new UpdateSpecialRequest
+                    {
+                        Content = specialModel.Content,
+                        Type = specialModel.Type,
+                        StartDate = specialModel.StartDate,
+                        StartTime = specialModel.StartTime,
+                        EndTime = specialModel.EndTime,
+                        ExpirationDate = specialModel.ExpirationDate,
+                        IsRecurring = specialModel.IsRecurring,
+                        RecurringPeriod = specialModel.RecurringPeriod,
+                        ActiveDaysOfWeek = specialModel.ActiveDaysOfWeek,
+                        TagIds = specialModel.TagIds
+                    };
+
+                // Update existing special
+                response = await Http.PutAsJsonAsync($"api/admin/specials/{Parameters.Special?.Id}", updateRequest);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                await Dialog.CloseAsync(DialogResult.Ok(true));
+            }
+            else
+            {
+                errorMessage = $"Failed to {(IsNew ? "create" : "update")} special: {response.ReasonPhrase}";
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

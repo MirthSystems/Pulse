@@ -1,0 +1,376 @@
+﻿@page "/admin"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
+@inject IDialogService DialogService
+@attribute [Authorize]
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="10">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween">
+            <h1>Venue Management</h1>
+            <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())" @onclick="CreateNewVenue">Add Venue</FluentButton>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="8">
+            <div class="filter-section">
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" VerticalAlignment="VerticalAlignment.Center">
+                    <FluentSearch Placeholder="Search venues..." @bind-Value="searchText"
+                                  @oninput="HandleSearchInput" />
+                    <FluentSelect TOption="VenueTypeOption"
+                                  Items="@venueTypeOptions"
+                                  @bind-Value="selectedVenueType"
+                                  OptionText="@(option => option.Name)"
+                                  OptionValue="@(option => option.Id.ToString())"
+                                  Placeholder="Filter by type"
+                                  @onchange="FilterByVenueType" />
+                    <FluentButton Appearance="Appearance.Lightweight"
+                                  IconStart="@(new Icons.Regular.Size20.ArrowReset())"
+                                  @onclick="ResetFilters">Reset</FluentButton>
+                </FluentStack>
+            </div>
+        </FluentStack>
+
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <FluentProgressRing />
+                <p>Loading venues...</p>
+            </div>
+        }
+        else if (errorMessage != null)
+        {
+            <FluentMessageBar Intent="Intent.Error" Title="Error">
+                @errorMessage
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="LoadVenues">Retry</FluentButton>
+            </FluentMessageBar>
+        }
+        else if (venues == null || !venues.Any())
+        {
+            <FluentMessageBar Intent="Intent.Warning" Title="No Venues">
+                No venues found. Create a new venue to get started.
+            </FluentMessageBar>
+        }
+        else
+        {
+            <FluentDataGrid @ref="venuesGrid" ItemsProvider="@venuesProvider" TGridItem="VenueItem"
+                            GridTemplateColumns="auto 1fr 1fr 1fr auto" ResizableColumns="true">
+                <PropertyColumn Title="Name" Property="@(v => v.Name)" Sortable="true" />
+                <PropertyColumn Title="Type" Property="@(v => v.VenueTypeName)" Sortable="true" />
+                <PropertyColumn Title="Location" Property="@(v => $"{v.Locality}, {v.Region}")" Sortable="true" />
+                <PropertyColumn Title="Contact" Property="@(v => v.PhoneNumber ?? "N/A")" Sortable="false" />
+                <TemplateColumn Title="Actions">
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="4">
+                        <FluentButton Appearance="Appearance.Lightweight" Title="View Details"
+                                      IconStart="@(new Icons.Regular.Size16.Info())"
+                                      @onclick="() => ViewVenueDetails(context)" />
+                        <FluentButton Appearance="Appearance.Lightweight" Title="Edit"
+                                      IconStart="@(new Icons.Regular.Size16.Edit())"
+                                      @onclick="() => EditVenue(context)" />
+                        <FluentButton Appearance="Appearance.Lightweight" Title="Delete"
+                                      IconStart="@(new Icons.Regular.Size16.Delete())"
+                                      @onclick="() => DeleteVenue(context)" />
+                    </FluentStack>
+                </TemplateColumn>
+            </FluentDataGrid>
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private FluentDataGrid<VenueItem>? venuesGrid;
+    private GridItemsProvider<VenueItem>? venuesProvider;
+    private List<VenueItem>? allVenues;
+    private List<VenueTypeItem>? venueTypes;
+    private List<VenueTypeOption> venueTypeOptions = new();
+    private string? searchText;
+    private string? selectedVenueType;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadVenueTypes();
+            await LoadVenues();
+
+            venuesProvider = new GridItemsProvider<VenueItem>(FilterVenues);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading data: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadVenueTypes()
+    {
+        venueTypes = await Http.GetFromJsonAsync<List<VenueTypeItem>>("api/admin/venue-types");
+
+        venueTypeOptions.Clear();
+        venueTypeOptions.Add(new VenueTypeOption { Id = 0, Name = "All Types" });
+
+        if (venueTypes != null)
+        {
+            venueTypeOptions.AddRange(venueTypes.Select(vt => new VenueTypeOption { Id = vt.Id, Name = vt.Name }));
+        }
+    }
+
+    private async Task LoadVenues()
+    {
+        errorMessage = null;
+        isLoading = true;
+
+        try
+        {
+            allVenues = await Http.GetFromJsonAsync<List<VenueItem>>("api/admin/venues");
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading venues: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private ValueTask<GridItemsProviderResult<VenueItem>> FilterVenues(GridItemsProviderRequest<VenueItem> request)
+    {
+        if (allVenues == null)
+        {
+            return ValueTask.FromResult(new GridItemsProviderResult<VenueItem>
+                {
+                    Items = Array.Empty<VenueItem>(),
+                    TotalItemCount = 0
+                });
+        }
+
+        IQueryable<VenueItem> query = allVenues.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            string search = searchText.ToLower();
+            query = query.Where(v =>
+                (v.Name?.ToLower().Contains(search) ?? false) ||
+                (v.Locality?.ToLower().Contains(search) ?? false) ||
+                (v.Region?.ToLower().Contains(search) ?? false) ||
+                (v.Description?.ToLower().Contains(search) ?? false) ||
+                (v.PhoneNumber?.ToLower().Contains(search) ?? false)
+            );
+        }
+
+        if (!string.IsNullOrEmpty(selectedVenueType) && selectedVenueType != "0")
+        {
+            if (int.TryParse(selectedVenueType, out int venueTypeId) && venueTypeId > 0)
+            {
+                query = query.Where(v => v.VenueTypeId == venueTypeId);
+            }
+        }
+
+        int totalCount = query.Count();
+
+        if (request.SortByColumn?.Body is not null)
+        {
+            query = request.SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(request.SortByColumn)
+                    : query.OrderByDescending(request.SortByColumn);
+        }
+        else
+        {
+            query = query.OrderBy(v => v.Name);
+        }
+
+        var items = query
+            .Skip(request.StartIndex)
+            .Take(request.Count)
+            .ToArray();
+
+        return ValueTask.FromResult(new GridItemsProviderResult<VenueItem>
+            {
+                Items = items,
+                TotalItemCount = totalCount
+            });
+    }
+
+    private async Task HandleSearchInput(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString();
+        await RefreshGrid();
+    }
+
+    private async Task FilterByVenueType(ChangeEventArgs e)
+    {
+        selectedVenueType = e.Value?.ToString();
+        await RefreshGrid();
+    }
+
+    private async Task ResetFilters()
+    {
+        searchText = null;
+        selectedVenueType = null;
+        await RefreshGrid();
+    }
+
+    private async Task RefreshGrid()
+    {
+        if (venuesGrid != null)
+        {
+            await venuesGrid.RefreshDataAsync();
+        }
+    }
+
+    private async Task CreateNewVenue()
+    {
+        var parameters = new DialogParameters()
+            {
+                Title = "Create New Venue",
+                PrimaryActionText = "Create",
+                SecondaryActionText = "Cancel",
+                Width = "800px",
+                TrapFocus = true,
+                Modal = true,
+                PreventDismissOnOverlayClick = true,
+                PreventScroll = true
+            };
+
+        var dialog = await DialogService.ShowDialogAsync<VenueEditDialog>(
+            parameters,
+            new VenueEditDialogParameters
+                {
+                    IsNew = true,
+                    VenueTypes = venueTypes
+                });
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await LoadVenues();
+        }
+    }
+
+    private async Task ViewVenueDetails(VenueItem venue)
+    {
+        var parameters = new DialogParameters()
+            {
+                Title = venue.Name,
+                PrimaryActionText = "Close",
+                Width = "900px",
+                TrapFocus = true,
+                Modal = true,
+                PreventScroll = true
+            };
+
+        try
+        {
+            var venueDetails = await Http.GetFromJsonAsync<VenueWithDetails>($"api/admin/venues/{venue.Id}");
+
+            if (venueDetails != null)
+            {
+                await DialogService.ShowDialogAsync<VenueDetailsDialog>(
+                    parameters,
+                    new VenueDetailsDialogParameters
+                        {
+                            Venue = venueDetails
+                        });
+            }
+        }
+        catch (Exception ex)
+        {
+            await DialogService.ShowErrorAsync("Failed to load venue details", ex.Message);
+        }
+    }
+
+    private async Task EditVenue(VenueItem venue)
+    {
+        var parameters = new DialogParameters()
+            {
+                Title = $"Edit {venue.Name}",
+                PrimaryActionText = "Save",
+                SecondaryActionText = "Cancel",
+                Width = "800px",
+                TrapFocus = true,
+                Modal = true,
+                PreventDismissOnOverlayClick = true,
+                PreventScroll = true
+            };
+
+        try
+        {
+            var venueDetails = await Http.GetFromJsonAsync<VenueWithDetails>($"api/admin/venues/{venue.Id}");
+
+            if (venueDetails != null)
+            {
+                var dialog = await DialogService.ShowDialogAsync<VenueEditDialog>(
+                    parameters,
+                    new VenueEditDialogParameters
+                        {
+                            IsNew = false,
+                            VenueDetails = venueDetails,
+                            VenueTypes = venueTypes
+                        });
+
+                var result = await dialog.Result;
+                if (!result.Cancelled)
+                {
+                    await LoadVenues();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await DialogService.ShowErrorAsync("Failed to load venue for editing", ex.Message);
+        }
+    }
+
+    private async Task DeleteVenue(VenueItem venue)
+    {
+        var result = await DialogService.ShowConfirmationAsync(
+            $"Delete {venue.Name}?",
+            "This action cannot be undone. All associated specials and schedules will also be deleted.",
+            "Delete",
+            "Cancel");
+
+        if (result)
+        {
+            try
+            {
+                var response = await Http.DeleteAsync($"api/admin/venues/{venue.Id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadVenues();
+                    await DialogService.ShowInfoAsync("Venue Deleted", $"{venue.Name} has been successfully deleted.");
+                }
+                else
+                {
+                    await DialogService.ShowErrorAsync("Delete Failed", await response.Content.ReadAsStringAsync());
+                }
+            }
+            catch (Exception ex)
+            {
+                await DialogService.ShowErrorAsync("Delete Failed", ex.Message);
+            }
+        }
+    }
+
+    private class VenueTypeOption
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+}

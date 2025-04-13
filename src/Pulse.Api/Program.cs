@@ -27,6 +27,19 @@ namespace Pulse.Api
                 throw new InvalidOperationException("Azure Maps subscription key is not configured.");
             }
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("PulseWebClientPolicy", policy =>
+                {
+                    policy.WithOrigins(
+                            "https://localhost:7254",
+                            "http://localhost:5002")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
+
             builder.Services.AddPulseInfrastructure(connectionString, azureMapsSubscriptionKey);
             builder.Services.AddSingleton<IClock>(SystemClock.Instance);
 
@@ -49,6 +62,11 @@ namespace Pulse.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("PulseWebClientPolicy");
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
             app.MapFallbackToFile("index.html");

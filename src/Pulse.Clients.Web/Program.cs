@@ -14,10 +14,24 @@ namespace Pulse.Clients.Web
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            builder.Services.AddScoped(sp => new HttpClient 
-            { 
-                BaseAddress = new Uri("https://localhost:7253")
+            var apiBaseUrl = builder.Configuration["PulseApi:BaseUrl"] ?? "https://localhost:7253";
+            var apiScopes = builder.Configuration.GetSection("PulseApi:Scopes").Get<string[]>()
+                ?? new[] { "openid", "profile", "email" };
+
+            builder.Services.AddHttpClient("PulseApi", client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+            }).AddHttpMessageHandler(sp =>
+            {
+                var handler = sp.GetRequiredService<AuthorizationMessageHandler>()
+                    .ConfigureHandler(
+                        authorizedUrls: new[] { apiBaseUrl },
+                        scopes: apiScopes);
+                return handler;
             });
+
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
+                .CreateClient("PulseApi"));
 
             builder.Services.AddFluentUIComponents();
 
