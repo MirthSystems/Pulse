@@ -10,15 +10,15 @@
     public class NewOperatingScheduleRequest
     {
         [Required]
-        public required DayOfWeek DayOfWeek { get; set; }
+        public DayOfWeek DayOfWeek { get; set; }
 
         [Required]
-        public required LocalTime TimeOfOpen { get; set; }
+        public LocalTime TimeOfOpen { get; set; }
 
         [Required]
-        public required LocalTime TimeOfClose { get; set; }
+        public LocalTime TimeOfClose { get; set; }
 
         [Required]
-        public required bool IsClosed { get; set; }
+        public bool IsClosed { get; set; }
     }
 }

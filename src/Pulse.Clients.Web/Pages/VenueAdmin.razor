@@ -1,7 +1,7 @@
 ﻿@page "/venue-admin"
 @attribute [Authorize]
 @inject HttpClient Http
-@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Pulse.Core.Models
@@ -14,7 +14,7 @@
         <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" VerticalAlignment="VerticalAlignment.Center">
             <h1 class="no-margin">Venue Management</h1>
             <FluentSpacer />
-            <FluentButton Appearance="Appearance.Accent" OnClick="OpenNewVenueDialog">
+            <FluentButton Appearance="Appearance.Accent" OnClick="@(() => NavigationManager.NavigateTo("/new-venue"))">
                 <FluentIcon Slot="start" Value="@(new Icons.Regular.Size20.Add())" />
                 New Venue
             </FluentButton>
@@ -60,10 +60,6 @@
                 Venues = venues;
             }
         }
-        catch (AccessTokenNotAvailableException exception)
-        {
-            exception.Redirect();
-        }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading venues: {ex.Message}");
@@ -71,24 +67,6 @@
         finally
         {
             IsLoading = false;
-        }
-    }
-
-    private async Task OpenNewVenueDialog()
-    {
-        var parameters = new DialogParameters()
-            {
-                Title = "Create New Venue",
-                PrimaryAction = "Create",
-                SecondaryAction = "Cancel",
-                Width = "800px"
-            };
-
-        var dialog = await DialogService.ShowDialogAsync<NewVenueDialog>(parameters);
-
-        if (dialog.Result == DialogResult.Ok)
-        {
-            await LoadVenues();
         }
     }
 }

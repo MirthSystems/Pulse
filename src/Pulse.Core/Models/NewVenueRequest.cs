@@ -9,14 +9,14 @@
     {
         [Required]
         [StringLength(255)]
-        public required string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [StringLength(1000)]
         public string? Description { get; set; }
 
         [Required]
         [StringLength(255)]
-        public required string AddressLine1 { get; set; }
+        public string AddressLine1 { get; set; } = null!;
 
         [StringLength(255)]
         public string? AddressLine2 { get; set; }
@@ -29,19 +29,19 @@
 
         [Required]
         [StringLength(100)]
-        public required string Locality { get; set; }
+        public string Locality { get; set; } = null!;
 
         [Required]
         [StringLength(100)]
-        public required string Region { get; set; }
+        public string Region { get; set; } = null!;
 
         [Required]
         [StringLength(20)]
-        public required string Postcode { get; set; }
+        public string Postcode { get; set; } = null!;
 
         [Required]
         [StringLength(100)]
-        public required string Country { get; set; }
+        public string Country { get; set; } = null!;
 
         [StringLength(20)]
         [Phone]
@@ -60,6 +60,6 @@
         public string? ImageLink { get; set; }
 
         [Required]
-        public required int VenueTypeId { get; set; }
+        public int VenueTypeId { get; set; }
     }
 }

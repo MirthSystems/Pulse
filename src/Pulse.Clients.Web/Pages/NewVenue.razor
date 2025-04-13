@@ -1,0 +1,141 @@
+﻿@page "/new-venue"
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient Http
+@using Pulse.Core.Models
+@using System.Net.Http.Json
+
+<PageTitle>New Venue</PageTitle>
+
+<EditForm Model="@model" OnValidSubmit="SubmitForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Name</label>
+        <InputText @bind-Value="model.Name" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <InputTextArea @bind-Value="model.Description" class="form-control" />
+    </div>
+
+    <hr />
+    <h3>Address Information</h3>
+    <div class="form-group">
+        <label>Address Line 1</label>
+        <InputText @bind-Value="model.AddressLine1" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Address Line 2</label>
+        <InputText @bind-Value="model.AddressLine2" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Address Line 3</label>
+        <InputText @bind-Value="model.AddressLine3" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Address Line 4</label>
+        <InputText @bind-Value="model.AddressLine4" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>City</label>
+        <InputText @bind-Value="model.Locality" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>State/Province</label>
+        <InputText @bind-Value="model.Region" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Postal Code</label>
+        <InputText @bind-Value="model.Postcode" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Country</label>
+        <InputText @bind-Value="model.Country" class="form-control" required />
+    </div>
+
+    <hr />
+    <h3>Contact Information</h3>
+    <div class="form-group">
+        <label>Phone Number</label>
+        <InputText @bind-Value="model.PhoneNumber" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <InputText @bind-Value="model.Email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Website</label>
+        <InputText @bind-Value="model.Website" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Image URL</label>
+        <InputText @bind-Value="model.ImageLink" class="form-control" />
+    </div>
+
+    <hr />
+    <h3>Venue Type</h3>
+    <div class="form-group">
+        <label>Select Venue Type</label>
+        <select @bind="model.VenueTypeId" class="form-control">
+            @foreach (var type in venueTypes)
+            {
+                <option value="@type.Id">@type.Name</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Create Venue</button>
+</EditForm>
+
+@code {
+    private NewVenueRequest model = new NewVenueRequest();
+
+    private List<VenueTypeItem> venueTypes = new List<VenueTypeItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVenueTypes();
+    }
+
+    private async Task LoadVenueTypes()
+    {
+        try
+        {
+            var types = await Http.GetFromJsonAsync<List<VenueTypeItem>>("api/admin/venue-types");
+            if (types != null)
+            {
+                venueTypes = types;
+                if (venueTypes.Any())
+                {
+                    model.VenueTypeId = venueTypes.First().Id;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading venue types: {ex.Message}");
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/admin/venues", model);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Venue created successfully");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error creating venue: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in SubmitForm: {ex.Message}");
+        }
+    }
+}

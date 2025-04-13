@@ -9,7 +9,7 @@
     {
         [Required]
         [StringLength(100)]
-        public required string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [StringLength(255)]
         public string? Description { get; set; }

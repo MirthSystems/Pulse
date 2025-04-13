@@ -25,9 +25,9 @@
             : DateTime.Today.AddHours(12);
     }
 
-    private async Task OnValueChanged(DateTime value)
+    private async Task OnValueChanged(DateTime? value)
     {
-        var newValue = LocalTime.FromTimeOnly(TimeOnly.FromDateTime(value));
+        var newValue = LocalTime.FromTimeOnly(TimeOnly.FromDateTime(value ?? DateTime.Today.AddHours(12)));
         if (newValue != Value)
         {
             Value = newValue;

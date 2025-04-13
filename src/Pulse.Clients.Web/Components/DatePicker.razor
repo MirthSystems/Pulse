@@ -23,9 +23,9 @@
         get => Value != default ? Value.ToDateTimeUnspecified() : DateTime.Today;
     }
 
-    private async Task OnValueChanged(DateTime value)
+    private async Task OnValueChanged(DateTime? value)
     {
-        var newValue = LocalDate.FromDateTime(value);
+        var newValue = LocalDate.FromDateTime(value ?? DateTime.Today);
         if (newValue != Value)
         {
             Value = newValue;
