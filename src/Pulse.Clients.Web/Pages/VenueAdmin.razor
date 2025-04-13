@@ -1,0 +1,94 @@
+﻿@page "/venue-admin"
+@attribute [Authorize]
+@inject HttpClient Http
+@inject IDialogService DialogService
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Pulse.Core.Models
+@using System.Net.Http.Json
+
+<PageTitle>Venue Management</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" Gap="16">
+    <FluentCard Width="100%">
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" VerticalAlignment="VerticalAlignment.Center">
+            <h1 class="no-margin">Venue Management</h1>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Accent" OnClick="OpenNewVenueDialog">
+                <FluentIcon Slot="start" Value="@(new Icons.Regular.Size20.Add())" />
+                New Venue
+            </FluentButton>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard Width="100%">
+        @if (IsLoading)
+        {
+            <FluentProgressRing />
+            <p>Loading venues...</p>
+        }
+        else
+        {
+            <FluentDataGrid Items="@(Venues.AsQueryable())" TGridItem="VenueItem" ResizableColumns="true">
+                <PropertyColumn Title="Name" Property="@(v => v.Name)" Sortable="true" />
+                <PropertyColumn Title="Address" Property="@(v => v.AddressLine1)" Sortable="true" />
+                <PropertyColumn Title="City" Property="@(v => v.Locality)" Sortable="true" />
+                <PropertyColumn Title="State" Property="@(v => v.Region)" Sortable="true" />
+                <PropertyColumn Title="Type" Property="@(v => v.VenueTypeName)" Sortable="true" />
+            </FluentDataGrid>
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private List<VenueItem> Venues = new();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVenues();
+    }
+
+    private async Task LoadVenues()
+    {
+        try
+        {
+            IsLoading = true;
+            var venues = await Http.GetFromJsonAsync<List<VenueItem>>("api/admin/venues");
+            if (venues != null)
+            {
+                Venues = venues;
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading venues: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task OpenNewVenueDialog()
+    {
+        var parameters = new DialogParameters()
+            {
+                Title = "Create New Venue",
+                PrimaryAction = "Create",
+                SecondaryAction = "Cancel",
+                Width = "800px"
+            };
+
+        var dialog = await DialogService.ShowDialogAsync<NewVenueDialog>(parameters);
+
+        if (dialog.Result == DialogResult.Ok)
+        {
+            await LoadVenues();
+        }
+    }
+}

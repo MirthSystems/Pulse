@@ -5,10 +5,9 @@
         <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
             <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
             <FluentNavLink Href="counter" Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())" IconColor="Color.Accent">Counter</FluentNavLink>
-            
             <AuthorizeView>
                 <Authorized>
-                    <FluentNavLink Href="admin" Icon="@(new Icons.Regular.Size20.Building())" IconColor="Color.Accent">Admin Dashboard</FluentNavLink>
+                    <FluentNavLink Href="venue-admin" Icon="@(new Icons.Regular.Size20.BuildingBank())" IconColor="Color.Accent">Admin Dashboard</FluentNavLink>
                 </Authorized>
             </AuthorizeView>
         </FluentNavMenu>

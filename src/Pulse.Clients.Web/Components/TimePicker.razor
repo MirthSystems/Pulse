@@ -1,0 +1,37 @@
+﻿@using NodaTime
+
+<FluentStack Orientation="Orientation.Vertical" Width="100%">
+    <label class="fluent-label">@Label @(Required ? "<span style=\"color: var(--accent-fill-rest);\">*</span>" : "")</label>
+    <FluentTimePicker Required="@Required"
+                      Placeholder="@Placeholder"
+                      Value="@DateTimeValue"
+                      ValueChanged="@OnValueChanged"
+                      Width="@Width" />
+</FluentStack>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Time";
+    [Parameter] public bool Required { get; set; } = false;
+    [Parameter] public string Placeholder { get; set; } = "Select a time";
+    [Parameter] public string Width { get; set; } = "100%";
+
+    [Parameter] public LocalTime Value { get; set; } = LocalTime.FromTimeOnly(new TimeOnly(12, 0));
+    [Parameter] public EventCallback<LocalTime> ValueChanged { get; set; }
+
+    private DateTime DateTimeValue
+    {
+        get => Value != default
+            ? DateTime.Today.Add(new TimeSpan(Value.Hour, Value.Minute, Value.Second))
+            : DateTime.Today.AddHours(12);
+    }
+
+    private async Task OnValueChanged(DateTime value)
+    {
+        var newValue = LocalTime.FromTimeOnly(TimeOnly.FromDateTime(value));
+        if (newValue != Value)
+        {
+            Value = newValue;
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+}

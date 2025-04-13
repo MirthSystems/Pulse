@@ -1,0 +1,69 @@
+﻿@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Pulse.Core.Models
+@using System.Net.Http.Json
+
+<FluentListbox TOption="VenueTypeItem"
+               Label="@Label"
+               Items="@VenueTypes"
+               Height="@Height"
+               Width="@Width"
+               OptionValue="@(vt => vt.Id.ToString())"
+               OptionText="@(vt => vt.Name)"
+               Value="@StringSelectedVenueTypeId"
+               ValueChanged="@(v => UpdateSelectedValue(v))"
+               Required="@Required" />
+
+@code {
+    [Parameter] public string Label { get; set; } = "Venue Type";
+    [Parameter] public bool Required { get; set; } = true;
+    [Parameter] public string Height { get; set; } = "auto";
+    [Parameter] public string Width { get; set; } = "100%";
+
+    [Parameter] public int SelectedVenueTypeId { get; set; }
+    [Parameter] public EventCallback<int> SelectedVenueTypeIdChanged { get; set; }
+
+    private List<VenueTypeItem> VenueTypes { get; set; } = new();
+
+    private string StringSelectedVenueTypeId => SelectedVenueTypeId.ToString();
+
+    private async Task UpdateSelectedValue(string value)
+    {
+        if (int.TryParse(value, out var result) && result != SelectedVenueTypeId)
+        {
+            SelectedVenueTypeId = result;
+            await SelectedVenueTypeIdChanged.InvokeAsync(result);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVenueTypes();
+    }
+
+    private async Task LoadVenueTypes()
+    {
+        try
+        {
+            var types = await Http.GetFromJsonAsync<List<VenueTypeItem>>("api/admin/venue-types");
+            if (types != null)
+            {
+                VenueTypes = types;
+
+                if (SelectedVenueTypeId == 0 && VenueTypes.Any())
+                {
+                    SelectedVenueTypeId = VenueTypes.First().Id;
+                    await SelectedVenueTypeIdChanged.InvokeAsync(SelectedVenueTypeId);
+                }
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading venue types: {ex.Message}");
+        }
+    }
+}
