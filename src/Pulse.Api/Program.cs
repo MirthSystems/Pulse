@@ -29,7 +29,7 @@ namespace Pulse.Api
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("PulseWebClientPolicy", policy =>
+                options.AddPolicy("PulseClientPolicy", policy =>
                 {
                     policy.WithOrigins(
                             "https://localhost:7254",
@@ -63,7 +63,7 @@ namespace Pulse.Api
 
             app.UseHttpsRedirection();
 
-            app.UseCors("PulseWebClientPolicy");
+            app.UseCors("PulseClientPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();

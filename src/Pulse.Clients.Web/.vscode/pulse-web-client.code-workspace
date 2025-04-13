@@ -1,0 +1,51 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "node_modules/typescript/lib",
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		},
+		"eslint.validate": [
+			"javascript",
+			"javascriptreact",
+			"typescript",
+			"typescriptreact",
+			"vue"
+		],
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/dist": true
+		},
+		"files.associations": {
+			"*.vue": "vue"
+		},
+		"typescript.preferences.importModuleSpecifier": "relative"
+	},
+	"extensions": {
+		"recommendations": [
+			"dbaeumer.vscode-eslint",
+			"esbenp.prettier-vscode",
+			"octref.vetur",
+			"Vue.volar",
+			"ms-vscode.vscode-typescript-next"
+		]
+	},
+	"launch": {
+		"configurations": [
+			{
+				"type": "msedge",
+				"request": "launch",
+				"name": "Launch Edge against localhost",
+				"url": "http://localhost:3000",
+				"webRoot": "${workspaceFolder}/src"
+			}
+		],
+		"compounds": []
+	}
+}
