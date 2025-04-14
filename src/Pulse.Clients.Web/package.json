@@ -9,7 +9,7 @@
     "serve:client": "vite"
   },
   "dependencies": {
-    "@auth0/auth0-vue": "^2.3.0",
+    "@auth0/auth0-vue": "^2.4.0",
     "@fortawesome/fontawesome-svg-core": "^6.5.0",
     "@fortawesome/free-solid-svg-icons": "^6.5.0",
     "@fortawesome/vue-fontawesome": "^3.0.1",
@@ -21,7 +21,7 @@
     "highlight.js": "^11.9.0",
     "morgan": "^1.10.0",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.1"
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.18.8",
