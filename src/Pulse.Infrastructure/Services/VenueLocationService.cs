@@ -238,6 +238,90 @@
         }
 
         /// <summary>
+        /// Finds venues with active specials at a specific time near a specified address
+        /// </summary>
+        /// <param name="address">The address to search from</param>
+        /// <param name="specificTime">The specific time to check for active specials</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <returns>Collection of venues with active specials and distance information</returns>
+        public async Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsForTimeNearAddressAsync(
+            string address,
+            Instant specificTime,
+            double radiusMiles)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(address))
+                {
+                    throw new ArgumentException("Address cannot be empty", nameof(address));
+                }
+
+                var geocodingResult = await _locationService.GeocodeAddressAsync(address);
+
+                if (!geocodingResult.Success || geocodingResult.Point == null)
+                {
+                    _logger.LogWarning(
+                        "Failed to geocode address for venue search: {ErrorMessage}",
+                        geocodingResult.ErrorMessage);
+                    return Enumerable.Empty<VenueWithDistance>();
+                }
+
+                return await FindVenuesWithActiveSpecialsForTimeNearPointAsync(
+                    geocodingResult.Point.Y, geocodingResult.Point.X, specificTime, radiusMiles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error finding venues with active specials for specific time near address: {Address}", address);
+                return Enumerable.Empty<VenueWithDistance>();
+            }
+        }
+
+        /// <summary>
+        /// Finds venues with active specials at a specific time near a specified geographic point
+        /// </summary>
+        /// <param name="latitude">Latitude of the search point</param>
+        /// <param name="longitude">Longitude of the search point</param>
+        /// <param name="specificTime">The specific time to check for active specials</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <returns>Collection of venues with active specials and distance information</returns>
+        public async Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsForTimeNearPointAsync(
+            double latitude,
+            double longitude,
+            Instant specificTime,
+            double radiusMiles)
+        {
+            try
+            {
+                var searchPoint = new Point(longitude, latitude) { SRID = 4326 };
+
+                _logger.LogInformation(
+                    "Finding venues with active specials at specific time {SpecificTime} near point ({Longitude}, {Latitude}) within {Radius} miles",
+                    specificTime, longitude, latitude, radiusMiles);
+
+                var localTime = await _locationService.ConvertToLocalTimeAsync(specificTime, searchPoint);
+
+                var venues = await _unitOfWork.Venues.FindVenuesWithActiveSpecialsNearbyAsync(
+                    searchPoint, radiusMiles, specificTime);
+
+                foreach (var venue in venues)
+                {
+                    venue.LocalTime = localTime;
+                }
+
+                return venues;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error finding venues with active specials at specific time near point ({Longitude}, {Latitude})",
+                    longitude,
+                    latitude);
+                return Enumerable.Empty<VenueWithDistance>();
+            }
+        }
+
+        /// <summary>
         /// Gets the local time at a specific geographic point.
         /// </summary>
         /// <param name="point">Geographic point</param>

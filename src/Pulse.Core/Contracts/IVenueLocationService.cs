@@ -64,6 +64,32 @@
             double radiusMiles);
 
         /// <summary>
+        /// Finds venues with active specials at a specific time near a specified address
+        /// </summary>
+        /// <param name="address">The address to search from</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <param name="specificTime">The specific time to check for active specials</param>
+        /// <returns>Collection of venues with active specials and distance information</returns>
+        Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsForTimeNearAddressAsync(
+            string address,
+            Instant specificTime,
+            double radiusMiles);
+
+        /// <summary>
+        /// Finds venues with active specials at a specific time near a specified geographic point
+        /// </summary>
+        /// <param name="latitude">Latitude of the search point</param>
+        /// <param name="longitude">Longitude of the search point</param>
+        /// <param name="radiusMiles">Search radius in miles</param>
+        /// <param name="specificTime">The specific time to check for active specials</param>
+        /// <returns>Collection of venues with active specials and distance information</returns>
+        Task<IEnumerable<VenueWithDistance>> FindVenuesWithActiveSpecialsForTimeNearPointAsync(
+            double latitude,
+            double longitude,
+            Instant specificTime,
+            double radiusMiles);
+
+        /// <summary>
         /// Gets the local time at a specific geographic point
         /// </summary>
         /// <param name="point">Geographic point</param>
