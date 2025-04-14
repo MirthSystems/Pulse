@@ -12,6 +12,7 @@
 
     using Pulse.Core.Models;
     using Pulse.Core.Utilities;
+    using NodaTime.Text;
 
     [ApiController]
     [Route("api/specials")]
@@ -79,6 +80,85 @@
                 address, radiusMiles);
 
             var result = await CreateVenueWithActiveSpecialsItems(venuesWithDistance);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Finds venues with active specials at a specific time near a geographic point
+        /// </summary>
+        /// <param name="latitude">Latitude of search point</param>
+        /// <param name="longitude">Longitude of search point</param>
+        /// <param name="dateTime">ISO-8601 formatted date and time to check for specials (UTC)</param>
+        /// <param name="radiusMiles">Search radius in miles (default: 5)</param>
+        /// <returns>List of venues with active specials at the specified time</returns>
+        [HttpGet("nearby/future")]
+        [ProducesResponseType(typeof(IEnumerable<VenueWithActiveSpecials>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> FindVenuesWithSpecialsForTimeNearPoint(
+            [FromQuery] double latitude,
+            [FromQuery] double longitude,
+            [FromQuery] string dateTime,
+            [FromQuery] double radiusMiles = 5)
+        {
+            if (string.IsNullOrWhiteSpace(dateTime))
+            {
+                return BadRequest("DateTime is required");
+            }
+
+            var parseResult = InstantPattern.ExtendedIso.Parse(dateTime);
+            if (!parseResult.Success)
+            {
+                return BadRequest($"Invalid date-time format: {parseResult.Exception.Message}");
+            }
+
+            var specificTime = parseResult.Value;
+
+            var venuesWithDistance = await _venueLocationService.FindVenuesWithActiveSpecialsForTimeNearPointAsync(
+                latitude, longitude, specificTime, radiusMiles);
+
+            var result = await CreateVenueWithActiveSpecialsItems(venuesWithDistance, specificTime);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Finds venues with active specials at a specific time near an address
+        /// </summary>
+        /// <param name="address">Search address</param>
+        /// <param name="dateTime">ISO-8601 formatted date and time to check for specials (UTC)</param>
+        /// <param name="radiusMiles">Search radius in miles (default: 5)</param>
+        /// <returns>List of venues with active specials at the specified time</returns>
+        [HttpGet("nearby/address/future")]
+        [ProducesResponseType(typeof(IEnumerable<VenueWithActiveSpecials>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> FindVenuesWithSpecialsForTimeNearAddress(
+            [FromQuery] string address,
+            [FromQuery] string dateTime,
+            [FromQuery] double radiusMiles = 5)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return BadRequest("Address is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(dateTime))
+            {
+                return BadRequest("DateTime is required");
+            }
+
+            var parseResult = InstantPattern.ExtendedIso.Parse(dateTime);
+            if (!parseResult.Success)
+            {
+                return BadRequest($"Invalid date-time format: {parseResult.Exception.Message}");
+            }
+
+            var specificTime = parseResult.Value;
+
+            var venuesWithDistance = await _venueLocationService.FindVenuesWithActiveSpecialsForTimeNearAddressAsync(
+                address, specificTime, radiusMiles);
+
+            var result = await CreateVenueWithActiveSpecialsItems(venuesWithDistance, specificTime);
 
             return Ok(result);
         }
@@ -191,11 +271,14 @@
         /// <summary>
         /// Helper method to create Items for venues with their active specials
         /// </summary>
+        /// <param name="venuesWithDistance">Collection of venues with distance information</param>
+        /// <param name="checkTime">Optional specific time to check for active specials (defaults to current time)</param>
         private async Task<IEnumerable<VenueWithActiveSpecials>> CreateVenueWithActiveSpecialsItems(
-            IEnumerable<VenueWithDistance> venuesWithDistance)
+            IEnumerable<VenueWithDistance> venuesWithDistance,
+            Instant? checkTime = null)
         {
             var result = new List<VenueWithActiveSpecials>();
-            var currentInstant = _clock.GetCurrentInstant();
+            var timeToCheck = checkTime ?? _clock.GetCurrentInstant();
 
             foreach (var venueWithDistance in venuesWithDistance)
             {
@@ -203,7 +286,7 @@
                 if (venue != null)
                 {
                     var activeSpecials = venue.Specials
-                        .Where(s => SpecialHelper.IsActive(s, currentInstant))
+                        .Where(s => SpecialHelper.IsActive(s, timeToCheck))
                         .ToList();
 
                     var tuple = (Venue: venue, DistanceMiles: venueWithDistance.DistanceMiles, ActiveSpecials: activeSpecials);
