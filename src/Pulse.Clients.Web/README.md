@@ -1,10 +1,6 @@
-# Scenario #1 - Logging In and Gated Content
+# Scenario #2 - Calling an External API
 
-This sample demonstrates:
-
-- Logging in to Auth0 using Redirect Mode
-- Accessing profile information that has been provided in the ID token
-- Gated content. The `/profile` route is not accessible without having first logged in
+For this scenario, an API endpoint `/api/external` has been included in the Express server that requires a bearer token to be supplied as a bearer token in the `Authorization` header (as provided during the authentication flow). This uses the [`express-oauth2-jwt-bearer`](https://github.com/auth0/node-oauth2-jwt-bearer) middleware to validate the token against the identifier of your API as set up in the Auth0 dashboard, as well as checking that the signature is valid.
 
 ## Project setup
 
@@ -14,18 +10,21 @@ npm install
 
 ### Configuration
 
-The project needs to be configured with your Auth0 domain and client ID in order for the authentication flow to work.
+The project needs to be configured with your Auth0 domain and client ID in order for the authentication flow to work. When calling an external API, ensure to also set the `audience` to the value of your Auth0 API identifier.
 
-To do this, first copy `auth_config.json.example` into a new file in the same folder called `auth_config.json`, and replace the values within with your own Auth0 application credentials:
+To do this, first copy `auth_config.sample.json` into a new file in the same folder called `auth_config.json`, and replace the values within with your own Auth0 application credentials:
 
 ```json
 {
   "domain": "<YOUR AUTH0 DOMAIN>",
-  "clientId": "<YOUR AUTH0 CLIENT ID>"
+  "clientId": "<YOUR AUTH0 CLIENT ID>",
+  "audience": "<YOUR AUTH0 API IDENTIFIER>"
 }
 ```
 
-### Compiles and hot-reloads for development
+### Running in development
+
+This compiles and serves the Vue app, and starts the backend API server on port 3001:
 
 ```bash
 npm run serve
@@ -41,7 +40,7 @@ npm run build
 
 ### Docker build
 
-To build and run the Docker image, run `exec.sh`, or `exec.ps1` on Windows.
+To build the Docker image run `exec.sh`, or `exec.ps1` on Windows.
 
 ### Lints and fixes files
 

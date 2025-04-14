@@ -26,10 +26,9 @@ import { useAuth0 } from '@auth0/auth0-vue';
 export default {
   name: "profile-view",
   setup() {
-    const auth0 = useAuth0();
-    
+    const { user } = useAuth0();
     return {
-      user: auth0.user,
+      user,
     }
   }
 };

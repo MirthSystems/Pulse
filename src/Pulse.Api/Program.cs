@@ -32,8 +32,7 @@ namespace Pulse.Api
                 options.AddPolicy("PulseClientPolicy", policy =>
                 {
                     policy.WithOrigins(
-                            "https://localhost:7254",
-                            "http://localhost:5002")
+                            "http://localhost:3000")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
