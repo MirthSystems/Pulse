@@ -5,34 +5,55 @@
 		}
 	],
 	"settings": {
-		"typescript.tsdk": "node_modules/typescript/lib",
 		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
 		},
-		"eslint.validate": [
-			"javascript",
-			"javascriptreact",
-			"typescript",
-			"typescriptreact",
-			"vue"
-		],
-		"search.exclude": {
-			"**/node_modules": true,
-			"**/dist": true
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"[vue]": {
+			"editor.defaultFormatter": "Vue.volar"
 		},
+		"[typescript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"typescript.tsdk": "node_modules/typescript/lib",
+		"typescript.enablePromptUseWorkspaceTsdk": true,
+		"volar.autoCompleteRefs": true,
+		"volar.icon.preview": true,
 		"files.associations": {
+			"*.css": "css",
 			"*.vue": "vue"
 		},
-		"typescript.preferences.importModuleSpecifier": "relative"
+		"emmet.includeLanguages": {
+			"vue": "html"
+		},
+		"emmet.syntaxProfiles": {
+			"vue-html": "html"
+		},
+		"eslint.validate": [
+			"javascript",
+			"typescript",
+			"vue"
+		],
+		"editor.quickSuggestions": {
+			"strings": true
+		},
+		"vite.devCommand": "npm run dev"
 	},
 	"extensions": {
 		"recommendations": [
-			"dbaeumer.vscode-eslint",
-			"esbenp.prettier-vscode",
+			"ms-vscode.vscode-typescript-tslint-plugin",
 			"Vue.volar",
-			"ms-vscode.vscode-typescript-next"
+			"Vue.vscode-typescript-vue-plugin",
+			"esbenp.prettier-vscode",
+			"dbaeumer.vscode-eslint",
+			"hollowtree.vue-snippets",
+			"vuetifyjs.vuetify-vscode",
+			"mikestead.dotenv",
+			"antfu.vite",
+			"antfu.iconify",
+			"auth0.auth0-deploy",
+			"redhat.vscode-yaml"
 		]
 	},
 	"launch": {
@@ -42,35 +63,7 @@
 				"request": "launch",
 				"name": "Launch Edge against localhost",
 				"url": "http://localhost:3000",
-				"webRoot": "${workspaceFolder}/src",
-				"preLaunchTask": "npm: serve"
-			}
-		],
-		"compounds": []
-	},
-	"tasks": {
-		"version": "2.0.0",
-		"tasks": [
-			{
-				"label": "npm: serve",
-				"type": "npm",
-				"script": "serve",
-				"detail": "vite",
-				"isBackground": true,
-				"problemMatcher": {
-					"owner": "npm",
-					"pattern": {
-						"regexp": "",
-						"file": 1,
-						"location": 2,
-						"message": 3
-					},
-					"background": {
-						"activeOnStart": true,
-						"beginsPattern": ".*VITE.*",
-						"endsPattern": ".*ready in.*"
-					}
-				}
+				"webRoot": "${workspaceFolder}"
 			}
 		]
 	}
