@@ -2,16 +2,22 @@ import App from "./App.vue";
 import { createApp } from "vue";
 import { createRouter } from "./router";
 import { createAuth0 } from "@auth0/auth0-vue";
+import {
+  provideFluentDesignSystem,
+  allComponents,
+} from "@fluentui/web-components";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faLink, faUser, faPowerOff } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import authConfig from "../auth_config.json";
-import hljs from 'highlight.js/lib/core';
-import json from 'highlight.js/lib/languages/json';
+import hljs from "highlight.js/lib/core";
+import json from "highlight.js/lib/languages/json";
 import hljsVuePlugin from "@highlightjs/vue-plugin";
 import "highlight.js/styles/github.css";
 
-hljs.registerLanguage('json', json);
+provideFluentDesignSystem().register(allComponents);
+
+hljs.registerLanguage("json", json);
 
 const app = createApp(App);
 
@@ -27,7 +33,7 @@ app
       authorizationParams: {
         redirect_uri: window.location.origin,
         audience: authConfig.authorizationParams.audience,
-      }
+      },
     })
   )
   .component("font-awesome-icon", FontAwesomeIcon)

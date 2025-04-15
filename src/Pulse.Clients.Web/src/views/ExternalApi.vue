@@ -23,32 +23,25 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useAuth0 } from "@auth0/auth0-vue";
 import { ref } from "vue";
 
-export default {
-  name: "api-view",
-  setup() {
-    const auth0 = useAuth0();
-    const apiMessage = ref();
-    return {
-      apiMessage,
-      async callApi() {
-        const accessToken = await auth0.getAccessTokenSilently();
-        try {
-          const response = await fetch("/api/external", {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
-          const data = await response.json();
-          apiMessage.value = data;
-        } catch (e: any) {
-          apiMessage.value = `Error: the server responded with '${e.response.status}: ${e.response.statusText}'`;
-        }
+const auth0 = useAuth0();
+const apiMessage = ref();
+
+async function callApi() {
+  const accessToken = await auth0.getAccessTokenSilently();
+  try {
+    const response = await fetch("/api/external", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    };
-  },
-};
+    });
+    const data = await response.json();
+    apiMessage.value = data;
+  } catch (e: any) {
+    apiMessage.value = `Error: the server responded with '${e.response.status}: ${e.response.statusText}'`;
+  }
+}
 </script>

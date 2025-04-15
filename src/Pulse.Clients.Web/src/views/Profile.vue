@@ -20,17 +20,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { useAuth0 } from '@auth0/auth0-vue';
+<script setup lang="ts">
+import { useAuth0 } from "@auth0/auth0-vue";
 
-export default {
-  name: "profile-view",
-  setup() {
-    const { user } = useAuth0();
-    return {
-      user,
-    }
-  }
-};
+const { user } = useAuth0();
 </script>
-

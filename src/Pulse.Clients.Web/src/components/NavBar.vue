@@ -119,32 +119,23 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import { useAuth0 } from "@auth0/auth0-vue";
 
-export default defineComponent({
-  name: "NavBar",
-  setup() {
-    const auth0 = useAuth0();
+const auth0 = useAuth0();
+const { isAuthenticated, isLoading, user } = auth0;
 
-    return {
-      isAuthenticated: auth0.isAuthenticated,
-      isLoading: auth0.isLoading,
-      user: auth0.user,
-      login() {
-        auth0.loginWithRedirect();
-      },
-      logout() {
-        auth0.logout({
-          logoutParams: {
-            returnTo: window.location.origin,
-          },
-        });
-      },
-    };
-  },
-});
+function login() {
+  auth0.loginWithRedirect();
+}
+
+function logout() {
+  auth0.logout({
+    logoutParams: {
+      returnTo: window.location.origin,
+    },
+  });
+}
 </script>
 
 <style>
