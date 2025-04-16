@@ -1,5 +1,5 @@
 import { SpecialTypes } from '../enums';
-import type { Period } from './period-model';
+type Duration = import('luxon').Duration;
 
 /**
  * Represents a special item offered by a venue.
@@ -13,7 +13,7 @@ export interface SpecialItem {
   endTime?: string; // HH:mm:ss format
   expirationDate?: string; // YYYY-MM-DD format
   isRecurring: boolean;
-  recurringPeriod?: Period;
+  recurringPeriod?: Duration;
   activeDaysOfWeek?: number;
   venueId: number;
 }

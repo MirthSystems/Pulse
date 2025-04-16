@@ -1,4 +1,3 @@
-export * from './period-model';
 export * from './problem-details-model';
 export * from './operating-schedule-item-model';
 export * from './new-operating-schedule-request-model';

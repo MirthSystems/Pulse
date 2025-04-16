@@ -1,5 +1,5 @@
 import { SpecialTypes } from '../enums';
-import type { Period } from './period-model';
+type Duration = import('luxon').Duration;
 
 /**
  * Request payload for updating an existing special.
@@ -12,7 +12,7 @@ export interface UpdateSpecialRequest {
   endTime?: string; // HH:mm:ss
   expirationDate?: string; // YYYY-MM-DD
   isRecurring: boolean;
-  recurringPeriod?: Period;
+  recurringPeriod?: Duration;
   activeDaysOfWeek?: number;
   tagIds?: number[];
 }
