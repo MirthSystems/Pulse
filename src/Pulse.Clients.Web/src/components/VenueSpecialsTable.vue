@@ -2,13 +2,13 @@
   <v-card>
     <v-card-title>
       <span class="text-h5">Specials</span>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-btn color="primary" @click="$emit('create')">Create Special</v-btn>
     </v-card-title>
     <v-data-table
+      class="elevation-1"
       :headers="headers"
       :items="specials"
-      class="elevation-1"
     >
       <template #[`item.actions`]="{ item }">
         <v-btn icon size="small" variant="text" @click="$emit('edit', item)">

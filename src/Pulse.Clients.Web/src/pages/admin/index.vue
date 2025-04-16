@@ -1,38 +1,105 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col>
-        <h1 class="text-h4 mb-4">Administration</h1>
-      </v-col>
-    </v-row>
+    <h1 class="text-h4 mb-6">Venue Management</h1>
 
-    <div v-if="loading && !venues.length" class="d-flex justify-center align-center" style="height: 400px;">
-      <v-progress-circular color="primary" indeterminate />
+    <div class="d-flex align-center mb-6">
+      <v-text-field
+        v-model="search"
+        bg-color="transparent"
+        class="rounded-lg flex-grow-1 mr-4"
+        density="comfortable"
+        hide-details
+        placeholder="Search venues"
+        prepend-inner-icon="mdi-magnify"
+        single-line
+      />
+      <v-btn
+        class="mr-2"
+        color="primary"
+        prepend-icon="mdi-refresh"
+        @click="loadVenues"
+      >
+        REFRESH
+      </v-btn>
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="openCreateVenueDialog"
+      >
+        ADD VENUE
+      </v-btn>
     </div>
 
-    <v-alert v-else-if="error" class="mb-4" type="error">
-      {{ error }}
-    </v-alert>
+    <v-table
+      class="rounded-lg"
+    >
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+          <th>City</th>
+          <th>State</th>
+          <th>Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in venues" :key="item.id" class="venue-row">
+          <td>{{ item.name }}</td>
+          <td>{{ item.addressLine1 }}</td>
+          <td>{{ item.locality }}</td>
+          <td>{{ item.region }}</td>
+          <td>{{ item.venueTypeName }}</td>
+          <td>
+            <div class="d-flex">
+              <v-btn icon variant="text" @click="manageVenue(item.id)">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+              <v-btn color="error" icon variant="text" @click="openDeleteVenueDialog(item)">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
 
-    <template v-else>
-      <v-row>
-        <v-col cols="12">
-          <v-data-table :headers="headers" :items="venues" :loading="loading">
-            <template #[`item.actions`]="{ item }">
-              <v-btn color="primary" @click="manageVenue(item.id)">Manage</v-btn>
-              <v-btn color="secondary" @click="editVenue(item.id)">Edit</v-btn>
-              <v-btn color="error" @click="deleteVenue(item)">Delete</v-btn>
-              <v-btn color="info" @click="viewSpecials(item.id)">View Specials</v-btn>
-            </template>
-          </v-data-table>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-btn color="primary" @click="openCreateVenueDialog">Create New Venue</v-btn>
-        </v-col>
-      </v-row>
-    </template>
+    <div class="d-flex align-center justify-end mt-4">
+      <span class="mr-4">Items per page: </span>
+      <v-select
+        v-model="itemsPerPage"
+        class="items-per-page-select"
+        density="compact"
+        hide-details
+        :items="[5, 10, 15, 20]"
+        style="width: 80px"
+        variant="outlined"
+      />
+      <span class="mx-4">1-{{ venues.length }} of {{ venues.length }}</span>
+      <v-btn disabled icon variant="text">
+        <v-icon>mdi-page-first</v-icon>
+      </v-btn>
+      <v-btn disabled icon variant="text">
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-btn disabled icon variant="text">
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+      <v-btn disabled icon variant="text">
+        <v-icon>mdi-page-last</v-icon>
+      </v-btn>
+    </div>
+
+    <VenueConfirmDeleteDialog
+      v-model="deleteDialogVisible"
+      :venue="selectedVenue"
+      @confirm="deleteVenue"
+    />
+    <VenueFormDialog
+      v-model="createDialogVisible"
+      :venue="selectedVenue"
+      @save="loadVenues"
+    />
   </v-container>
 </template>
 
@@ -49,12 +116,11 @@
   const venues = ref<VenueItem[]>([]);
   const loading = ref(true);
   const error = ref<string | null>(null);
-
-  const headers = [
-    { text: 'Name', value: 'name' },
-    { text: 'Address', value: 'addressLine1' },
-    { text: 'Actions', value: 'actions', sortable: false },
-  ];
+  const deleteDialogVisible = ref(false);
+  const createDialogVisible = ref(false);
+  const selectedVenue = ref<VenueItem | null>(null);
+  const search = ref('');
+  const itemsPerPage = ref(10);
 
   onMounted(async () => {
     if (!authStore.isAuthenticated) {
@@ -79,23 +145,43 @@
     }
   }
 
+  function openCreateVenueDialog () {
+    selectedVenue.value = null;
+    createDialogVisible.value = true;
+  }
+
   function manageVenue (id: number) {
     router.push(`/admin/${id}`);
   }
 
-  function openCreateVenueDialog () {
-    // Logic to open the create new venue dialog
+  function openDeleteVenueDialog (venue: VenueItem) {
+    selectedVenue.value = venue;
+    deleteDialogVisible.value = true;
   }
 
-  function editVenue (id: number) {
-    // Logic to open the edit venue dialog
+  async function deleteVenue () {
+    if (selectedVenue.value) {
+      try {
+        await AdminClient.deleteVenue(selectedVenue.value.id);
+        await loadVenues();
+      } catch (error) {
+        console.error('Failed to delete venue:', error);
+      } finally {
+        deleteDialogVisible.value = false;
+      }
+    }
   }
 
-  function deleteVenue (venue: VenueItem) {
-    // Logic to open the delete venue dialog
-  }
-
-  function viewSpecials (id: number) {
-    // Logic to open the view specials dialog
-  }
 </script>
+
+<style scoped>
+.venue-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.items-per-page-select :deep(.v-field__input) {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 32px;
+}
+</style>

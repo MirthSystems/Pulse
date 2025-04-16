@@ -18,21 +18,21 @@
   import type { SpecialItem } from '@/models';
   import { AdminClient } from '@/api';
 
-  defineProps<{
+  const props = defineProps<{
     modelValue: boolean;
     special: SpecialItem | null;
   }>();
 
-  defineEmits<{
+  const emit = defineEmits<{
     (e: 'update:model-value', value: boolean): void;
     (e: 'confirm'): void;
   }>();
 
-  async function handleDelete() {
-    if (special) {
+  async function handleDelete () {
+    if (props.special) {
       try {
-        await AdminClient.deleteSpecial(special.id);
-        $emit('confirm');
+        await AdminClient.deleteSpecial(props.special.id);
+        emit('confirm');
       } catch (error) {
         console.error('Failed to delete special:', error);
       }

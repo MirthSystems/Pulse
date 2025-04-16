@@ -2,120 +2,122 @@
   <v-card>
     <v-card-title>
       <span class="text-h5">Venue Details</span>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-btn icon @click="editMode = !editMode">
         <v-icon>{{ editMode ? 'mdi-check' : 'mdi-wrench' }}</v-icon>
       </v-btn>
     </v-card-title>
     <v-card-text>
-      <v-form v-model="valid" ref="form">
+      <v-form ref="form" v-model="valid">
         <v-text-field
-          v-model="venue.name"
-          :readonly="!editMode"
+          v-model="venueData.name"
           label="Name"
-          :rules="[rules.required]"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.description"
           :readonly="!editMode"
+          :rules="[rules.required]"
+        />
+        <v-text-field
+          v-model="venueData.description"
           label="Description"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.addressLine1"
           :readonly="!editMode"
+        />
+        <v-text-field
+          v-model="venueData.addressLine1"
           label="Address Line 1"
-          :rules="[rules.required]"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.addressLine2"
           :readonly="!editMode"
+          :rules="[rules.required]"
+        />
+        <v-text-field
+          v-model="venueData.addressLine2"
           label="Address Line 2"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.locality"
           :readonly="!editMode"
+        />
+        <v-text-field
+          v-model="venueData.locality"
           label="City"
-          :rules="[rules.required]"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.region"
           :readonly="!editMode"
+          :rules="[rules.required]"
+        />
+        <v-text-field
+          v-model="venueData.region"
           label="State"
-          :rules="[rules.required]"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.postcode"
           :readonly="!editMode"
+          :rules="[rules.required]"
+        />
+        <v-text-field
+          v-model="venueData.postcode"
           label="Postcode"
-          :rules="[rules.required]"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.country"
           :readonly="!editMode"
+          :rules="[rules.required]"
+        />
+        <v-text-field
+          v-model="venueData.country"
           label="Country"
-          :rules="[rules.required]"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.phoneNumber"
           :readonly="!editMode"
+          :rules="[rules.required]"
+        />
+        <v-text-field
+          v-model="venueData.phoneNumber"
           label="Phone Number"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.email"
           :readonly="!editMode"
+        />
+        <v-text-field
+          v-model="venueData.email"
           label="Email"
-        ></v-text-field>
-        <v-text-field
-          v-model="venue.website"
           :readonly="!editMode"
+        />
+        <v-text-field
+          v-model="venueData.website"
           label="Website"
-        ></v-text-field>
+          :readonly="!editMode"
+        />
         <v-text-field
-          v-model="venue.imageLink"
-          :readonly="!editMode"
+          v-model="venueData.imageLink"
           label="Image Link"
-        ></v-text-field>
-        <v-select
-          v-model="venue.venueTypeId"
-          :items="venueTypes"
           :readonly="!editMode"
+        />
+        <v-select
+          v-model="venueData.venueTypeId"
+          :items="venueTypes"
           label="Venue Type"
+          :readonly="!editMode"
           :rules="[rules.required]"
-        ></v-select>
-        <v-divider></v-divider>
+        />
+        <v-divider />
         <v-card-subtitle>Operating Schedule</v-card-subtitle>
-        <v-row v-for="(schedule, index) in venue.businessHours" :key="index">
+        <v-row v-for="(schedule, index) in venueData.businessHours" :key="index">
           <v-col cols="4">
             <v-select
               v-model="schedule.dayOfWeek"
+              item-text="text"
+              item-value="value"
               :items="daysOfWeek"
-              :readonly="!editMode"
               label="Day of Week"
+              :readonly="!editMode"
               :rules="[rules.required]"
-            ></v-select>
+            />
           </v-col>
           <v-col cols="4">
             <v-text-field
               v-model="schedule.timeOfOpen"
-              :readonly="!editMode"
               label="Open Time"
+              :readonly="!editMode"
               :rules="[rules.required]"
-            ></v-text-field>
+            />
           </v-col>
           <v-col cols="4">
             <v-text-field
               v-model="schedule.timeOfClose"
-              :readonly="!editMode"
               label="Close Time"
+              :readonly="!editMode"
               :rules="[rules.required]"
-            ></v-text-field>
+            />
           </v-col>
         </v-row>
       </v-form>
     </v-card-text>
     <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="primary" @click="saveChanges" v-if="editMode">Save</v-btn>
+      <v-spacer />
+      <v-btn v-if="editMode" color="primary" @click="saveChanges">Save</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -123,7 +125,7 @@
 <script lang="ts" setup>
   import { ref, watch } from 'vue';
   import { AdminClient } from '@/api';
-  import type { VenueWithDetails, VenueTypeItem } from '@/models';
+  import type { VenueTypeItem, VenueWithDetails } from '@/models';
   import { DayOfWeek } from '@/enums';
 
   const props = defineProps<{
@@ -134,16 +136,27 @@
 
   const editMode = ref(false);
   const valid = ref(false);
-  const form = ref(null);
 
+  interface FormInstance {
+    validate: () => boolean;
+  }
+
+  const form = ref<FormInstance | null>(null);
+  const daysOfWeek = Object.keys(DayOfWeek)
+    .filter(key => isNaN(Number(key)))
+    .map(key => ({
+      text: key,
+      value: DayOfWeek[key as keyof typeof DayOfWeek],
+    }));
   const venueTypes = ref<VenueTypeItem[]>([]);
-  const daysOfWeek = Object.values(DayOfWeek).filter(value => typeof value === 'string');
 
   const rules = {
     required: (value: string) => !!value || 'Required.',
   };
 
-  watch(editMode, async (newValue) => {
+  const venueData = ref({ ...props.venue });
+
+  watch(editMode, async newValue => {
     if (newValue) {
       try {
         venueTypes.value = await AdminClient.getVenueTypes();
@@ -153,11 +166,11 @@
     }
   });
 
-  async function saveChanges() {
-    if (form.value && (form.value as any).validate()) {
+  async function saveChanges () {
+    if (form.value && form.value.validate()) {
       try {
-        await AdminClient.updateVenue(props.venue.id, props.venue);
-        await AdminClient.updateVenueSchedules(props.venue.id, props.venue.businessHours);
+        await AdminClient.updateVenue(props.venue.id, venueData.value);
+        await AdminClient.updateVenueSchedules(props.venue.id, venueData.value.businessHours);
         emit('update');
         editMode.value = false;
       } catch (error) {

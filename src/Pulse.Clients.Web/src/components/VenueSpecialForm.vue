@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="modelValue" max-width="600px">
+  <v-dialog max-width="600px" :model-value="modelValue" @update:model-value="emit('update:model-value', $event)">
     <v-card>
       <v-card-title>
         <span class="text-h5">{{ special ? 'Edit Special' : 'Create Special' }}</span>
@@ -9,53 +9,53 @@
           <v-text-field
             v-model="form.content"
             label="Content"
-            :rules="[rules.required]"
             required
-          ></v-text-field>
+            :rules="[rules.required]"
+          />
           <v-select
             v-model="form.type"
             :items="specialTypes"
             label="Type"
-            :rules="[rules.required]"
             required
-          ></v-select>
+            :rules="[rules.required]"
+          />
           <v-text-field
             v-model="form.startDate"
             label="Start Date"
-            :rules="[rules.required]"
             required
-          ></v-text-field>
+            :rules="[rules.required]"
+          />
           <v-text-field
             v-model="form.startTime"
             label="Start Time"
-            :rules="[rules.required]"
             required
-          ></v-text-field>
+            :rules="[rules.required]"
+          />
           <v-text-field
             v-model="form.endTime"
             label="End Time"
-          ></v-text-field>
+          />
           <v-text-field
             v-model="form.expirationDate"
             label="Expiration Date"
-          ></v-text-field>
+          />
           <v-checkbox
             v-model="form.isRecurring"
             label="Is Recurring"
-          ></v-checkbox>
+          />
           <v-text-field
+            v-if="form.isRecurring"
             v-model="form.recurringPeriod"
             label="Recurring Period"
-            v-if="form.isRecurring"
-          ></v-text-field>
+          />
           <v-text-field
             v-model="form.activeDaysOfWeek"
             label="Active Days of Week"
-          ></v-text-field>
+          />
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn color="primary" @click="saveSpecial">Save</v-btn>
         <v-btn color="secondary" @click="closeDialog">Cancel</v-btn>
       </v-card-actions>
@@ -64,9 +64,9 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, watch, defineProps, defineEmits } from 'vue';
+  import { defineEmits, defineProps, ref, watch } from 'vue';
   import { AdminClient } from '@/api';
-  import type { SpecialItem, NewSpecialRequest, UpdateSpecialRequest } from '@/models';
+  import type { NewSpecialRequest, SpecialItem, UpdateSpecialRequest } from '@/models';
   import { SpecialTypes } from '@/enums';
 
   const props = defineProps<{
@@ -101,9 +101,9 @@
 
   const specialTypes = Object.values(SpecialTypes);
 
-  watch(() => props.special, (newSpecial) => {
+  watch(() => props.special, newSpecial => {
     if (newSpecial) {
-      form.value = { ...newSpecial, tagIds: newSpecial.tagIds || [] };
+      form.value = { ...newSpecial, tagIds: (newSpecial as { tagIds?: number[] }).tagIds || [] };
     } else {
       form.value = {
         content: '',
@@ -121,11 +121,11 @@
     }
   });
 
-  function closeDialog() {
+  function closeDialog () {
     emit('update:model-value', false);
   }
 
-  async function saveSpecial() {
+  async function saveSpecial () {
     if (valid.value) {
       try {
         if (props.special) {

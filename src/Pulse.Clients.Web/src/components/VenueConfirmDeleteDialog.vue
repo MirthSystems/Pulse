@@ -18,21 +18,21 @@
   import type { VenueItem } from '@/models';
   import { AdminClient } from '@/api';
 
-  defineProps<{
+  const props = defineProps<{
     modelValue: boolean;
     venue: VenueItem | null;
   }>();
 
-  defineEmits<{
+  const emit = defineEmits<{
     (e: 'update:model-value', value: boolean): void;
     (e: 'confirm'): void;
   }>();
 
-  async function handleDelete() {
-    if (venue) {
+  async function handleDelete () {
+    if (props.venue) {
       try {
-        await AdminClient.deleteVenue(venue.id);
-        $emit('confirm');
+        await AdminClient.deleteVenue(props.venue.id);
+        emit('confirm');
       } catch (error) {
         console.error('Failed to delete venue:', error);
       }
