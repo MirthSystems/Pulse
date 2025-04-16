@@ -12,9 +12,11 @@ declare module 'vue' {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SpecialFormDialog: typeof import('./components/SpecialFormDialog.vue')['default']
     Specials: typeof import('./components/Specials.vue')['default']
     VenueActionBar: typeof import('./components/VenueActionBar.vue')['default']
     VenueConfirmDeleteDialog: typeof import('./components/VenueConfirmDeleteDialog.vue')['default']
+    VenueFormDialog: typeof import('./components/VenueFormDialog.vue')['default']
     VenueSearchBar: typeof import('./components/VenueSearchBar.vue')['default']
     VenuesTable: typeof import('./components/VenuesTable.vue')['default']
   }

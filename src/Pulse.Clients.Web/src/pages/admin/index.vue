@@ -83,15 +83,15 @@
   }
 
   function addVenue () {
-    router.push('/venues/create');
+    router.push('/admin/create');
   }
 
   function viewVenue (id: number) {
-    router.push(`/venues/${id}`);
+    router.push(`/admin/${id}`);
   }
 
   function editVenue (id: number) {
-    router.push(`/venues/${id}/edit`);
+    router.push(`/admin/${id}/edit`);
   }
 
   function confirmDelete (venue: VenueItem) {
