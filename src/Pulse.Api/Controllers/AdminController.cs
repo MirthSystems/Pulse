@@ -82,8 +82,13 @@
         /// </summary>
         [HttpPost("venues")]
         [ProducesResponseType(typeof(VenueItem), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> CreateVenue(NewVenueRequest request)
+        public async Task<IActionResult> CreateVenue([FromBody] NewVenueRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var venue = _mapper.Map<Venue>(request);
 
             var userId = GetUserId();
@@ -100,8 +105,13 @@
         [HttpPut("venues/{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> UpdateVenue(long id, UpdateVenueRequest request)
+        public async Task<IActionResult> UpdateVenue(long id, [FromBody] UpdateVenueRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var venue = await _unitOfWork.Venues.GetByIdAsync(id);
             if (venue == null)
             {
@@ -266,8 +276,13 @@
         /// </summary>
         [HttpPost("specials")]
         [ProducesResponseType(typeof(SpecialItem), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> CreateSpecial(NewSpecialRequest request)
+        public async Task<IActionResult> CreateSpecial([FromBody] NewSpecialRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var special = _mapper.Map<Special>(request);
 
             var userId = GetUserId();
@@ -293,8 +308,13 @@
         [HttpPut("specials/{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> UpdateSpecial(long id, UpdateSpecialRequest request)
+        public async Task<IActionResult> UpdateSpecial(long id, [FromBody] UpdateSpecialRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var special = await _unitOfWork.Specials.GetByIdAsync(id);
             if (special == null)
             {
@@ -395,8 +415,13 @@
         [HttpPost("venues/{venueId}/schedules")]
         [ProducesResponseType(typeof(OperatingScheduleItem), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> CreateSchedule(long venueId, NewOperatingScheduleRequest request)
+        public async Task<IActionResult> CreateSchedule(long venueId, [FromBody] NewOperatingScheduleRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
             if (venue == null)
             {
@@ -419,8 +444,13 @@
         [HttpPut("schedules/{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> UpdateSchedule(long id, UpdateOperatingScheduleRequest request)
+        public async Task<IActionResult> UpdateSchedule(long id, [FromBody] UpdateOperatingScheduleRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var schedule = await _unitOfWork.BusinessHours.GetByIdAsync(id);
             if (schedule == null)
             {
@@ -442,8 +472,13 @@
         [HttpPut("venues/{venueId}/schedules")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> UpdateVenueSchedules(long venueId, IEnumerable<UpdateOperatingScheduleRequest> requests)
+        public async Task<IActionResult> UpdateVenueSchedules(long venueId, [FromBody] IEnumerable<UpdateOperatingScheduleRequest> requests)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
             if (venue == null)
             {
@@ -521,8 +556,13 @@
         /// </summary>
         [HttpPost("tags")]
         [ProducesResponseType(typeof(TagItem), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> CreateTag(NewTagRequest request)
+        public async Task<IActionResult> CreateTag([FromBody] NewTagRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var tag = _mapper.Map<Tag>(request);
 
             var userId = GetUserId();
@@ -538,8 +578,13 @@
         [HttpPut("tags/{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> UpdateTag(long id, UpdateTagRequest request)
+        public async Task<IActionResult> UpdateTag(long id, [FromBody] UpdateTagRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var tag = await _unitOfWork.Tags.GetByIdAsync(id);
             if (tag == null)
             {
