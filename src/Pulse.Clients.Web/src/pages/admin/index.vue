@@ -15,30 +15,16 @@
     </v-alert>
 
     <template v-else>
-      <v-row class="mb-4">
-        <v-col class="d-flex align-center" cols="12" sm="6">
-          <VenueSearchBar v-model="search" />
-        </v-col>
-        <v-col class="d-flex justify-end" cols="12" sm="6">
-          <VenueActionBar @add="addVenue" @refresh="loadVenues" />
+      <v-row>
+        <v-col cols="12">
+          <v-data-table :headers="headers" :items="venues" :loading="loading">
+            <template #[`item.actions`]="{ item }">
+              <v-btn color="primary" @click="manageVenue(item.id)">Manage</v-btn>
+            </template>
+          </v-data-table>
         </v-col>
       </v-row>
-
-      <VenuesTable
-        :loading="loading"
-        :search="search"
-        :venues="venues"
-        @delete="confirmDelete"
-        @edit="editVenue"
-        @view="viewVenue"
-      />
     </template>
-
-    <VenueConfirmDeleteDialog
-      v-model="deleteDialog"
-      :venue="venueToDelete"
-      @confirm="deleteVenue"
-    />
   </v-container>
 </template>
 
@@ -55,9 +41,12 @@
   const venues = ref<VenueItem[]>([]);
   const loading = ref(true);
   const error = ref<string | null>(null);
-  const search = ref('');
-  const deleteDialog = ref(false);
-  const venueToDelete = ref<VenueItem | null>(null);
+
+  const headers = [
+    { text: 'Name', value: 'name' },
+    { text: 'Address', value: 'addressLine1' },
+    { text: 'Actions', value: 'actions', sortable: false },
+  ];
 
   onMounted(async () => {
     if (!authStore.isAuthenticated) {
@@ -82,34 +71,7 @@
     }
   }
 
-  function addVenue () {
-    router.push('/admin/create');
-  }
-
-  function viewVenue (id: number) {
+  function manageVenue (id: number) {
     router.push(`/admin/${id}`);
-  }
-
-  function editVenue (id: number) {
-    router.push(`/admin/${id}/edit`);
-  }
-
-  function confirmDelete (venue: VenueItem) {
-    venueToDelete.value = venue;
-    deleteDialog.value = true;
-  }
-
-  async function deleteVenue () {
-    if (!venueToDelete.value) return;
-
-    try {
-      await AdminClient.deleteVenue(venueToDelete.value.id);
-      venues.value = venues.value.filter(v => v.id !== venueToDelete.value?.id);
-      deleteDialog.value = false;
-      venueToDelete.value = null;
-    } catch (err) {
-      console.error('Failed to delete venue:', err);
-      error.value = 'Failed to delete venue. Please try again.';
-    }
   }
 </script>
