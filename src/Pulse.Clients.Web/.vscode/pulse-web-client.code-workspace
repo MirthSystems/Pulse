@@ -5,35 +5,9 @@
 		}
 	],
 	"settings": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"[vue]": {
-			"editor.defaultFormatter": "Vue.volar"
-		},
-		"[typescript]": {
-			"editor.defaultFormatter": "esbenp.prettier-vscode"
-		},
-		"typescript.tsdk": "node_modules/typescript/lib",
-		"typescript.enablePromptUseWorkspaceTsdk": true,
-		"files.associations": {
-			"*.css": "css",
-			"*.vue": "vue"
-		},
-		"emmet.includeLanguages": {
-			"vue": "html"
-		},
-		"emmet.syntaxProfiles": {
-			"vue-html": "html"
-		},
-		"eslint.validate": [
-			"javascript",
-			"typescript",
-			"vue"
-		],
-		"editor.quickSuggestions": {
-			"strings": true
-		},
 		"vite.devCommand": "yarn run dev",
-		"files.autoSave": "onWindowChange"
+		"files.autoSave": "onWindowChange",
+		"editor.formatOnSave": true
 	},
 	"extensions": {
 		"recommendations": [
