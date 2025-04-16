@@ -17,64 +17,28 @@
     <template v-else>
       <v-row class="mb-4">
         <v-col class="d-flex align-center" cols="12" sm="6">
-          <v-text-field
-            v-model="search"
-            density="compact"
-            hide-details
-            label="Search venues"
-            prepend-inner-icon="mdi-magnify"
-          />
+          <VenueSearchBar v-model="search" />
         </v-col>
         <v-col class="d-flex justify-end" cols="12" sm="6">
-          <v-btn class="mr-2" color="secondary" prepend-icon="mdi-refresh" @click="loadVenues">
-            Refresh
-          </v-btn>
-          <v-btn color="primary" prepend-icon="mdi-plus">
-            Add Venue
-          </v-btn>
+          <VenueActionBar @add="addVenue" @refresh="loadVenues" />
         </v-col>
       </v-row>
 
-      <v-card>
-        <v-data-table
-          class="elevation-1"
-          :headers="headers"
-          :items="venues"
-          :loading="loading"
-          :search="search"
-        >
-          <template #[`item.address`]="{ item }">
-            {{ formatAddress(item) }}
-          </template>
-
-          <template #[`item.actions`]="{ item }">
-            <v-btn icon size="small" variant="text" @click="viewVenue(item.id)">
-              <v-icon>mdi-eye</v-icon>
-            </v-btn>
-            <v-btn icon size="small" variant="text" @click="editVenue(item.id)">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn icon size="small" variant="text" @click="confirmDelete(item)">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </template>
-        </v-data-table>
-      </v-card>
+      <VenuesTable
+        :loading="loading"
+        :search="search"
+        :venues="venues"
+        @delete="confirmDelete"
+        @edit="editVenue"
+        @view="viewVenue"
+      />
     </template>
 
-    <v-dialog v-model="deleteDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5">Confirm Delete</v-card-title>
-        <v-card-text>
-          Are you sure you want to delete the venue "{{ venueToDelete?.name }}"? This action cannot be undone.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" variant="text" @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn color="error" variant="text" @click="deleteVenue">Delete</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <VenueConfirmDeleteDialog
+      v-model="deleteDialog"
+      :venue="venueToDelete"
+      @confirm="deleteVenue"
+    />
   </v-container>
 </template>
 
@@ -94,15 +58,6 @@
   const search = ref('');
   const deleteDialog = ref(false);
   const venueToDelete = ref<VenueItem | null>(null);
-
-  const headers = [
-    { title: 'Name', key: 'name' },
-    { title: 'Address', key: 'address' },
-    { title: 'City', key: 'locality' },
-    { title: 'State', key: 'region' },
-    { title: 'Type', key: 'venueTypeName' },
-    { title: 'Actions', key: 'actions', sortable: false },
-  ];
 
   onMounted(async () => {
     if (!authStore.isAuthenticated) {
@@ -127,8 +82,8 @@
     }
   }
 
-  function formatAddress (venue: VenueItem): string {
-    return venue.addressLine1 + (venue.addressLine2 ? `, ${venue.addressLine2}` : '');
+  function addVenue () {
+    router.push('/venues/create');
   }
 
   function viewVenue (id: number) {

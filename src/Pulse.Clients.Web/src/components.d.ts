@@ -13,5 +13,9 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Specials: typeof import('./components/Specials.vue')['default']
+    VenueActionBar: typeof import('./components/VenueActionBar.vue')['default']
+    VenueConfirmDeleteDialog: typeof import('./components/VenueConfirmDeleteDialog.vue')['default']
+    VenueSearchBar: typeof import('./components/VenueSearchBar.vue')['default']
+    VenuesTable: typeof import('./components/VenuesTable.vue')['default']
   }
 }
