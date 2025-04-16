@@ -11,8 +11,6 @@
 	"extensions": {
 		"recommendations": [
 			"ms-vscode.vscode-typescript-tslint-plugin",
-			"Vue.volar",
-			"Vue.vscode-typescript-vue-plugin",
 			"esbenp.prettier-vscode",
 			"dbaeumer.vscode-eslint",
 			"hollowtree.vue-snippets",
