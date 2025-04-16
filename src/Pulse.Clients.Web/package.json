@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.4.0",
+    "@date-io/luxon": "^3.2.0",
     "@mdi/font": "7.4.47",
     "axios": "^1.8.4",
     "dotenv": "^16.5.0",
+    "luxon": "^3.6.1",
     "roboto-fontface": "*",
     "vue": "^3.5.13",
     "vuetify": "^3.8.1"

@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col>
-        <h1 class="text-h4 mb-4">Venue Management</h1>
+        <h1 class="text-h4 mb-4">Administration</h1>
       </v-col>
     </v-row>
 

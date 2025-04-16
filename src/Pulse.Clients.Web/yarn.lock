@@ -45,6 +45,18 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.2.5.tgz#8e82c0af292113b4a89f8b658c71c4636c8d2e36"
   integrity sha512-/g5EzJifw5GF8aren8wZ/G5oMuPoGeS6MQD3ca8ddcvdXR5UELUfdTZITCGNhNXynY/AYl3Z4plmxdj/tRl/hQ==
 
+"@date-io/core@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@date-io/core/-/core-3.2.0.tgz#7c8985ac26ccacf4f1b1fec10e2e22c75a28288a"
+  integrity sha512-hqwXvY8/YBsT9RwQITG868ZNb1MVFFkF7W1Ecv4P472j/ZWa7EFcgSmxy8PUElNVZfvhdvfv+a8j6NWJqOX5mA==
+
+"@date-io/luxon@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@date-io/luxon/-/luxon-3.2.0.tgz#3f6d12e0aa3d396aee6a972180f02f1f0e16ab83"
+  integrity sha512-oua8GrNs/KDapsj8HUhgVXTFkeGRb4078PvrbHc5EhdMxIS9TW7W8KcfElpXznj2FhU6FQQbyma4iVG98dteWw==
+  dependencies:
+    "@date-io/core" "^3.2.0"
+
 "@esbuild/aix-ppc64@0.25.2":
   version "0.25.2"
   resolved "https://registry.yarnpkg.com/@esbuild/aix-ppc64/-/aix-ppc64-0.25.2.tgz#b87036f644f572efb2b3c75746c97d1d2d87ace8"
@@ -1528,6 +1540,11 @@ lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
+luxon@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.6.1.tgz#d283ffc4c0076cb0db7885ec6da1c49ba97e47b0"
+  integrity sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ==
 
 magic-string-ast@^0.7.0:
   version "0.7.1"

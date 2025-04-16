@@ -42,7 +42,7 @@
   }>();
 
   const headers = [
-    { title: 'Name', key: 'name' },
+    { title: 'Venue Name', key: 'name' },
     { title: 'Address', key: 'address' },
     { title: 'City', key: 'locality' },
     { title: 'State', key: 'region' },

@@ -36,7 +36,7 @@
     },
     {
       title: 'Administration',
-      to: '/management',
+      to: '/admin',
     },
     {
       title: 'Settings',
