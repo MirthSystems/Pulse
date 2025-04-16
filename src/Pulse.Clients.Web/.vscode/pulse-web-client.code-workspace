@@ -6,8 +6,7 @@
 	],
 	"settings": {
 		"vite.devCommand": "yarn run dev",
-		"files.autoSave": "onWindowChange",
-		"editor.formatOnSave": true
+		"files.autoSave": "onWindowChange"
 	},
 	"extensions": {
 		"recommendations": [
