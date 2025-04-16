@@ -14,8 +14,6 @@
 		},
 		"typescript.tsdk": "node_modules/typescript/lib",
 		"typescript.enablePromptUseWorkspaceTsdk": true,
-		"volar.autoCompleteRefs": true,
-		"volar.icon.preview": true,
 		"files.associations": {
 			"*.css": "css",
 			"*.vue": "vue"
@@ -34,7 +32,8 @@
 		"editor.quickSuggestions": {
 			"strings": true
 		},
-		"vite.devCommand": "yarn run dev"
+		"vite.devCommand": "yarn run dev",
+		"files.autoSave": "onWindowChange"
 	},
 	"extensions": {
 		"recommendations": [

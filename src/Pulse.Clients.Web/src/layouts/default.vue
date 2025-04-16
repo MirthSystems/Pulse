@@ -1,13 +1,13 @@
 <template>
   <v-app id="inspire">
-    <v-app-bar>
-      <v-app-bar-nav-icon @click="drawer = !drawer" />
+    <AppBar v-model:drawer="drawer" :routes="routes" />
 
-      <v-app-bar-title>Application</v-app-bar-title>
-    </v-app-bar>
-
-    <v-navigation-drawer v-model="drawer" temporary>
-      <!--  -->
+    <v-navigation-drawer v-if="isAuthenticated" v-model="drawer" temporary>
+      <v-list>
+        <v-list-item v-for="route in routes" :key="route.title" link :to="route.to">
+          <v-list-item-title>{{ route.title }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
     </v-navigation-drawer>
 
     <v-main>
@@ -20,6 +20,23 @@
 
 <script lang="ts" setup>
   import { ref } from 'vue';
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import AppBar from '@/components/AppBar.vue';
+  import AppFooter from '@/components/AppFooter.vue';
 
   const drawer = ref(false);
+  const auth0 = useAuth0();
+
+  const isAuthenticated = auth0.isAuthenticated;
+
+  const routes = [
+    {
+      title: 'Home',
+      to: '/',
+    },
+    {
+      title: 'Settings',
+      to: '/settings',
+    },
+  ];
 </script>
