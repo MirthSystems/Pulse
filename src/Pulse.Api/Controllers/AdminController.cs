@@ -17,6 +17,7 @@
     [Authorize]
     [ApiController]
     [Route("api/admin")]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class AdminController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

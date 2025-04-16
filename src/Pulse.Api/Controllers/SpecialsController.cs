@@ -16,6 +16,7 @@
 
     [ApiController]
     [Route("api/specials")]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class SpecialsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

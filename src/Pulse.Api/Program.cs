@@ -3,6 +3,7 @@ namespace Pulse.Api
     using System.Security.Claims;
 
     using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.IdentityModel.Tokens;
 
     using NodaTime;
@@ -46,18 +47,25 @@ namespace Pulse.Api
             builder.Services.AddAuthorization();
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
-            builder.Services.AddSwaggerService();
+
+            // Replace Swagger with NSwag
+            var nswagVersion = "v1";
+            builder.Services.AddNSwagService(nswagVersion);
 
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
             {
                 app.UseStaticFiles();
-                app.MapOpenApi();
-                app.UseSwagger();
-                app.UseSwaggerUI();
+
+                app.UseOpenApi(options => {
+                    options.Path = "/swagger/{documentName}/swagger.json";
+                });
+
+                app.UseSwaggerUi(options => {
+                    options.Path = "/swagger";
+                    options.DocumentPath = $"/swagger/{nswagVersion}/swagger.json"; // Match your DocumentName
+                });
             }
 
             app.UseHttpsRedirection();
