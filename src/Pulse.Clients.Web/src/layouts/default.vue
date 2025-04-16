@@ -35,8 +35,8 @@
       to: '/',
     },
     {
-      title: 'Management',
-      to: '/venues',
+      title: 'Administration',
+      to: '/management',
     },
     {
       title: 'Settings',
