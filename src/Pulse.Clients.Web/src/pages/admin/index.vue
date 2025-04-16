@@ -20,8 +20,16 @@
           <v-data-table :headers="headers" :items="venues" :loading="loading">
             <template #[`item.actions`]="{ item }">
               <v-btn color="primary" @click="manageVenue(item.id)">Manage</v-btn>
+              <v-btn color="secondary" @click="editVenue(item.id)">Edit</v-btn>
+              <v-btn color="error" @click="deleteVenue(item)">Delete</v-btn>
+              <v-btn color="info" @click="viewSpecials(item.id)">View Specials</v-btn>
             </template>
           </v-data-table>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12">
+          <v-btn color="primary" @click="openCreateVenueDialog">Create New Venue</v-btn>
         </v-col>
       </v-row>
     </template>
@@ -73,5 +81,21 @@
 
   function manageVenue (id: number) {
     router.push(`/admin/${id}`);
+  }
+
+  function openCreateVenueDialog () {
+    // Logic to open the create new venue dialog
+  }
+
+  function editVenue (id: number) {
+    // Logic to open the edit venue dialog
+  }
+
+  function deleteVenue (venue: VenueItem) {
+    // Logic to open the delete venue dialog
+  }
+
+  function viewSpecials (id: number) {
+    // Logic to open the view specials dialog
   }
 </script>

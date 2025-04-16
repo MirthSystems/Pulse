@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="text-h5">Confirm Delete</v-card-title>
       <v-card-text>
-        Are you sure you want to delete the venue "{{ venue?.name }}"? This action cannot be undone.
+        Are you sure you want to delete the special "{{ special?.content }}"? This action cannot be undone.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -15,12 +15,12 @@
 </template>
 
 <script lang="ts" setup>
-  import type { VenueItem } from '@/models';
+  import type { SpecialItem } from '@/models';
   import { AdminClient } from '@/api';
 
   defineProps<{
     modelValue: boolean;
-    venue: VenueItem | null;
+    special: SpecialItem | null;
   }>();
 
   defineEmits<{
@@ -29,12 +29,12 @@
   }>();
 
   async function handleDelete() {
-    if (venue) {
+    if (special) {
       try {
-        await AdminClient.deleteVenue(venue.id);
+        await AdminClient.deleteSpecial(special.id);
         $emit('confirm');
       } catch (error) {
-        console.error('Failed to delete venue:', error);
+        console.error('Failed to delete special:', error);
       }
     }
   }

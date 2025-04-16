@@ -1,35 +1,16 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="3">
-        <v-card>
-          <v-card-title>Venue Details</v-card-title>
-          <v-card-text>
-            <p><strong>Name:</strong> {{ venue?.name }}</p>
-            <p><strong>Address:</strong> {{ venue?.addressLine1 }}</p>
-            <p><strong>City:</strong> {{ venue?.locality }}</p>
-            <p><strong>State:</strong> {{ venue?.region }}</p>
-            <p><strong>Postcode:</strong> {{ venue?.postcode }}</p>
-          </v-card-text>
-        </v-card>
+      <v-col cols="12" md="4">
+        <VenueDetailsCard :venue="venue" @update="loadVenueDetails" />
       </v-col>
-
-      <v-col cols="9">
-        <v-card>
-          <v-card-title>Specials</v-card-title>
-          <v-card-text>
-            <v-data-table :headers="specialHeaders" inline-edit :items="venue?.specials">
-              <template #[`item.actions`]="{ item }">
-                <v-btn icon @click="deleteSpecial(item.id)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </template>
-            </v-data-table>
-            <v-btn color="primary" @click="addSpecial">Add Special</v-btn>
-          </v-card-text>
-        </v-card>
+      <v-col cols="12" md="8">
+        <VenueSpecialsTable :specials="venue?.specials || []" @create="openCreateSpecialDialog" @edit="openEditSpecialDialog" @delete="openDeleteSpecialDialog" />
       </v-col>
     </v-row>
+
+    <VenueSpecialForm v-model="specialFormVisible" :special="selectedSpecial" :venue-id="venueId" @save="loadVenueDetails" />
+    <SpecialConfirmDeleteDialog v-model="deleteSpecialDialogVisible" :special="selectedSpecial" @confirm="deleteSpecial" />
   </v-container>
 </template>
 
@@ -37,35 +18,55 @@
   import { onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { AdminClient } from '@/api';
-  import type { VenueWithDetails } from '@/models';
+  import type { VenueWithDetails, SpecialItem } from '@/models';
+  import VenueDetailsCard from '@/components/VenueDetailsCard.vue';
+  import VenueSpecialsTable from '@/components/VenueSpecialsTable.vue';
+  import VenueSpecialForm from '@/components/VenueSpecialForm.vue';
+  import SpecialConfirmDeleteDialog from '@/components/SpecialConfirmDeleteDialog.vue';
 
   const route = useRoute();
-  const venueId = 'id' in route.params ? Number(route.params.id) : 0;
+  const venueId = Number(route.params.id);
+
   const venue = ref<VenueWithDetails | null>(null);
-  const specialHeaders = [
-    { text: 'Content', value: 'content' },
-    { text: 'Type', value: 'type' },
-    { text: 'Start Date', value: 'startDate' },
-    { text: 'Actions', value: 'actions', sortable: false },
-  ];
+  const specialFormVisible = ref(false);
+  const deleteSpecialDialogVisible = ref(false);
+  const selectedSpecial = ref<SpecialItem | null>(null);
 
   onMounted(async () => {
-    await loadVenue();
+    await loadVenueDetails();
   });
 
-  async function loadVenue () {
+  async function loadVenueDetails() {
     try {
       venue.value = await AdminClient.getVenue(venueId);
-    } catch (err) {
-      console.error('Failed to load venue:', err);
+    } catch (error) {
+      console.error('Failed to load venue details:', error);
     }
   }
 
-  function addSpecial () {
-    console.log('Add special logic here');
+  function openCreateSpecialDialog() {
+    selectedSpecial.value = null;
+    specialFormVisible.value = true;
   }
 
-  function deleteSpecial (id: number) {
-    console.log('Delete special logic here', id);
+  function openEditSpecialDialog(special: SpecialItem) {
+    selectedSpecial.value = special;
+    specialFormVisible.value = true;
+  }
+
+  function openDeleteSpecialDialog(special: SpecialItem) {
+    selectedSpecial.value = special;
+    deleteSpecialDialogVisible.value = true;
+  }
+
+  async function deleteSpecial() {
+    if (selectedSpecial.value) {
+      try {
+        await AdminClient.deleteSpecial(selectedSpecial.value.id);
+        await loadVenueDetails();
+      } catch (error) {
+        console.error('Failed to delete special:', error);
+      }
+    }
   }
 </script>

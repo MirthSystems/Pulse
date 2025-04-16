@@ -17,4 +17,8 @@
   defineEmits<{
     (e: 'update:modelValue', value: string): void;
   }>();
+
+  function handleSearch(query: string) {
+    // Logic to handle search venues
+  }
 </script>
