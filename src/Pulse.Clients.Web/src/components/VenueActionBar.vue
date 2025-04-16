@@ -5,11 +5,15 @@
   <v-btn color="primary" prepend-icon="mdi-plus" @click="$emit('add')">
     Add Venue
   </v-btn>
+  <v-btn color="primary" prepend-icon="mdi-plus" @click="$emit('create')">
+    Create New Venue
+  </v-btn>
 </template>
 
 <script lang="ts" setup>
   defineEmits<{
     (e: 'refresh'): void;
     (e: 'add'): void;
+    (e: 'create'): void;
   }>();
 </script>

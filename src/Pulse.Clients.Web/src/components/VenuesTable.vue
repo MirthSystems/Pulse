@@ -12,13 +12,13 @@
       </template>
 
       <template #[`item.actions`]="{ item }">
-        <v-btn icon size="small" variant="text" @click="$emit('view', item.id)">
+        <v-btn icon size="small" variant="text" @click="viewSpecials(item.id)">
           <v-icon>mdi-eye</v-icon>
         </v-btn>
-        <v-btn icon size="small" variant="text" @click="$emit('edit', item.id)">
+        <v-btn icon size="small" variant="text" @click="editVenue(item.id)">
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon size="small" variant="text" @click="$emit('delete', item)">
+        <v-btn icon size="small" variant="text" @click="deleteVenue(item)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>
@@ -52,5 +52,17 @@
 
   function formatAddress (venue: VenueItem): string {
     return venue.addressLine1 + (venue.addressLine2 ? `, ${venue.addressLine2}` : '');
+  }
+
+  function viewSpecials(id: number) {
+    // Logic to handle the view specials dialog
+  }
+
+  function editVenue(id: number) {
+    // Logic to handle the edit venue dialog
+  }
+
+  function deleteVenue(venue: VenueItem) {
+    // Logic to handle the delete venue dialog
   }
 </script>
