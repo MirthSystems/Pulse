@@ -16,9 +16,6 @@ export default function Home() {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-        <Button variant="contained" onClick={() => navigate('/admin')}>Admin Login</Button>
-      </Box>
       <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Paper elevation={3} sx={{ p: 4, minWidth: 350 }}>
           <Typography variant="h5" align="center" gutterBottom>Find Specials Near You</Typography>
