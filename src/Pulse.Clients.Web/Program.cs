@@ -1,11 +1,13 @@
 namespace Pulse.Clients.Web
 {
     using Microsoft.AspNetCore.Components.Web;
+    using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
     using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
     using Microsoft.FluentUI.AspNetCore.Components;
     using Microsoft.Graph;
 
     using Pulse.Clients.Web.Extensions;
+    using Pulse.Clients.Web.Factories;
 
     public class Program
     {
@@ -29,11 +31,12 @@ namespace Pulse.Clients.Web
             builder.Services.AddGraphClient(baseUrl, scopes);
             builder.Services.AddFluentUIComponents();
 
-            builder.Services.AddMsalAuthentication(options =>
+            builder.Services.AddMsalAuthentication<RemoteAuthenticationState, RemoteUserAccount>(options =>
             {
-                builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
-                options.ProviderOptions.DefaultAccessTokenScopes.Add("https://graph.microsoft.com/User.Read");
-            });
+                builder.Configuration.Bind("AzureAd",
+                options.ProviderOptions.Authentication);
+            })
+            .AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, RemoteUserAccount, AccountFactory>();
 
             await builder.Build().RunAsync();
         }
