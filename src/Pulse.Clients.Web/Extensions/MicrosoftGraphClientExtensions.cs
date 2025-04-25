@@ -1,0 +1,70 @@
+namespace Pulse.Clients.Web.Extensions
+{
+    using System.Net.Http.Headers;
+
+    using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+    using Microsoft.Authentication.WebAssembly.Msal.Models;
+    using Microsoft.Graph;
+    using Microsoft.Kiota.Abstractions;
+    using Microsoft.Kiota.Abstractions.Authentication;
+
+    using IAccessTokenProvider = Microsoft.AspNetCore.Components.WebAssembly.Authentication.IAccessTokenProvider;
+
+    internal static class MicrosoftGraphClientExtensions
+    {
+        public static IServiceCollection AddGraphClient(
+                this IServiceCollection services, string? baseUrl, List<string>? scopes)
+        {
+            if (string.IsNullOrEmpty(baseUrl) || scopes?.Count == 0)
+            {
+                return services;
+            }
+
+            services.Configure<RemoteAuthenticationOptions<MsalProviderOptions>>(
+                options =>
+                {
+                    scopes?.ForEach((scope) =>
+                    {
+                        options.ProviderOptions.DefaultAccessTokenScopes.Add(scope);
+                    });
+                });
+
+            services.AddScoped<IAuthenticationProvider, GraphAuthenticationProvider>();
+
+            services.AddScoped(sp =>
+            {
+                return new GraphServiceClient(
+                    new HttpClient(),
+                    sp.GetRequiredService<IAuthenticationProvider>(),
+                    baseUrl);
+            });
+
+            return services;
+        }
+
+        private class GraphAuthenticationProvider(IAccessTokenProvider tokenProvider,
+            IConfiguration config) : IAuthenticationProvider
+        {
+            private readonly IConfiguration config = config;
+
+            public IAccessTokenProvider TokenProvider { get; } = tokenProvider;
+
+            public async Task AuthenticateRequestAsync(RequestInformation request,
+                Dictionary<string, object>? additionalAuthenticationContext = null,
+                CancellationToken cancellationToken = default)
+            {
+                var result = await TokenProvider.RequestAccessToken(
+                    new AccessTokenRequestOptions()
+                    {
+                        Scopes = config.GetSection("MicrosoftGraph:Scopes").Get<string[]>() ?? ["user.read"]
+                    });
+
+                if (result.TryGetToken(out var token))
+                {
+                    var authHeader = new AuthenticationHeaderValue(CoreConstants.Headers.Bearer, token.Value);
+                    request.Headers.Add("Authorization", authHeader.ToString());
+                }
+            }
+        }
+    }
+}
