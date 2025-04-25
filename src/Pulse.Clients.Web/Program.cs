@@ -8,6 +8,7 @@ namespace Pulse.Clients.Web
 
     using Pulse.Clients.Web.Extensions;
     using Pulse.Clients.Web.Factories;
+    using Pulse.Clients.Web.Services;
 
     public class Program
     {
@@ -17,18 +18,21 @@ namespace Pulse.Clients.Web
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
+            var graphSection = builder.Configuration.GetSection("MicrosoftGraph");
             var baseUrl = string.Join("/",
-                builder.Configuration.GetSection("MicrosoftGraph")["BaseUrl"] ??
-                    "https://graph.microsoft.com",
-                builder.Configuration.GetSection("MicrosoftGraph")["Version"] ??
-                    "v1.0");
+                graphSection["BaseUrl"] ?? "https://graph.microsoft.com",
+                graphSection["Version"] ?? "v1.0");
 
             var scopes = builder.Configuration.GetSection("MicrosoftGraph:Scopes")
                 .Get<List<string>>() ?? ["user.read"];
 
             builder.Services.AddGraphClient(baseUrl, scopes);
+
+            builder.Services.AddHttpClient<PulseApiService>(client =>
+            {
+                client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+            });
+
             builder.Services.AddFluentUIComponents();
 
             builder.Services.AddMsalAuthentication<RemoteAuthenticationState, RemoteUserAccount>(options =>
