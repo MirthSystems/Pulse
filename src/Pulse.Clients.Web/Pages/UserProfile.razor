@@ -4,29 +4,28 @@
 @inject Microsoft.Graph.GraphServiceClient GraphClient
 @attribute [Authorize]
 
-<h3>User Profile</h3>
+<PageTitle>User Profile</PageTitle>
+
+<h1>User Profile</h1>
+
 @if (user == null)
 {
-    <p><em>Loading...</em></p>
+    <FluentProgressRing Label="Loading..." />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Property</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tr>
-            <td> DisplayName </td>
-            <td> @user.DisplayName </td>
-        </tr>
-        <tr>
-            <td> UserPrincipalName </td>
-            <td> @user.UserPrincipalName </td>
-        </tr>
-    </table>
+    <FluentCard>
+        <FluentGrid>
+            <FluentGridItem xs="12" sm="6">
+                <FluentLabel Typo="Typography.Subject">Display Name</FluentLabel>
+                <FluentLabel Typo="Typography.Body">@user.DisplayName</FluentLabel>
+            </FluentGridItem>
+            <FluentGridItem xs="12" sm="6">
+                <FluentLabel Typo="Typography.Subject">User Principal Name</FluentLabel>
+                <FluentLabel Typo="Typography.Body">@user.UserPrincipalName</FluentLabel>
+            </FluentGridItem>
+        </FluentGrid>
+    </FluentCard>
 }
 
 @code {
