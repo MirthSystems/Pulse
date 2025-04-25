@@ -18,10 +18,10 @@ namespace Pulse.Clients.Web
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            var graphSection = builder.Configuration.GetSection("MicrosoftGraph");
+            var graphConfigSection = builder.Configuration.GetSection("MicrosoftGraph");
             var baseUrl = string.Join("/",
-                graphSection["BaseUrl"] ?? "https://graph.microsoft.com",
-                graphSection["Version"] ?? "v1.0");
+                graphConfigSection["BaseUrl"] ?? "https://graph.microsoft.com",
+                graphConfigSection["Version"] ?? "v1.0");
 
             var scopes = builder.Configuration.GetSection("MicrosoftGraph:Scopes")
                 .Get<List<string>>() ?? ["user.read"];
