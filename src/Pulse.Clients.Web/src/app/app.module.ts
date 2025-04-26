@@ -14,6 +14,8 @@ import { MaterialModule } from './modules/material.module';
 import { AppRoutingModule } from './app-routing.module';
 // Import home component and other components here
 
+import { environment } from '../environments/environment';
+
 @NgModule({
   declarations: [
     // Add your components here, but not AppComponent as it's standalone
@@ -28,8 +30,8 @@ import { AppRoutingModule } from './app-routing.module';
     MsalModule.forRoot(
       new PublicClientApplication({
         auth: {
-          clientId: '{{REPLACE_WITH_CLIENT_ID_FROM_ENV}}',
-          authority: '{{REPLACE_WITH_AUTHORITY_FROM_ENV}}',
+          clientId: environment.auth.clientId,
+          authority: environment.auth.authority,
           redirectUri: window.location.origin,
           postLogoutRedirectUri: window.location.origin,
         },

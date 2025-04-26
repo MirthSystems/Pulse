@@ -27,7 +27,18 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 // MSAL Instance Factory
 export function MSALInstanceFactory(): IPublicClientApplication {
-  return new PublicClientApplication(environment.msalConfig);
+  return new PublicClientApplication({
+    auth: {
+      clientId: environment.auth.clientId,
+      authority: environment.auth.authority,
+      redirectUri: window.location.origin,
+      postLogoutRedirectUri: window.location.origin,
+    },
+    cache: {
+      cacheLocation: 'localStorage',
+      storeAuthStateInCookie: false,
+    }
+  });
 }
 
 // MSAL Guard Configuration Factory
@@ -35,7 +46,7 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
   return {
     interactionType: InteractionType.Redirect,
     authRequest: {
-      scopes: environment.apiConfig.scopes
+      scopes: environment.microsoftGraph.scopes
     },
     loginFailedRoute: '/login-failed'
   };
@@ -46,7 +57,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap: new Map([
-      [environment.apiConfig.graphEndpoint, environment.apiConfig.scopes]
+      [environment.microsoftGraph.domain, environment.microsoftGraph.scopes]
     ])
   };
 }
