@@ -16,7 +16,8 @@ export class HomeComponent {
 
   constructor(private authService: MsalService, private msalBroadcastService: MsalBroadcastService) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.authService.instance.initialize();
     this.msalBroadcastService.msalSubject$
       .pipe(
         filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS),

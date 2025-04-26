@@ -33,8 +33,9 @@ export class AppComponent implements OnInit, OnDestroy {
     private msalBroadcastService: MsalBroadcastService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.isIframe = window !== window.parent && !window.opener;
+    await this.authService.instance.initialize();
     this.setLoginDisplay();
 
     this.msalBroadcastService.inProgress$
