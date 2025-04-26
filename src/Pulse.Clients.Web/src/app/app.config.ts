@@ -24,6 +24,12 @@ import {
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 
 // MSAL Instance Factory
 export function MSALInstanceFactory(): IPublicClientApplication {
@@ -68,6 +74,12 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(MatSnackBarModule),
+    importProvidersFrom(MatToolbarModule),
+    importProvidersFrom(MatButtonModule),
+    importProvidersFrom(MatSidenavModule),
+    importProvidersFrom(MatIconModule),
+    importProvidersFrom(MatListModule),
+    importProvidersFrom(MatMenuModule),
 
     // MSAL providers
     {
