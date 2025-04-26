@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.Clients.Web", "src\Pulse.Clients.Web\Pulse.Clients.Web.csproj", "{7B98C536-C288-431B-BD3C-5A60D2EEA1C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aspire.AppHost", "src\Aspire\Aspire.AppHost\Aspire.AppHost.csproj", "{8706A8CF-B46B-4598-BA08-ADFB14DDDC74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aspire.ServiceDefaults", "src\Aspire\Aspire.ServiceDefaults\Aspire.ServiceDefaults.csproj", "{5458901B-FF03-A43E-32AA-55EBE75ED657}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.Tests", "src\Pulse.Tests\Pulse.Tests.csproj", "{E0C702E5-FC57-499D-8516-EC2BB602B711}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.API", "src\Pulse.API\Pulse.API.csproj", "{13278CFD-90F1-4CCE-941A-6B2CBFFD6F90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.Web", "src\Pulse.Web\Pulse.Web.csproj", "{5E1036F7-0F23-4937-BA41-465EED4E938F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +19,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B98C536-C288-431B-BD3C-5A60D2EEA1C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B98C536-C288-431B-BD3C-5A60D2EEA1C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B98C536-C288-431B-BD3C-5A60D2EEA1C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B98C536-C288-431B-BD3C-5A60D2EEA1C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8706A8CF-B46B-4598-BA08-ADFB14DDDC74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8706A8CF-B46B-4598-BA08-ADFB14DDDC74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8706A8CF-B46B-4598-BA08-ADFB14DDDC74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8706A8CF-B46B-4598-BA08-ADFB14DDDC74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5458901B-FF03-A43E-32AA-55EBE75ED657}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5458901B-FF03-A43E-32AA-55EBE75ED657}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5458901B-FF03-A43E-32AA-55EBE75ED657}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5458901B-FF03-A43E-32AA-55EBE75ED657}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0C702E5-FC57-499D-8516-EC2BB602B711}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0C702E5-FC57-499D-8516-EC2BB602B711}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0C702E5-FC57-499D-8516-EC2BB602B711}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0C702E5-FC57-499D-8516-EC2BB602B711}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13278CFD-90F1-4CCE-941A-6B2CBFFD6F90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13278CFD-90F1-4CCE-941A-6B2CBFFD6F90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13278CFD-90F1-4CCE-941A-6B2CBFFD6F90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13278CFD-90F1-4CCE-941A-6B2CBFFD6F90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
