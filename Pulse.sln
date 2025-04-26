@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.API", "src\Pulse.API\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.Web", "src\Pulse.Web\Pulse.Web.csproj", "{5E1036F7-0F23-4937-BA41-465EED4E938F}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Pulse.Clients.Web", "src\Pulse.Clients.Web\Pulse.Clients.Web.esproj", "{F5333779-2C62-A357-4BE6-36FDF1871B86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,12 @@ Global
 		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E1036F7-0F23-4937-BA41-465EED4E938F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5333779-2C62-A357-4BE6-36FDF1871B86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5333779-2C62-A357-4BE6-36FDF1871B86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5333779-2C62-A357-4BE6-36FDF1871B86}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F5333779-2C62-A357-4BE6-36FDF1871B86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5333779-2C62-A357-4BE6-36FDF1871B86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5333779-2C62-A357-4BE6-36FDF1871B86}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

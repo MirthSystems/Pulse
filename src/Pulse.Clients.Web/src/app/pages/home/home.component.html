@@ -1,0 +1,36 @@
+<div class="home-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Welcome to Pulse</mat-card-title>
+      <mat-card-subtitle>A Real-Time Nightlife Discovery Platform</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="content-section">
+        <h2>Discover What's Happening Now</h2>
+        <p>
+          Pulse helps you find the best nightlife venues with real-time updates on crowd levels,
+          special events, and promotions. Never miss out on a great night again!
+        </p>
+      </div>
+
+      <div *ngIf="!isLoggedIn" class="auth-section">
+        <h3>Sign in to get started</h3>
+        <p>Sign in with your account to view your profile and access personalized recommendations.</p>
+        <button mat-raised-button color="primary" (click)="login()">
+          <mat-icon>login</mat-icon>
+          Sign In
+        </button>
+      </div>
+
+      <div *ngIf="isLoggedIn" class="auth-section">
+        <h3>You're signed in!</h3>
+        <p>Check out your profile or explore venues near you.</p>
+        <button mat-raised-button color="primary" routerLink="/profile">
+          <mat-icon>person</mat-icon>
+          View Profile
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
