@@ -15,9 +15,7 @@ export class AuthService {
   }
 
   public login(): Observable<void> {
-    return from(this.msalService.loginRedirect({
-      scopes: environment.auth.scopes
-    }));
+    return from(this.msalService.loginRedirect());
   }
 
   public logout(): Observable<void> {
