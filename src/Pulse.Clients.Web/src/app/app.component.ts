@@ -1,49 +1,87 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
+import { MsalService, MsalBroadcastService, MSAL_GUARD_CONFIG, MsalGuardConfiguration } from '@azure/msal-angular';
+import { InteractionStatus, RedirectRequest } from '@azure/msal-browser';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+// Import necessary modules for standalone components
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
-import { MatSidenav } from '@angular/material/sidenav';
+import { RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MsalService } from '@azure/msal-angular';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    MatToolbarModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatListModule,
-    MatMenuModule
+  standalone: true, // Ensure standalone is true
+  imports: [ // Add imports array
+    CommonModule, // For *ngIf
+    RouterModule, // For routerLink and router-outlet
+    MatToolbarModule, // For mat-toolbar
+    MatButtonModule // For mat-button
   ]
 })
-export class AppComponent {
-  @ViewChild('sidenav') sidenav!: MatSidenav;
-  title = 'Pulse';
-  isLoggedIn = false;
+export class AppComponent implements OnInit, OnDestroy {
+  title = 'Pulse.Clients.Web';
+  loginDisplay = false;
+  isIframe = false;
+  private readonly _destroying$ = new Subject<void>();
 
-  constructor(private msalService: MsalService) {
-    this.isLoggedIn = this.msalService.instance.getAllAccounts().length > 0;
+  constructor(
+    @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
+    private authService: MsalService,
+    private msalBroadcastService: MsalBroadcastService
+  ) {}
+
+  ngOnInit(): void {
+    this.isIframe = window !== window.parent && !window.opener;
+    this.setLoginDisplay();
+
+    this.msalBroadcastService.inProgress$
+      .pipe(
+        filter((status: InteractionStatus) => status === InteractionStatus.None),
+        takeUntil(this._destroying$)
+      )
+      .subscribe(() => {
+        this.setLoginDisplay();
+        this.checkAndSetActiveAccount();
+      });
   }
 
-  toggleSidenav() {
-    this.sidenav.toggle();
+  setLoginDisplay() {
+    this.loginDisplay = this.authService.instance.getAllAccounts().length > 0;
+  }
+
+  checkAndSetActiveAccount(){
+    /**
+     * If no active account set but there are accounts signed in, sets first account to active account
+     * To use active account set here, subscribe to inProgress$ first in your component
+     * Note: Basic usage demonstrated. Your app may require more complicated account selection logic
+     */
+    let activeAccount = this.authService.instance.getActiveAccount();
+
+    if (!activeAccount && this.authService.instance.getAllAccounts().length > 0) {
+      let accounts = this.authService.instance.getAllAccounts();
+      this.authService.instance.setActiveAccount(accounts[0]);
+    }
   }
 
   login() {
-    this.msalService.loginRedirect();
+    if (this.msalGuardConfig.authRequest){
+      this.authService.loginRedirect({...this.msalGuardConfig.authRequest} as RedirectRequest);
+    } else {
+      this.authService.loginRedirect();
+    }
   }
 
-  logout() {
-    this.msalService.logout();
+  logout() { // Add log out function here
+    this.authService.logoutRedirect({
+      postLogoutRedirectUri: '/'
+    });
+  }
+
+  ngOnDestroy(): void {
+    this._destroying$.next(undefined);
+    this._destroying$.complete();
   }
 }
