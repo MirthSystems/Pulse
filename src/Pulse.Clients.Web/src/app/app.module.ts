@@ -43,14 +43,13 @@ import { environment } from '../environments/environment';
       {
         interactionType: InteractionType.Redirect,
         authRequest: {
-          scopes: ['user.read']
+          scopes: environment.microsoftGraph.scopes
         }
       },
       {
         interactionType: InteractionType.Redirect,
         protectedResourceMap: new Map([
-          ['https://graph.microsoft.com/v1.0/me', ['user.read']]
-          // Add your API endpoints and required scopes here
+          [`${environment.microsoftGraph.domain}/${environment.microsoftGraph.version}/me`, environment.microsoftGraph.scopes]
         ])
       }
     )
