@@ -24,16 +24,8 @@ export class AuthService {
     return from(this.msalService.logout());
   }
 
-  public getAccount(): AccountInfo | null {
-    const accounts = this.msalService.instance.getAllAccounts();
-    if (accounts.length === 0) {
-      return null;
-    }
-    return accounts[0];
-  }
-
   public acquireToken(scopes: string[]): Observable<any> {
-    const account = this.getAccount();
+    const account = this.msalService.instance.getAllAccounts()[0];
     if (!account) {
       return from(Promise.reject('User not logged in'));
     }
