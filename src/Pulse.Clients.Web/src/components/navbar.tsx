@@ -24,8 +24,11 @@ import {
   SearchIcon,
 } from "@/components/icons";
 import { Logo } from "@/components/icons";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Navbar = () => {
+  const { isAuthenticated, user, login, logout } = useAuth();
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -106,6 +109,34 @@ export const Navbar = () => {
           >
             Sponsor
           </Button>
+        </NavbarItem>
+        <NavbarItem>
+          {isAuthenticated ? (
+            <div className="relative">
+              <button className="flex items-center gap-2">
+                <img
+                  src={user.avatar}
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+              </button>
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg">
+                <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700">
+                  Profile
+                </Link>
+                <button
+                  onClick={logout}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Button onClick={login} variant="flat">
+              Login / Sign Up
+            </Button>
+          )}
         </NavbarItem>
       </NavbarContent>
 

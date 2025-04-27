@@ -7,6 +7,8 @@ import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
+import SpecialsSearch from "@/components/specials-search";
+import LoginButton from "@/components/login";
 
 export default function IndexPage() {
   return (
@@ -53,6 +55,14 @@ export default function IndexPage() {
               <Code color="primary">pages/index.tsx</Code>
             </span>
           </Snippet>
+        </div>
+
+        <div className="mt-8">
+          <SpecialsSearch />
+        </div>
+
+        <div className="absolute top-4 right-4">
+          <LoginButton />
         </div>
       </section>
     </DefaultLayout>

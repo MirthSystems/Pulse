@@ -1,6 +1,8 @@
 import { Link } from "@heroui/link";
 
 import { Navbar } from "@/components/navbar";
+import SpecialsSearch from "@/components/specials-search";
+import LoginButton from "@/components/login";
 
 export default function DefaultLayout({
   children,
@@ -11,6 +13,12 @@ export default function DefaultLayout({
     <div className="relative flex flex-col h-screen">
       <Navbar />
       <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
+        <div className="absolute top-4 right-4">
+          <LoginButton />
+        </div>
+        <div className="mt-8">
+          <SpecialsSearch />
+        </div>
         {children}
       </main>
       <footer className="w-full flex items-center justify-center py-3">
