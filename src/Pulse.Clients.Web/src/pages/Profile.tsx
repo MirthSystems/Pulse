@@ -5,24 +5,15 @@ import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
 import { loginRequest } from "../configs/auth";
 
-// Sample app imports
+// App imports
 import { ProfileData } from "../components/profile/ProfileData";
-import Loading from "../components/common/Loading";
-import ErrorComponent from "../components/common/ErrorComponent";
-import { callMsGraph } from "../utils/MsGraphApiCall";
+import Loading from "../components/Loading";
+import ErrorComponent from "../components/ErrorComponent";
+import { GraphService } from "../services/graphService";
+import { GraphData } from "../types/graph-data";
 
 // Material-ui imports
 import Paper from "@mui/material/Paper";
-
-// Define GraphData interface
-export interface GraphData {
-  jobTitle?: string;
-  mail?: string;
-  businessPhones?: string[];
-  officeLocation?: string;
-  displayName?: string;
-  id?: string;
-}
 
 const ProfileContent: React.FC = () => {
     const { instance, inProgress } = useMsal();
@@ -41,7 +32,7 @@ const ProfileContent: React.FC = () => {
                 ...loginRequest,
                 account: instance.getActiveAccount() as AccountInfo
             }).then((response) => {
-                callMsGraph(response.accessToken)
+                GraphService.getUserInfo(response.accessToken)
                     .then(response => setGraphData(response))
                     .catch(error => console.log(error));
             }).catch((e) => {
@@ -56,7 +47,7 @@ const ProfileContent: React.FC = () => {
     }, [inProgress, graphData, instance]);
   
     return (
-        <Paper>
+        <Paper sx={{ p: 3 }}>
             {graphData ? <ProfileData graphData={graphData} /> : <p>No profile data found</p>}
         </Paper>
     );

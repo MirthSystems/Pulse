@@ -1,22 +1,113 @@
 import React from 'react';
-import { GraphData } from '../../pages/Profile';
+import { 
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Card,
+  CardContent,
+  Divider,
+  Avatar
+} from '@mui/material';
+import { GraphData } from '../../types/graph-data';
+import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import WorkIcon from '@mui/icons-material/Work';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 interface ProfileDataProps {
   graphData: GraphData;
 }
 
 export const ProfileData: React.FC<ProfileDataProps> = ({ graphData }) => {
+  const { displayName, mail, businessPhones, jobTitle, officeLocation } = graphData;
+  
   return (
-    <div id="profile-div">
-      <h2>Profile Information</h2>
-      <ul>
-        <li><strong>Name: </strong> {graphData.displayName}</li>
-        {graphData.jobTitle && <li><strong>Title: </strong> {graphData.jobTitle}</li>}
-        {graphData.mail && <li><strong>Mail: </strong> {graphData.mail}</li>}
-        {graphData.businessPhones && graphData.businessPhones.length > 0 && 
-          <li><strong>Phone: </strong> {graphData.businessPhones[0]}</li>}
-        {graphData.officeLocation && <li><strong>Location: </strong> {graphData.officeLocation}</li>}
-      </ul>
-    </div>
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Avatar 
+            sx={{ 
+              width: 64, 
+              height: 64, 
+              bgcolor: 'primary.main', 
+              fontSize: '1.5rem',
+              mr: 2
+            }}
+          >
+            {displayName && displayName.charAt(0).toUpperCase()}
+          </Avatar>
+          <Box>
+            <Typography variant="h5" component="h1" gutterBottom>
+              {displayName}
+            </Typography>
+            {jobTitle && (
+              <Typography variant="subtitle1" color="text.secondary">
+                {jobTitle}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+        
+        <Divider sx={{ mb: 3 }} />
+        
+        <Typography variant="h6" component="h2" gutterBottom>
+          Contact Information
+        </Typography>
+        
+        <List>
+          {mail && (
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemIcon>
+                <EmailIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Email"
+                secondary={mail}
+              />
+            </ListItem>
+          )}
+          
+          {businessPhones && businessPhones.length > 0 && (
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemIcon>
+                <PhoneIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Phone"
+                secondary={businessPhones[0]}
+              />
+            </ListItem>
+          )}
+          
+          {jobTitle && (
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemIcon>
+                <WorkIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Job Title"
+                secondary={jobTitle}
+              />
+            </ListItem>
+          )}
+          
+          {officeLocation && (
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemIcon>
+                <LocationOnIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Office Location"
+                secondary={officeLocation}
+              />
+            </ListItem>
+          )}
+        </List>
+      </CardContent>
+    </Card>
   );
 };
