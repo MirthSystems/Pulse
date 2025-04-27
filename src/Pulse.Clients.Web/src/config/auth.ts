@@ -1,4 +1,4 @@
-import { Configuration } from "@azure/msal-browser";
+import { Configuration } from "@heroui/system";
 
 const msalConfig: Configuration = {
   auth: {

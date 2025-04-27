@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Input } from "@heroui/input";
+import { Button } from "@heroui/button";
 
 const SpecialsSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,16 +18,16 @@ const SpecialsSearch = () => {
   return (
     <div className="specials-search">
       <form onSubmit={handleSearchSubmit}>
-        <input
+        <Input
           type="text"
           value={searchTerm}
           onChange={handleSearchChange}
           placeholder="Search for specials..."
           className="search-input"
         />
-        <button type="submit" className="search-button">
+        <Button type="submit" className="search-button">
           Search
-        </button>
+        </Button>
       </form>
     </div>
   );
