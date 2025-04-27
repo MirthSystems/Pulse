@@ -1,26 +1,50 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Msal imports
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
-import { loginRequest } from "../authConfig";
+import { loginRequest } from "../configs/auth";
 
 // Sample app imports
-import { ProfileData, GraphData } from "../components/ProfileData";
-import { Loading } from "../components/Loading";
-import { ErrorComponent } from "../components/ErrorComponent";
+import { ProfileData } from "../components/profile/ProfileData";
+import Loading from "../components/common/Loading";
+import ErrorComponent from "../components/common/ErrorComponent";
 import { callMsGraph } from "../utils/MsGraphApiCall";
 
 // Material-ui imports
 import Paper from "@mui/material/Paper";
 
-const ProfileContent = () => {
+// Define GraphData interface
+export interface GraphData {
+  jobTitle?: string;
+  mail?: string;
+  businessPhones?: string[];
+  officeLocation?: string;
+  displayName?: string;
+  id?: string;
+}
+
+const ProfileContent: React.FC = () => {
     const { instance, inProgress } = useMsal();
-    const [graphData, setGraphData] = useState<null|GraphData>(null);
+    const [graphData, setGraphData] = useState<GraphData | null>(null);
 
     useEffect(() => {
         if (!graphData && inProgress === InteractionStatus.None) {
-            callMsGraph().then(response => setGraphData(response)).catch((e) => {
+            // Get the active account
+            const account = instance.getActiveAccount();
+            if (!account) {
+                instance.setActiveAccount(instance.getAllAccounts()[0]);
+            }
+            
+            // Get token silently then call MS Graph
+            instance.acquireTokenSilent({
+                ...loginRequest,
+                account: instance.getActiveAccount() as AccountInfo
+            }).then((response) => {
+                callMsGraph(response.accessToken)
+                    .then(response => setGraphData(response))
+                    .catch(error => console.log(error));
+            }).catch((e) => {
                 if (e instanceof InteractionRequiredAuthError) {
                     instance.acquireTokenRedirect({
                         ...loginRequest,
@@ -33,12 +57,12 @@ const ProfileContent = () => {
   
     return (
         <Paper>
-            { graphData ? <ProfileData graphData={graphData} /> : null }
+            {graphData ? <ProfileData graphData={graphData} /> : <p>No profile data found</p>}
         </Paper>
     );
 };
 
-export function Profile() {
+const Profile: React.FC = () => {
     const authRequest = {
         ...loginRequest
     };
@@ -52,5 +76,7 @@ export function Profile() {
         >
             <ProfileContent />
         </MsalAuthenticationTemplate>
-      )
+    );
 };
+
+export default Profile;

@@ -4,7 +4,7 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import Typography from "@mui/material/Typography";
 import { Link as RouterLink } from "react-router-dom";
 
-export function Home() {
+export default function Home() {
   return (
       <>
           <AuthenticatedTemplate>

@@ -1,11 +1,11 @@
 import Typography from "@mui/material/Typography";
-import NavBar from "./NavBar";
+import NavBar from "../components/NavBar";
 
 type Props = {
     children?: React.ReactNode;
 };
 
-export const PageLayout: React.FC<Props> = ({children}) => {
+export const DefaultLayout: React.FC<Props> = ({children}) => {
     return (
         <>
             <NavBar />

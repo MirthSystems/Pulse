@@ -1,14 +1,13 @@
-import { NavigationClient, NavigationOptions } from "@azure/msal-browser";
 import { NavigateFunction } from "react-router-dom";
+import { INavigationClient, NavigationOptions } from "@azure/msal-browser";
 
 /**
  * This is an example for overriding the default function MSAL uses to navigate to other urls in your webpage
  */
-export class CustomNavigationClient extends NavigationClient {
+export class CustomNavigationClient implements INavigationClient {
     private navigate: NavigateFunction;
 
     constructor(navigate: NavigateFunction) {
-        super();
         this.navigate = navigate;
     }
 
@@ -27,5 +26,15 @@ export class CustomNavigationClient extends NavigationClient {
         }
 
         return false;
+    }
+
+    /**
+     * Navigates to external pages outside your web application
+     * @param url
+     * @param options
+     */
+    async navigateExternal(url: string, options: NavigationOptions) {
+        window.location.assign(url);
+        return true;
     }
 }

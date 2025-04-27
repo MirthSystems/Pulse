@@ -1,19 +1,13 @@
-import { loginRequest, graphConfig } from "../authConfig";
-import { msalInstance } from "../index";
+import { graphConfig } from "../configs/auth";
 
-export async function callMsGraph() {
-    const account = msalInstance.getActiveAccount();
-    if (!account) {
-        throw Error("No active account! Verify a user has been signed in and setActiveAccount has been called.");
-    }
-
-    const response = await msalInstance.acquireTokenSilent({
-        ...loginRequest,
-        account: account
-    });
-
+/**
+ * Calls the MS Graph API with the provided access token
+ * @param accessToken - The access token acquired from MSAL
+ * @returns Promise containing the response data
+ */
+export async function callMsGraph(accessToken: string) {
     const headers = new Headers();
-    const bearer = `Bearer ${response.accessToken}`;
+    const bearer = `Bearer ${accessToken}`;
 
     headers.append("Authorization", bearer);
 
@@ -23,6 +17,14 @@ export async function callMsGraph() {
     };
 
     return fetch(graphConfig.graphMeEndpoint, options)
-        .then(response => response.json())
-        .catch(error => console.log(error));
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Graph API returned ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error("Error calling MS Graph API:", error);
+            throw error;
+        });
 }
