@@ -1,0 +1,27 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"type": "msedge",
+				"request": "launch",
+				"name": "localhost (Edge)",
+				"url": "http://localhost:49446",
+				"webRoot": "${workspaceFolder}"
+			},
+			{
+				"type": "chrome",
+				"request": "launch",
+				"name": "localhost (Chrome)",
+				"url": "http://localhost:49446",
+				"webRoot": "${workspaceFolder}"
+			}
+		]
+	}
+}
