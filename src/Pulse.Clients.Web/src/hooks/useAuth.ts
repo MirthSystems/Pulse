@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { PublicClientApplication, AccountInfo } from "@azure/msal-browser";
+import { PublicClientApplication, AccountInfo } from "@heroui/system";
 import { msalConfig, loginRequest } from "@/config/auth";
 
 const msalInstance = new PublicClientApplication(msalConfig);
