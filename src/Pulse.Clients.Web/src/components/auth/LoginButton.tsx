@@ -1,15 +1,13 @@
 import React from 'react';
-import { useIsAuthenticated, useMsal } from '@azure/msal-react';
-import { loginRequest } from '../../configs/auth';
 import { Box, Button } from '@mui/material';
 import UserMenu from '../user/UserMenu';
+import { useAuth } from '../../hooks/useAuth';
 
 const LoginButton: React.FC = () => {
-  const { instance } = useMsal();
-  const isAuthenticated = useIsAuthenticated();
+  const { isAuthenticated, loginRedirect } = useAuth();
 
   const handleLoginRedirect = () => {
-    instance.loginRedirect(loginRequest).catch(e => {
+    loginRedirect().catch((e: Error) => {
       console.error(e);
     });
   };

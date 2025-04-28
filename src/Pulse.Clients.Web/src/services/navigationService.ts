@@ -31,9 +31,9 @@ export class NavigationService implements INavigationClient {
   /**
    * Navigates to external pages outside the web application
    * @param url
-   * @param options
+   * @param _options Unused navigation options
    */
-  async navigateExternal(url: string, options: NavigationOptions) {
+  async navigateExternal(url: string, _options: NavigationOptions) {
     window.location.assign(url);
     return true;
   }

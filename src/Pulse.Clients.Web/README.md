@@ -1,71 +1,88 @@
-# MSAL.js for React TypeScript Sample - Authorization Code Flow in Single-Page Applications
+# Pulse Web Client
 
-## About this sample
+A modern web application for the Pulse platform built with React, TypeScript, and Vite.
 
-This developer sample is used to run basic use cases for the MSAL library. You can also alter the configuration in `./src/authConfig.js` to execute other behaviors.
-This sample was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Features
 
-## Notable files and what they demonstrate
+- Real-time nightlife discovery platform
+- Microsoft Authentication Library (MSAL) integration
+- Material UI components
+- Dark/light theme support
+- Responsive design for all devices
 
-1. `./src/App.tsx` - Shows implementation of `MsalProvider`, all children will have access to `@azure/msal-react` context, hooks and components.
-1. `./src/index.tsx` - Shows intialization of the `PublicClientApplication` that is passed to `App.js`
-1. `./src/pages/Home.tsx` - Homepage, shows how to conditionally render content using `AuthenticatedTemplate` and `UnauthenticatedTemplate` depending on whether or not a user is signed in.
-1. `./src/pages/Profile.tsx` - Example of a protected route using `MsalAuthenticationTemplate`. If a user is not yet signed in, signin will be invoked automatically. If a user is signed in it will acquire an access token and make a call to MS Graph to fetch user profile data.
-1. `./src/authConfig.ts` - Configuration options for `PublicClientApplication` and token requests.
-1. `./src/ui-components/SignInSignOutButton.tsx` - Example of how to conditionally render a Sign In or Sign Out button using the `useIsAuthenticated` hook.
-1. `./src/ui-components/SignInButton.tsx` - Example of how to get the `PublicClientApplication` instance using the `useMsal` hook and invoking a login function.
-1. `./src/ui-components/SignOutButton.tsx` - Example of how to get the `PublicClientApplication` instance using the `useMsal` hook and invoking a logout function.
-1. `./src/utils/MsGraphApiCall.ts` - Example of how to call the MS Graph API with an access token.
-1. `./src/utils/NavigationClient.ts` - Example implementation of `INavigationClient` which can be used to override the default navigation functions MSAL.js uses
+## Quick Start
 
-## How to run the sample
+### Prerequisites
 
-### Pre-requisites
+- Node.js 16.x or later
+- npm 7.x or later
 
-- Ensure [all pre-requisites](../../../lib/msal-react/README.md#prerequisites) have been completed to run `@azure/msal-react`.
-- Install node.js if needed (<https://nodejs.org/en/>).
-
-### Configure the application
-
-- Open `./src/authConfig.ts` in an editor.
-- Replace client id with the Application (client) ID from the portal registration, or use the currently configured lab registration.
-  - Optionally, you may replace any of the other parameters, or you can remove them and use the default values.
-
-#### Install npm dependencies for sample
+### Installation
 
 ```bash
-# Install dev dependencies for msal-react and msal-browser from root of repo
+# Install dependencies
 npm install
-
-# Change directory to sample directory
-cd samples/msal-react-samples/typescript-sample
-
-# Build packages locally
-npm run build:package
 ```
 
-#### Running the sample development server
+### Development
 
-1. In a command prompt, run `npm start`.
-1. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-1. Open [http://localhost:3000/profile](http://localhost:3000/profile) to see an example of a protected route. If you are not yet signed in, signin will be invoked automatically.
+```bash
+# Start the development server
+npm run dev
+```
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+The app will be available at http://localhost:3000
 
-- In the web page, click on the "Login" button and select either `Sign in using Popup` or `Sign in using Redirect` to begin the auth flow.
+### Building for Production
 
-#### Running the sample production server
+```bash
+# Create a production build
+npm run build
 
-1. In a command prompt, run `npm run build`.
-1. Next run `serve -s build`
-1. Open [http://localhost:5000](http://localhost:3000) to view it in the browser.
-1. Open [http://localhost:5000/profile](http://localhost:3000/profile) to see an example of a protected route. If you are not yet signed in, signin will be invoked automatically.
+# Preview the production build
+npm run preview
+```
 
-#### Learn more about the 3rd-party libraries used to create this sample
+## Project Structure
 
-- [React documentation](https://reactjs.org/)
-- [TypeScript documentation](https://www.typescriptlang.org/docs/)
-- [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started)
-- [React Router documentation](https://reactrouter.com/web/guides/quick-start)
-- [Material-UI documentation](https://material-ui.com/getting-started/installation/)
+```
+src/
+├── components/     # Reusable UI components
+├── configs/        # Configuration files
+├── contexts/       # React context providers
+├── hooks/          # Custom React hooks
+├── layouts/        # Page layout components
+├── pages/          # Application pages
+├── services/       # API and other services
+├── styles/         # Global styles and themes
+├── types/          # TypeScript type definitions
+├── utils/          # Utility functions
+├── App.tsx         # Main App component
+└── index.tsx       # Application entry point
+```
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+# Authentication (MSAL.js)
+REACT_APP_AUTH_CLIENT_ID=your-client-id
+REACT_APP_AUTH_AUTHORITY=https://login.microsoftonline.com/common
+
+# Microsoft Graph
+REACT_APP_MICROSOFT_GRAPH_DOMAIN=https://graph.microsoft.com/
+REACT_APP_MICROSOFT_GRAPH_VERSION=v1.0
+REACT_APP_MICROSOFT_GRAPH_SCOPES=user.read
+
+# Backend API
+REACT_APP_PULSE_API_URL=http://localhost:3000/api
+REACT_APP_PULSE_API_SCOPES=your-api-scopes
+```
+
+## Testing
+
+```bash
+# Run tests
+npm run test:e2e
+```

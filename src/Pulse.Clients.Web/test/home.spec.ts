@@ -1,3 +1,11 @@
+// Add Jest specific TypeScript declarations for global variables
+declare global {
+  // eslint-disable-next-line no-var
+  var __BROWSER__: import('puppeteer').Browser;
+  // eslint-disable-next-line no-var
+  var __PORT__: number;
+}
+
 import * as puppeteer from "puppeteer";
 import {
     Screenshot,
@@ -24,9 +32,7 @@ describe("/ (Home Page)", () => {
     let BrowserCache: BrowserCacheUtils;
 
     beforeAll(async () => {
-        // @ts-ignore
         browser = await global.__BROWSER__;
-        // @ts-ignore
         port = global.__PORT__;
 
         const labApiParams: LabApiQueryParams = {

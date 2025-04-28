@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   Typography,
   Grid,
@@ -80,7 +79,7 @@ export default function Home() {
             Find the Perfect Vibe
           </Typography>
           <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}>
-            Pulse gives you real-time insights about what's happening at venues around you right now, 
+            Pulse gives you real-time insights about what&apos;s happening at venues around you right now, 
             not what happened last week or last month.
           </Typography>
           

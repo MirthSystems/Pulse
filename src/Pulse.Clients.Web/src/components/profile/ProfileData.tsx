@@ -11,19 +11,18 @@ import {
   Divider,
   Avatar
 } from '@mui/material';
-import { GraphData } from '../../types/graph-data';
-import PersonIcon from '@mui/icons-material/Person';
+import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WorkIcon from '@mui/icons-material/Work';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 interface ProfileDataProps {
-  graphData: GraphData;
+  graphData: MicrosoftGraph.User;
 }
 
 export const ProfileData: React.FC<ProfileDataProps> = ({ graphData }) => {
-  const { displayName, mail, businessPhones, jobTitle, officeLocation } = graphData;
+  const { displayName, mail, businessPhones, jobTitle, officeLocation, userPrincipalName } = graphData;
   
   return (
     <Card>
@@ -67,6 +66,18 @@ export const ProfileData: React.FC<ProfileDataProps> = ({ graphData }) => {
               <ListItemText 
                 primary="Email"
                 secondary={mail}
+              />
+            </ListItem>
+          )}
+          
+          {!mail && userPrincipalName && (
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemIcon>
+                <EmailIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Email"
+                secondary={userPrincipalName}
               />
             </ListItem>
           )}

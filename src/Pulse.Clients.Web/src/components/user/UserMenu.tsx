@@ -1,34 +1,38 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useMsal } from '@azure/msal-react';
 import {
   IconButton,
   Menu,
   MenuItem,
   ListItemIcon,
+  ListItemText,
   Divider,
-  Tooltip
+  Tooltip,
+  ListItemSecondaryAction,
+  Switch
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import UserAvatar from './UserAvatar';
+import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 
 const UserMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const { instance } = useMsal();
+  const { account, logout } = useAuth();
+  const { mode, toggleColorMode } = useTheme();
   const location = useLocation();
   
-  // Check if we're in the dashboard area
-  const isDashboard = location.pathname.startsWith('/dashboard') || 
-                      location.pathname.startsWith('/profile') ||
-                      location.pathname.startsWith('/specials') ||
-                      location.pathname.startsWith('/venues') ||
-                      location.pathname.startsWith('/settings');
+  const open = Boolean(anchorEl);
+  const isDarkMode = mode === 'dark';
   
-  const activeAccount = instance.getActiveAccount();
-  const name = activeAccount ? activeAccount.name : '';
+  // Dashboard route check using regex for better maintainability
+  const isDashboard = /^\/(?:dashboard|profile|specials|venues|settings)/.test(location.pathname);
+  
+  const name = account?.name || '';
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -39,10 +43,15 @@ const UserMenu: React.FC = () => {
   };
 
   const handleLogout = () => {
-    instance.logoutRedirect({
-      postLogoutRedirectUri: "/"
+    logout("/").catch((error: Error) => {
+      console.error('Logout failed:', error);
     });
     setAnchorEl(null);
+  };
+
+  const handleThemeToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleColorMode();
   };
 
   return (
@@ -77,7 +86,7 @@ const UserMenu: React.FC = () => {
             overflow: 'visible',
             filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
             mt: 1.5,
-            width: 200,
+            width: 220,
             '& .MuiAvatar-root': {
               width: 32,
               height: 32,
@@ -92,22 +101,40 @@ const UserMenu: React.FC = () => {
             <ListItemIcon>
               <LocalFireDepartmentIcon fontSize="small" />
             </ListItemIcon>
-            Main Site
+            <ListItemText primary="Main Site" />
           </MenuItem>
         ) : (
           <MenuItem component={Link} to="/dashboard">
             <ListItemIcon>
               <DashboardIcon fontSize="small" />
             </ListItemIcon>
-            Dashboard
+            <ListItemText primary="Dashboard" />
           </MenuItem>
         )}
+        
         <Divider />
+        
+        <MenuItem onClick={handleThemeToggle}>
+          <ListItemIcon>
+            {isDarkMode ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+          </ListItemIcon>
+          <ListItemText primary={isDarkMode ? "Light Mode" : "Dark Mode"} />
+          <ListItemSecondaryAction>
+            <Switch 
+              edge="end"
+              size="small"
+              checked={isDarkMode}
+              onClick={(e) => e.stopPropagation()}
+              onChange={toggleColorMode}
+            />
+          </ListItemSecondaryAction>
+        </MenuItem>
+        
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
-          Sign out
+          <ListItemText primary="Sign out" />
         </MenuItem>
       </Menu>
     </>

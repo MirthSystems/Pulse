@@ -261,13 +261,22 @@ const DashboardContent: React.FC = () => {
   );
 };
 
+// Wrapper components for MSAL authentication to fix type issues
+const MsalErrorComponent: React.FC<unknown> = () => (
+  <ErrorComponent 
+    title="Authentication Error" 
+    message="There was a problem authenticating you. Please try again." 
+  />
+);
+const MsalLoadingComponent = () => <Loading />;
+
 const Dashboard: React.FC = () => {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
       authenticationRequest={loginRequest}
-      errorComponent={ErrorComponent}
-      loadingComponent={Loading}
+      errorComponent={MsalErrorComponent}
+      loadingComponent={MsalLoadingComponent}
     >
       <DashboardContent />
     </MsalAuthenticationTemplate>

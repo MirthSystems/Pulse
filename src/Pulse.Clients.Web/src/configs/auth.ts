@@ -1,54 +1,62 @@
-import { Configuration, PopupRequest, RedirectRequest, PublicClientApplication } from "@azure/msal-browser";
+import { Configuration, PublicClientApplication } from "@azure/msal-browser";
 
-// Config object to be passed to Msal on creation
+// Auth configuration
 export const msalConfig: Configuration = {
   auth: {
-    clientId: process.env.REACT_APP_AUTH_CLIENT_ID || "1ea2773e-e10a-4e8c-b050-14574337ac7e",
-    authority: process.env.REACT_APP_AUTH_AUTHORITY || "https://login.microsoftonline.com/common",
+    clientId: import.meta.env.VITE_AUTH_CLIENT_ID || "1ea2773e-e10a-4e8c-b050-14574337ac7e",
+    authority: import.meta.env.VITE_AUTH_AUTHORITY || "https://login.microsoftonline.com/common",
     redirectUri: window.location.origin,
     postLogoutRedirectUri: window.location.origin,
   },
   cache: {
-    cacheLocation: "localStorage", // This configures where your cache will be stored
-    storeAuthStateInCookie: true, // Set this to "true" if you are having issues on IE11 or Edge
+    cacheLocation: "localStorage",
+    storeAuthStateInCookie: true,
   },
   system: {
-    allowRedirectInIframe: false, // Avoids redirects within iframes
+    allowRedirectInIframe: false,
     loggerOptions: {
       loggerCallback: (level, message, containsPii) => {
         if (containsPii) {
           return;
         }
+        
         switch (level) {
-          case 0:
+          case 0: // Error
             console.error(message);
-            return;
-          case 1:
+            break;
+          case 1: // Warning
             console.warn(message);
-            return;
-          case 2:
-            console.log(message);
-            return;
-          case 3:
+            break;
+          case 2: // Info
+            console.info(message);
+            break;
+          case 3: // Verbose
             console.debug(message);
-            return;
+            break;
           default:
-            return;
+            break;
         }
       }
     }
   }
 };
 
-// Add here scopes for token request
-export const loginRequest: PopupRequest | RedirectRequest = {
-  scopes: ["User.Read"]
+// Login request configuration
+export const loginRequest = {
+  scopes: (import.meta.env.VITE_MICROSOFT_GRAPH_SCOPES || "user.read").split(",")
 };
 
-// Add here the endpoints for MS Graph API services
+// Microsoft Graph API endpoints
 export const graphConfig = {
-  graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
+  graphEndpoint: `${import.meta.env.VITE_MICROSOFT_GRAPH_DOMAIN || "https://graph.microsoft.com/"}${import.meta.env.VITE_MICROSOFT_GRAPH_VERSION || "v1.0"}`,
+  graphMeEndpoint: `${import.meta.env.VITE_MICROSOFT_GRAPH_DOMAIN || "https://graph.microsoft.com/"}${import.meta.env.VITE_MICROSOFT_GRAPH_VERSION || "v1.0"}/me`
 };
 
-// Create and export the MSAL instance
+// Backend API configuration
+export const apiConfig = {
+  apiUrl: import.meta.env.VITE_PULSE_API_URL || "http://localhost:3000/api",
+  apiScopes: (import.meta.env.VITE_PULSE_API_SCOPES || "api://20e5aada-0b67-4db5-9646-1b0316b2a242/access_as_user").split(",")
+};
+
+// Initialize the MSAL application instance
 export const pca = new PublicClientApplication(msalConfig);

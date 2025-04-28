@@ -138,7 +138,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {title}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
