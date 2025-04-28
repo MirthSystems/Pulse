@@ -1,10 +1,17 @@
-import { AuthenticationResult, AccountInfo, RedirectRequest, PopupRequest, SilentRequest } from '@azure/msal-browser';
+import { createContext } from 'react';
+import { 
+  AuthenticationResult, 
+  AccountInfo, 
+  RedirectRequest,
+  PopupRequest,
+  SilentRequest
+} from '@azure/msal-browser';
 
 /**
- * Interface for authentication context value.
+ * Type for authentication context value.
  * Provides authentication state, account info, error/loading state, and auth methods.
  */
-export interface AuthContextType {
+export type AuthContextType = {
   /** Indicates if the user is authenticated. */
   isAuthenticated: boolean;
   /** Indicates if authentication is in progress. */
@@ -13,6 +20,10 @@ export interface AuthContextType {
   account: AccountInfo | null;
   /** Any authentication error encountered. */
   error: Error | null;
+  /** User roles for authorization checks. */
+  userRoles: string[];
+  /** Indicates if roles are still being loaded. */
+  isLoadingRoles: boolean;
   /** Initiates login using redirect flow. */
   loginRedirect: (request?: RedirectRequest) => Promise<void>;
   /** Initiates login using popup flow. */
@@ -23,4 +34,12 @@ export interface AuthContextType {
   acquireToken: (request?: SilentRequest) => Promise<string | null>;
   /** Clears any authentication error in context. */
   clearError: () => void;
-}
+};
+
+/**
+ * React context for authentication state and actions.
+ * Provides authentication status, account info, and auth methods to consumers.
+ */
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export default AuthContext;

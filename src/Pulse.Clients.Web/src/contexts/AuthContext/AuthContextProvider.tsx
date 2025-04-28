@@ -9,8 +9,7 @@ import {
 } from '@azure/msal-browser';
 import { useMsal, useIsAuthenticated as useMsalIsAuthenticated } from '@azure/msal-react';
 import { loginRequest } from '../../configs/auth';
-import { AuthContextType } from '../../types/auth-context-type';
-import { AuthContext } from '../auth-context';
+import AuthContext, { AuthContextType } from './index';
 
 /**
  * Props for the AuthProvider component.
@@ -26,7 +25,7 @@ interface AuthProviderProps {
  * @param props - AuthProviderProps
  * @returns JSX.Element
  */
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useMsalIsAuthenticated();
   const [account, setAccount] = useState<AccountInfo | null>(null);
@@ -143,7 +142,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loginPopup,
     logout,
     acquireToken,
-    clearError
+    clearError,
+    userRoles: [],
+    isLoadingRoles: false
   };
 
   return (

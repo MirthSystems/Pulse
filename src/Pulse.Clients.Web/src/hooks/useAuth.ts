@@ -1,7 +1,6 @@
 import { useContext } from 'react';
+import AuthContext, { AuthContextType } from '@/contexts/AuthContext';
 import { AccountInfo } from '@azure/msal-browser';
-import { AuthContextType } from '../types/auth-context-type';
-import { AuthContext } from '../contexts/auth-context';
 
 /**
  * Custom hook to access the authentication context.

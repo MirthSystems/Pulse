@@ -1,7 +1,7 @@
 /**
- * UserProfile is a unified interface for profile data throughout the app
+ * UserProfile is a unified type for profile data throughout the app
  */
-export interface UserProfile {
+export type UserProfile = {
   id: string;
   displayName: string;
   email?: string;
@@ -9,4 +9,4 @@ export interface UserProfile {
   phoneNumber?: string;
   location?: string;
   avatar?: string;
-}
+};

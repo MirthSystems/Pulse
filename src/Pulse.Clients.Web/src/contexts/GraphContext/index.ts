@@ -1,11 +1,12 @@
-import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
+import { createContext } from 'react';
 import { Client } from '@microsoft/microsoft-graph-client';
+import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
 
 /**
- * Interface for Microsoft Graph context value.
+ * Type for Microsoft Graph context value.
  * Provides Graph client, user profile, error/loading state, and Graph methods.
  */
-export interface GraphContextType {
+export type GraphContextType = {
   /** The Microsoft Graph client instance, or null if not initialized. */
   graphClient: Client | null;
   /** The current user's Microsoft Graph profile, or null if not loaded. */
@@ -22,4 +23,12 @@ export interface GraphContextType {
   clearError: () => void;
   /** Forces a refresh of the user profile from Microsoft Graph. */
   refreshProfile: () => Promise<void>;
-}
+};
+
+/**
+ * React context for Microsoft Graph API state and actions.
+ * Provides Graph client, user profile, error/loading state, and Graph methods.
+ */
+const GraphContext = createContext<GraphContextType | undefined>(undefined);
+
+export default GraphContext;

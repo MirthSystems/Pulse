@@ -5,8 +5,7 @@ import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
 import { loginRequest, graphConfig } from '../../configs/auth';
-import { GraphContextType } from '../../types/graph-context-type';
-import { GraphContext } from '../graph-context';
+import GraphContext, { GraphContextType } from './index';
 
 /**
  * Props for the GraphProvider component.
@@ -22,7 +21,7 @@ interface GraphProviderProps {
  * @param props - GraphProviderProps
  * @returns JSX.Element
  */
-export const GraphProvider: React.FC<GraphProviderProps> = ({ children }) => {
+export const GraphContextProvider: React.FC<GraphProviderProps> = ({ children }) => {
   const { instance, accounts } = useMsal();
   const [graphClient, setGraphClient] = useState<Client | null>(null);
   const [userProfile, setUserProfile] = useState<MicrosoftGraph.User | null>(null);

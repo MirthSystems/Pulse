@@ -12,9 +12,7 @@ import {
 } from '@mui/material';
 import { Special } from '../types/special';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import LocalBarIcon from '@mui/icons-material/LocalBar';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import { getTagIcon } from '../utils/getTagIcon';
 
 // Sample data - would come from API in a real implementation
 const sampleSpecials: Special[] = [
@@ -80,25 +78,13 @@ const sampleSpecials: Special[] = [
   }
 ];
 
-// Helper for tag icons
-const getTagIcon = (tag: string) => {
-  const lowerTag = tag.toLowerCase();
-  if (lowerTag.includes('beer') || lowerTag.includes('happy') || lowerTag.includes('wine')) {
-    return <LocalBarIcon fontSize="small" />;
-  } else if (lowerTag.includes('music') || lowerTag.includes('jazz') || lowerTag.includes('live')) {
-    return <MusicNoteIcon fontSize="small" />;
-  } else {
-    return <RestaurantIcon fontSize="small" />;
-  }
-};
-
 const SpecialsList: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
       <Typography variant="h3" component="h1" gutterBottom fontWeight={600}>
         Specials Near You
       </Typography>
-      <Typography variant="h6" color="text.secondary" paragraph sx={{ mb: 6 }}>
+      <Typography variant="h6" component="h2" color="text.secondary" paragraph sx={{ mb: 6 }}>
         Check out these popular special offers happening in your area
       </Typography>
       

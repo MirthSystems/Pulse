@@ -68,6 +68,7 @@ const UserMenu: React.FC = () => {
           aria-controls={open ? 'account-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
+          aria-label="Open account menu"
         >
           <UserAvatar displayName={name} />
         </IconButton>
@@ -93,6 +94,7 @@ const UserMenu: React.FC = () => {
               ml: -0.5,
               mr: 1,
             },
+            'aria-label': 'Account menu',
           },
         }}
       >

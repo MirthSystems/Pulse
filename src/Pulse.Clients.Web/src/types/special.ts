@@ -3,7 +3,7 @@ import { SpecialStatus } from './special-status';
 /**
  * Basic special information
  */
-export interface Special {
+export type Special = {
   id: number;
   title: string;
   venue: string;
@@ -13,4 +13,4 @@ export interface Special {
   status: SpecialStatus;
   views?: number;
   scheduledDate?: string;
-}
+};

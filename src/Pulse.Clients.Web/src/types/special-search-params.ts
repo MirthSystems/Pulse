@@ -3,9 +3,9 @@ import { VenueType } from './venue-type';
 /**
  * Search parameters for specials
  */
-export interface SpecialSearchParams {
+export type SpecialSearchParams = {
   location?: string;
   keyword?: string;
   venueType?: VenueType;
   tags?: string[];
-}
+};

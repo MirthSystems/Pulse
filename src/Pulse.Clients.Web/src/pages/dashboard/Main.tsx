@@ -18,9 +18,9 @@ import {
 } from '@mui/material';
 import { MsalAuthenticationTemplate } from "@azure/msal-react";
 import { InteractionType } from "@azure/msal-browser";
-import { loginRequest } from "../configs/auth";
-import ErrorComponent from "../components/ErrorComponent";
-import Loading from "../components/Loading";
+import { loginRequest } from "../../configs/auth";
+import ErrorComponent from "@/components/ErrorComponent";
+import Loading from "@/components/Loading";
 
 // Sample data
 const recentSpecials = [

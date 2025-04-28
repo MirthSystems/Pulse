@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import { GraphContextType } from '../types/graph-context-type';
-import { GraphContext } from '../contexts/graph-context';
+import GraphContext, { GraphContextType } from '@/contexts/GraphContext';
 
 /**
  * Custom hook to access the Microsoft Graph context.

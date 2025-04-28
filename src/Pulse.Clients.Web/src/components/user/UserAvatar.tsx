@@ -10,7 +10,7 @@ interface UserAvatarProps {
 /**
  * A reusable user avatar component that displays the first letter of the user's name
  */
-const UserAvatar: React.FC<UserAvatarProps> = ({ 
+const UserAvatar: React.FC<UserAvatarProps> = React.memo(({ 
   displayName = '', 
   size = 32,
   color
@@ -33,6 +33,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       {avatarLetter}
     </Avatar>
   );
-};
+});
+
+// Add display name to fix the ESLint react/display-name warning
+UserAvatar.displayName = 'UserAvatar';
 
 export default UserAvatar;

@@ -75,10 +75,10 @@ export default function Home() {
       {/* Features Section */}
       <Box sx={{ py: 8 }}>
         <Container>
-          <Typography variant="h3" component="h2" align="center" gutterBottom fontWeight={600}>
+          <Typography variant="h3" component="h1" align="center" gutterBottom fontWeight={600}>
             Find the Perfect Vibe
           </Typography>
-          <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}>
+          <Typography variant="h6" component="h2" align="center" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}>
             Pulse gives you real-time insights about what&apos;s happening at venues around you right now, 
             not what happened last week or last month.
           </Typography>
@@ -128,7 +128,7 @@ export default function Home() {
           <Typography variant="h3" component="h2" align="center" gutterBottom fontWeight={600}>
             Trending Now
           </Typography>
-          <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}>
+          <Typography variant="h6" component="h3" align="center" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}>
             Discover popular specials and events happening right now in your area.
           </Typography>
           
@@ -232,10 +232,10 @@ export default function Home() {
         
         <Container>
           <AuthenticatedTemplate>
-            <Typography variant="h3" align="center" gutterBottom>
+            <Typography variant="h3" component="h2" align="center" gutterBottom>
               Ready to discover more?
             </Typography>
-            <Typography variant="h6" align="center" paragraph sx={{ mb: 4, maxWidth: 800, mx: 'auto', opacity: 0.9 }}>
+            <Typography variant="h6" component="h3" align="center" paragraph sx={{ mb: 4, maxWidth: 800, mx: 'auto', opacity: 0.9 }}>
               Head to your dashboard to manage venues and specials.
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -258,10 +258,10 @@ export default function Home() {
           </AuthenticatedTemplate>
 
           <UnauthenticatedTemplate>
-            <Typography variant="h3" align="center" gutterBottom>
+            <Typography variant="h3" component="h2" align="center" gutterBottom>
               Ready to get started?
             </Typography>
-            <Typography variant="h6" align="center" paragraph sx={{ mb: 4, maxWidth: 800, mx: 'auto', opacity: 0.9 }}>
+            <Typography variant="h6" component="h3" align="center" paragraph sx={{ mb: 4, maxWidth: 800, mx: 'auto', opacity: 0.9 }}>
               Sign in to save your favorite venues, receive notifications, and more.
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>

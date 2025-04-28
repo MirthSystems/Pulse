@@ -3,13 +3,13 @@ import React, { useEffect } from "react";
 // Msal imports
 import { MsalAuthenticationTemplate } from "@azure/msal-react";
 import { InteractionType } from "@azure/msal-browser";
-import { loginRequest } from "../configs/auth";
+import { loginRequest } from "../../configs/auth";
 
 // App imports
-import { ProfileData } from "../components/profile/ProfileData";
-import Loading from "../components/Loading";
-import ErrorComponent from "../components/ErrorComponent";
-import { useGraph } from "../hooks/useGraph";
+import { ProfileData } from "@/components/profile/ProfileData";
+import Loading from "@/components/Loading";
+import ErrorComponent from "@/components/ErrorComponent";
+import { useGraph } from "@/hooks/useGraph";
 
 // Material-ui imports
 import { Paper, Alert } from "@mui/material";
