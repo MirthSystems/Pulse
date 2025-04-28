@@ -49,7 +49,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
 
   const handleThemeChange = (newPreference: ThemePreference) => {
     if (newPreference === 'system') {
-      useSystemPreference();
+      useSystemPreference;
     } else {
       setThemeMode(newPreference);
     }
