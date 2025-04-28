@@ -12,12 +12,20 @@ import { loginRequest } from '../../configs/auth';
 import { AuthContextType } from '../../types/auth-context-type';
 import { AuthContext } from '../auth-context';
 
-// Provider props
+/**
+ * Props for the AuthProvider component.
+ * @property children - React children to be wrapped by the auth provider.
+ */
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Provider component
+/**
+ * Provides authentication context and MSAL integration to the application.
+ * Handles login, logout, token acquisition, and account state.
+ * @param props - AuthProviderProps
+ * @returns JSX.Element
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useMsalIsAuthenticated();
@@ -25,7 +33,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Update account when auth state changes
   useEffect(() => {
     const activeAccount = instance.getActiveAccount();
     if (activeAccount) {
@@ -38,7 +45,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [instance, accounts, isAuthenticated]);
 
-  // Clear loading state when interaction completes
   useEffect(() => {
     if (inProgress !== InteractionStatus.None) {
       setIsLoading(true);
@@ -47,7 +53,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [inProgress]);
 
-  // Login with redirect
+  /**
+   * Initiates login using redirect flow.
+   * @param request Optional redirect request configuration.
+   */
   const loginRedirect = async (request?: RedirectRequest) => {
     setError(null);
     try {
@@ -58,7 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Login with popup
+  /**
+   * Initiates login using popup flow.
+   * @param request Optional popup request configuration.
+   * @returns AuthenticationResult or null
+   */
   const loginPopup = async (request?: PopupRequest): Promise<AuthenticationResult | null> => {
     setError(null);
     setIsLoading(true);
@@ -73,7 +86,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Logout
+  /**
+   * Logs out the current user.
+   * @param postLogoutRedirectUri Optional URI to redirect to after logout.
+   */
   const logout = async (postLogoutRedirectUri?: string) => {
     setError(null);
     try {
@@ -86,7 +102,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Acquire token silently
+  /**
+   * Acquires an access token silently for the current account.
+   * @param request Optional silent request configuration.
+   * @returns Access token string or null
+   */
   const acquireToken = async (request?: SilentRequest): Promise<string | null> => {
     setError(null);
     try {
@@ -94,13 +114,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!activeAccount) {
         throw new Error('No active account! Sign in before acquiring a token.');
       }
-      
       const tokenRequest = {
         ...loginRequest,
         account: activeAccount,
         ...request
       };
-      
       const response = await instance.acquireTokenSilent(tokenRequest);
       return response.accessToken;
     } catch (err) {
@@ -109,12 +127,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Clear any error
+  /**
+   * Clears any authentication error in context.
+   */
   const clearError = () => {
     setError(null);
   };
 
-  // Context value
   const contextValue: AuthContextType = {
     isAuthenticated,
     isLoading,

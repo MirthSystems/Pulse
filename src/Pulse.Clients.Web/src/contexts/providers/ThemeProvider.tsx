@@ -5,67 +5,65 @@ import { getTheme } from '../../theme';
 import { ThemeContextType } from '../../types/theme-context-type';
 import { ThemeContext } from '../theme-context';
 
-// Props for the provider
+/**
+ * Props for the ThemeProvider component.
+ * @property children - React children to be wrapped by the theme provider.
+ */
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
-// Theme provider component
+/**
+ * Provides theme context and Material UI theming to the application.
+ * Handles palette mode (light/dark), system preference, and localStorage persistence.
+ * @param props - ThemeProviderProps
+ * @returns JSX.Element
+ */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Get saved theme mode from localStorage or use system preference
   const getInitialMode = (): PaletteMode => {
     const savedMode = localStorage.getItem('themeMode');
     if (savedMode && (savedMode === 'light' || savedMode === 'dark')) {
       return savedMode as PaletteMode;
     }
-    
-    // Check system preference if no saved preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
-    
     return 'light';
   };
-  
+
   const [mode, setMode] = useState<PaletteMode>(getInitialMode);
-  
-  // Toggle between light and dark mode
+
+  /**
+   * Toggles between light and dark color modes.
+   */
   const toggleColorMode = () => {
     setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
   };
-  
-  // Update theme when mode changes
+
   useEffect(() => {
     localStorage.setItem('themeMode', mode);
-    
-    // Update body background to match theme
-    document.body.style.backgroundColor = 
-      mode === 'light' ? '#fff' : '#121212';
+    document.body.style.backgroundColor = mode === 'light' ? '#fff' : '#121212';
   }, [mode]);
-  
-  // Listen for system theme preference changes
+
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
     const handleChange = (e: MediaQueryListEvent) => {
-      // Only change if user hasn't explicitly set a preference
       if (!localStorage.getItem('themeMode')) {
         setMode(e.matches ? 'dark' : 'light');
       }
     };
-    
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
-  
+
   const theme = getTheme(mode);
-  
+
   const contextValue: ThemeContextType = {
     mode,
     toggleColorMode,
     isDarkMode: mode === 'dark',
   };
-  
+
   return (
     <ThemeContext.Provider value={contextValue}>
       <MuiThemeProvider theme={theme}>
