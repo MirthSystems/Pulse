@@ -14,7 +14,7 @@ import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness'; // 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '../hooks/useTheme';
-import { ThemePreference } from '../types/theme-context-type';
+import { ThemePreference } from '@/types/theme-preference';
 
 interface ThemeToggleProps {
   size?: 'small' | 'medium' | 'large';
