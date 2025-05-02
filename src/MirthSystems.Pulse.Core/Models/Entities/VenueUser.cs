@@ -3,90 +3,98 @@
     using NodaTime;
 
     /// <summary>
-    /// Represents the association between a user and a venue, including their roles within that venue.
+    /// Represents the association between a user and a venue.
     /// </summary>
     /// <remarks>
-    /// <para>This is a join entity that creates a many-to-many relationship between users and venues with role information.</para>
-    /// <para>Each user can be associated with multiple venues, and each venue can have multiple users.</para>
-    /// <para>Each user-venue relationship can have multiple roles (e.g., Owner, Manager) through the VenueUserRoles collection.</para>
+    /// Essential for venue-specific roles and permissions.
+    /// Example: User "auth0|12345" associated with "The Rusty Anchor Pub".
     /// </remarks>
     public class VenueUser
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the venue-user association.
-        /// </summary>
-        /// <remarks>
-        /// This is the primary key for the VenueUser entity in the database.
-        /// </remarks>
         public long Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the foreign key to the ApplicationUser entity.
-        /// </summary>
-        /// <remarks>
-        /// <para>This represents the user who has a role within the venue.</para>
-        /// <para>This is a required field and is used to establish the relationship with the ApplicationUser entity.</para>
-        /// </remarks>
         public long UserId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the foreign key to the Venue entity.
-        /// </summary>
-        /// <remarks>
-        /// <para>This represents the venue where the user has a role.</para>
-        /// <para>This is a required field and is used to establish the relationship with the Venue entity.</para>
-        /// </remarks>
         public long VenueId { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp when this user was first associated with this venue.
+        /// Gets or sets when the association was created.
         /// </summary>
+        /// <remarks>
+        /// Example: "2023-03-01T09:00:00Z" for association date.
+        /// </remarks>
         public Instant CreatedAt { get; set; }
 
         /// <summary>
-        /// Gets or sets the ID of the user who created this association.
+        /// Gets or sets the ID of the user who created the association.
         /// </summary>
         /// <remarks>
-        /// <para>This provides an audit trail for venue user assignments.</para>
-        /// <para>If null, the association was created by the system.</para>
+        /// Example: 1 for the system admin who added the user.
         /// </remarks>
         public long? CreatedByUserId { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this user-venue association is active.
+        /// Gets or sets whether the association is active.
         /// </summary>
         /// <remarks>
-        /// <para>When false, all permissions for this user at this venue are effectively revoked.</para>
-        /// <para>This allows temporarily suspending access without removing role assignments.</para>
+        /// Example: true for an active association.
         /// </remarks>
         public bool IsActive { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the navigation property to the associated ApplicationUser.
+        /// Gets or sets whether the association has been soft-deleted.
         /// </summary>
         /// <remarks>
-        /// <para>This is the navigation property that links to the user associated with this venue.</para>
-        /// <para>It provides access to the user's information such as their name, email, and other profile details.</para>
+        /// Default is false. When true, the association is considered deleted but remains in the database.
+        /// </remarks>
+        public bool IsDeleted { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets when the association was deleted, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// Example: "2023-06-01T10:00:00Z" for deletion date.
+        /// </remarks>
+        public Instant? DeletedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who deleted the association, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// Example: 3 for the admin who removed it.
+        /// </remarks>
+        public long? DeletedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the associated user.
+        /// </summary>
+        /// <remarks>
+        /// Example: User with UserObjectId "auth0|12345".
         /// </remarks>
         public required virtual ApplicationUser User { get; set; }
 
         /// <summary>
-        /// Gets or sets the navigation property to the associated Venue.
+        /// Gets or sets the associated venue.
         /// </summary>
         /// <remarks>
-        /// <para>This is the navigation property that links to the venue associated with this user.</para>
-        /// <para>It provides access to the venue's information such as its name, address, and other details.</para>
+        /// Example: Venue named "The Rusty Anchor Pub".
         /// </remarks>
         public required virtual Venue Venue { get; set; }
 
         /// <summary>
-        /// Gets or sets the join entity collection that establishes the many-to-many relationship between VenueUser and VenueRole.
+        /// Gets or sets the user who created the association.
         /// </summary>
         /// <remarks>
-        /// <para>This collection connects to the VenueUserRole join table in the database.</para>
-        /// <para>It represents the explicit relationships between this user-venue pair and all assigned roles.</para>
-        /// <para>Use this collection for adding or removing roles from this user-venue relationship.</para>
+        /// Optional navigation property; null if created by the system.
         /// </remarks>
-        public virtual ICollection<VenueUserRole> VenueRoles { get; set; } = [];
+        public virtual ApplicationUser? CreatedByUser { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user who deleted the association, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// Optional navigation property; null if not deleted or deleted by the system.
+        /// </remarks>
+        public virtual ApplicationUser? DeletedByUser { get; set; }
+
+        public virtual ICollection<VenueUserRole> Roles { get; set; } = [];
     }
 }

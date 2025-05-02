@@ -1,51 +1,74 @@
 ﻿namespace MirthSystems.Pulse.Core.Models.Entities
 {
+    using NodaTime;
+
     /// <summary>
     /// Represents a permission within the application's authorization system.
     /// </summary>
     /// <remarks>
-    /// <para>Permissions are the fundamental units of authorization in the system and represent
-    /// discrete actions that can be performed on resources.</para>
-    /// <para>They can be assigned directly to users or grouped into roles.</para>
+    /// Permissions define specific actions on resources.
+    /// Example: "venues:edit" allows editing venue details.
     /// </remarks>
     public class ApplicationPermission
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the permission.
-        /// </summary>
         public long Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the unique name of the permission, used programmatically.
+        /// Gets or sets the unique permission value.
         /// </summary>
         /// <remarks>
-        /// <para>This should be a colon-notation string representing the resource and action.</para>
-        /// <para>Examples: "specials:create", "venues:edit", "users:manage"</para>
+        /// Example: "venues:edit" for editing venue information.
         /// </remarks>
         public required string Value { get; set; }
 
         /// <summary>
-        /// Gets or sets the description of the permission.
+        /// Gets or sets a description of the permission.
         /// </summary>
         /// <remarks>
-        /// <para>This should clearly explain what the permission allows.</para>
-        /// <para>Examples: "Allows creating new specials", "Allows editing venue details"</para>
+        /// Example: "Allows editing of venue details."
         /// </remarks>
         public required string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets the collection of application roles that include this permission.
+        /// Gets or sets when the permission was created.
         /// </summary>
+        public Instant CreatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who created the permission.
+        /// </summary>
+        public long? CreatedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the permission was last updated.
+        /// </summary>
+        public Instant? UpdatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who last updated the permission.
+        /// </summary>
+        public long? UpdatedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the permission is active.
+        /// </summary>
+        /// <remarks>
+        /// Example: true for an active permission, false for a deprecated one.
+        /// </remarks>
+        public bool IsActive { get; set; } = true; 
+
         public virtual ICollection<ApplicationRolePermission> Roles { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets the collection of users that have been directly assigned this permission.
-        /// </summary>
         public virtual ICollection<ApplicationUserPermission> Users { get; set; } = [];
+        public virtual ICollection<VenueRolePermission> VenueRoles { get; set; } = [];
 
         /// <summary>
-        /// Gets or sets the collection of venue roles that include this permission.
+        /// Gets or sets the user who created the permission.
         /// </summary>
-        public virtual ICollection<VenueRolePermission> VenueRoles { get; set; } = [];
+        public virtual ApplicationUser? CreatedByUser { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user who last updated the permission.
+        /// </summary>
+        public virtual ApplicationUser? UpdatedByUser { get; set; }
     }
 }

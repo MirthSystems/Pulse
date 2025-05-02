@@ -2,6 +2,8 @@
 {
     using System.Net;
 
+    using NodaTime;
+
     /// <summary>
     /// Represents a venue entity within the Pulse platform.
     /// </summary>
@@ -98,32 +100,115 @@
         public long AddressId { get; set; }
 
         /// <summary>
-        /// Gets or sets the navigation property to the associated Address.
+        /// Gets or sets the timestamp when the venue was created.
         /// </summary>
         /// <remarks>
-        /// <para>This navigation property links to the physical address of the venue.</para>
-        /// <para>It provides access to the address information such as street, city, and geographic coordinates.</para>
+        /// <para>Example: "2023-01-01T08:00:00Z" for a venue created on January 1, 2023.</para>
+        /// </remarks>
+        public Instant CreatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who created the venue.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: 1 for the user who created the venue.</para>
+        /// </remarks>
+        public long CreatedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp when the venue was last updated, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: "2023-02-15T10:00:00Z" for a venue updated on February 15, 2023.</para>
+        /// </remarks>
+        public Instant? UpdatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who last updated the venue, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: 2 for the user who last updated the venue.</para>
+        /// </remarks>
+        public long? UpdatedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the venue has been soft-deleted.
+        /// </summary>
+        /// <remarks>
+        /// <para>Default is false. When true, the venue is considered deleted but remains in the database for auditing purposes.</para>
+        /// </remarks>
+        public bool IsDeleted { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the timestamp when the venue was deleted, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: "2023-03-01T12:00:00Z" for a venue deleted on March 1, 2023.</para>
+        /// </remarks>
+        public Instant? DeletedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who deleted the venue, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: 3 for the user who performed the deletion.</para>
+        /// </remarks>
+        public long? DeletedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the associated address.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: Address with Line1 "123 Main St".</para>
         /// </remarks>
         public required virtual Address Address { get; set; }
 
         /// <summary>
-        /// Gets or sets the collection of VenueUser associations for this venue.
+        /// Gets or sets the collection of users associated with this venue.
         /// </summary>
         /// <remarks>
-        /// <para>This navigation property represents the users who have a relationship with this venue.</para>
-        /// <para>Each VenueUser defines a user's role(s) within the venue context.</para>
-        /// <para>Common roles include Venue Owner and Venue Manager, which determine the user's permissions.</para>
+        /// <para>Example: Users with roles like "Venue Manager" for this venue.</para>
         /// </remarks>
-        public virtual ICollection<VenueUser> VenueUsers { get; set; } = [];
+        public virtual ICollection<VenueUser> Users { get; set; } = [];
 
         /// <summary>
-        /// Gets or sets the collection of operating schedules for this venue.
+        /// Gets or sets the collection of business hours for this venue.
         /// </summary>
         /// <remarks>
-        /// <para>This navigation property represents the business hours for each day of the week.</para>
-        /// <para>A venue typically has 7 operating schedule entries, one for each day of the week.</para>
-        /// <para>Operating schedules define when the venue is open, closed, or has special hours.</para>
+        /// <para>Example: Operating schedules for each day of the week.</para>
         /// </remarks>
         public virtual ICollection<OperatingSchedule> BusinessHours { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the collection of specials associated with this venue.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: Specials like "Half-Price Wings Happy Hour".</para>
+        /// </remarks>
+        public virtual ICollection<Special> Specials { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the user who created the venue.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: User with UserObjectId "auth0|12345".</para>
+        /// </remarks>
+        public required virtual ApplicationUser CreatedByUser { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user who last updated the venue, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: User with UserObjectId "auth0|67890".</para>
+        /// </remarks>
+        public virtual ApplicationUser? UpdatedByUser { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user who deleted the venue, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>Example: User with UserObjectId "auth0|99999".</para>
+        /// </remarks>
+        public virtual ApplicationUser? DeletedByUser { get; set; }
     }
 }

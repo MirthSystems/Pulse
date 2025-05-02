@@ -1,73 +1,122 @@
 ﻿namespace MirthSystems.Pulse.Core.Models.Entities
 {
     using System.Security.Claims;
+    using NodaTime;
 
     /// <summary>
-    /// Represents a role within the application's authorization system that can be assigned to users.
+    /// Represents a system-wide role within the application's authorization system.
     /// </summary>
     /// <remarks>
-    /// <para>Application roles apply system-wide and are not tied to specific venues.</para>
-    /// <para>They group permissions to facilitate easier access management.</para>
+    /// Application roles apply globally and group permissions.
+    /// Example: "System.Administrator" role granting broad access.
     /// </remarks>
     public class ApplicationRole
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the role.
-        /// </summary>
         public long Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the display name of the role.
+        /// Gets or sets the human-readable name of the role.
         /// </summary>
         /// <remarks>
-        /// <para>Examples: "System Administrator", "Content Manager"</para>
+        /// Example: "System Administrator" displayed in the UI.
         /// </remarks>
         public required string DisplayName { get; set; }
 
         /// <summary>
-        /// Gets or sets the unique name of the role, used programmatically.
+        /// Gets or sets the machine-readable role value.
         /// </summary>
         /// <remarks>
-        /// <para>This should be a dot-notation string representing the role hierarchy.</para>
-        /// <para>Examples: "System.Administrator", "Content.Manager"</para>
+        /// Example: "System.Administrator" used in code logic.
         /// </remarks>
         public required string Value { get; set; }
 
         /// <summary>
-        /// Gets or sets the description of the role.
+        /// Gets or sets a description of the role's purpose.
         /// </summary>
         /// <remarks>
-        /// <para>This should clearly explain the purpose and scope of the role.</para>
-        /// <para>Example: "Full administrative access to all system functions"</para>
+        /// Example: "Grants full administrative access to the system."
         /// </remarks>
         public required string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets the collection of users assigned to this role.
-        /// </summary>
-        public virtual ICollection<ApplicationUserRole> Users { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets the collection of permissions assigned to this role.
-        /// </summary>
-        public virtual ICollection<ApplicationRolePermission> Permissions { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this role is active and available for assignment.
+        /// Gets or sets whether the role is active.
         /// </summary>
         /// <remarks>
-        /// <para>When false, this role cannot be newly assigned to users but existing assignments remain intact.</para>
-        /// <para>This allows deprecating roles while preserving existing assignments.</para>
+        /// Example: true for an active role, false for a deprecated one.
         /// </remarks>
         public bool IsActive { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the display order for this role when showing in lists.
+        /// Gets or sets the display order for UI sorting.
         /// </summary>
         /// <remarks>
-        /// <para>Lower values appear first in the list.</para>
-        /// <para>System roles typically have lower values than custom roles.</para>
+        /// Example: 1 to prioritize this role in lists.
         /// </remarks>
         public int DisplayOrder { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the role was created.
+        /// </summary>
+        /// <remarks>
+        /// Example: "2023-01-15T10:00:00Z" for a role created on that date.
+        /// </remarks>
+        public Instant CreatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who created the role.
+        /// </summary>
+        public long? CreatedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the role was last updated.
+        /// </summary>
+        /// <remarks>
+        /// Example: "2023-03-15T14:00:00Z" for a role updated on that date.
+        /// </remarks>
+        public Instant? UpdatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who last updated the role.
+        /// </summary>
+        public long? UpdatedByUserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the role has been soft-deleted.
+        /// </summary>
+        /// <remarks>
+        /// Default is false. When true, the role is considered deleted but remains in the database.
+        /// </remarks>
+        public bool IsDeleted { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets when the role was deleted, if applicable.
+        /// </summary>
+        /// <remarks>
+        /// Example: "2023-06-01T10:00:00Z" for deletion date.
+        /// </remarks>
+        public Instant? DeletedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the user who deleted the role, if applicable.
+        /// </summary>
+        public long? DeletedByUserId { get; set; }
+
+        public virtual ICollection<ApplicationUserRole> Users { get; set; } = [];
+        public virtual ICollection<ApplicationRolePermission> Permissions { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the user who created the role.
+        /// </summary>
+        public virtual ApplicationUser? CreatedByUser { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user who last updated the role.
+        /// </summary>
+        public virtual ApplicationUser? UpdatedByUser { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user who deleted the role, if applicable.
+        /// </summary>
+        public virtual ApplicationUser? DeletedByUser { get; set; }
     }
 }
