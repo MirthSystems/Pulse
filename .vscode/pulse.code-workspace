@@ -296,11 +296,5 @@
 		  "request": "attach"
 		}
 	  ],
-	  "compounds": [
-		{
-		  "name": "Aspire Full Stack",
-		  "configurations": [".NET Core Launch (web)", ".NET Core Attach"]
-		}
-	  ]
 	},
 }
