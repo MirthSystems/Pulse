@@ -1,24 +1,64 @@
 namespace MirthSystems.Pulse.Services.DatabaseMigrations
 {
-    public class Worker : BackgroundService
-    {
-        private readonly ILogger<Worker> _logger;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Storage;
 
-        public Worker(ILogger<Worker> logger)
+    using MirthSystems.Pulse.Infrastructure.Data;
+
+    public class Worker(
+        IServiceProvider serviceProvider,
+        IHostEnvironment hostEnvironment,
+        IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
+    {
+        private readonly ActivitySource _activitySource = new(hostEnvironment.ApplicationName);
+
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _logger = logger;
+            using var activity = _activitySource.StartActivity(hostEnvironment.ApplicationName, ActivityKind.Client);
+
+            try
+            {
+                using var scope = serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                await EnsureDatabaseAsync(dbContext, cancellationToken);
+                await RunMigrationAsync(dbContext, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                activity?.AddException(ex);
+                throw;
+            }
+
+            hostApplicationLifetime.StopApplication();
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        private static async Task EnsureDatabaseAsync(ApplicationDbContext dbContext, CancellationToken cancellationToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            var dbCreator = dbContext.GetService<IRelationalDatabaseCreator>();
+
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
-                if (_logger.IsEnabled(LogLevel.Information))
+                if (!await dbCreator.ExistsAsync(cancellationToken))
                 {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                    await dbCreator.CreateAsync(cancellationToken);
                 }
-                await Task.Delay(1000, stoppingToken);
-            }
+            });
+        }
+
+        private static async Task RunMigrationAsync(ApplicationDbContext dbContext, CancellationToken cancellationToken)
+        {
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+                await dbContext.Database.MigrateAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            });
         }
     }
 }

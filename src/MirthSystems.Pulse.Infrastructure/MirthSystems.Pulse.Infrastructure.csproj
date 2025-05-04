@@ -13,9 +13,9 @@
   <ItemGroup>
     <Folder Include="Auth\" />
     <Folder Include="Data\Handlers\" />
+    <Folder Include="Data\Migrations\" />
     <Folder Include="Data\Queries\" />
     <Folder Include="Data\Repositories\" />
-    <Folder Include="Extensions\" />
     <Folder Include="Configurations\" />
     <Folder Include="Services\Geocoding\" />
   </ItemGroup>
@@ -27,6 +27,7 @@
     <PackageReference Include="Azure.Maps.Common" Version="1.0.0-beta.4" />
     <PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />
     <PackageReference Include="Azure.Maps.Search" Version="2.0.0-beta.5" />
+    <PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="9.0.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
@@ -40,6 +41,12 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="9.0.4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="9.0.4" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

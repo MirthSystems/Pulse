@@ -125,9 +125,9 @@
         /// Gets or sets the ID of the user who created the special.
         /// </summary>
         /// <remarks>
-        /// <para>Example: 3 for the user who created the special.</para>
+        /// <para>Example: "auth0|12345" for the user who created the special.</para>
         /// </remarks>
-        public long CreatedByUserId { get; set; }
+        public required string CreatedByUserId { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp when the special was last updated, if applicable.
@@ -141,9 +141,9 @@
         /// Gets or sets the ID of the user who last updated the special, if applicable.
         /// </summary>
         /// <remarks>
-        /// <para>Example: 4 for the user who last updated the special.</para>
+        /// <para>Example: "auth0|12345" for the user who last updated the special.</para>
         /// </remarks>
-        public long? UpdatedByUserId { get; set; }
+        public string? UpdatedByUserId { get; set; }
 
         /// <summary>
         /// Gets or sets whether the special has been soft-deleted.
@@ -165,38 +165,14 @@
         /// Gets or sets the ID of the user who deleted the special, if applicable.
         /// </summary>
         /// <remarks>
-        /// <para>Example: 5 for the user who performed the deletion.</para>
+        /// <para>Example: "auth0|12345" for the user who performed the deletion.</para>
         /// </remarks>
-        public long? DeletedByUserId { get; set; }
+        public string? DeletedByUserId { get; set; }
 
         /// <summary>
         /// The venue associated with the special.
         /// This navigation property provides access to the venue's details, such as its location for timezone derivation.
         /// </summary>
         public required virtual Venue Venue { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user who created the special.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: User with UserObjectId "auth0|12345".</para>
-        /// </remarks>
-        public required virtual ApplicationUser CreatedByUser { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user who last updated the special, if applicable.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: User with UserObjectId "auth0|67890".</para>
-        /// </remarks>
-        public virtual ApplicationUser? UpdatedByUser { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user who deleted the special, if applicable.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: User with UserObjectId "auth0|99999".</para>
-        /// </remarks>
-        public virtual ApplicationUser? DeletedByUser { get; set; }
     }
 }

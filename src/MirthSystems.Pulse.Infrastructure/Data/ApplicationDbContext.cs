@@ -9,20 +9,10 @@
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<ApplicationUser> Users { get; set; }
-        public DbSet<ApplicationRole> Roles { get; set; }
-        public DbSet<ApplicationPermission> Permissions { get; set; }
-        public DbSet<ApplicationUserRole> UserRoles { get; set; }
-        public DbSet<ApplicationUserPermission> UserPermissions { get; set; }
-        public DbSet<ApplicationRolePermission> RolePermissions { get; set; }
-        public DbSet<Venue> Venues { get; set; }
-        public DbSet<VenueUser> VenueUsers { get; set; }
-        public DbSet<VenueRole> VenueRoles { get; set; }
-        public DbSet<VenueUserRole> VenueUserRoles { get; set; }
-        public DbSet<VenueRolePermission> VenueRolePermissions { get; set; }
-        public DbSet<Special> Specials { get; set; }
-        public DbSet<OperatingSchedule> OperatingSchedules { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<Venue> Venues { get; set; }
+        public DbSet<OperatingSchedule> OperatingSchedules { get; set; }
+        public DbSet<Special> Specials { get; set; }   
 
         /// <summary>
         /// Configures the model that was discovered by convention from the entity types.

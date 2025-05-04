@@ -111,9 +111,9 @@
         /// Gets or sets the ID of the user who created the venue.
         /// </summary>
         /// <remarks>
-        /// <para>Example: 1 for the user who created the venue.</para>
+        /// <para>Example: "auth0|12345" for the user who created the venue.</para>
         /// </remarks>
-        public long CreatedByUserId { get; set; }
+        public required string CreatedByUserId { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp when the venue was last updated, if applicable.
@@ -127,9 +127,9 @@
         /// Gets or sets the ID of the user who last updated the venue, if applicable.
         /// </summary>
         /// <remarks>
-        /// <para>Example: 2 for the user who last updated the venue.</para>
+        /// <para>Example: "auth0|12345" for the user who last updated the venue.</para>
         /// </remarks>
-        public long? UpdatedByUserId { get; set; }
+        public string? UpdatedByUserId { get; set; }
 
         /// <summary>
         /// Gets or sets whether the venue has been soft-deleted.
@@ -151,9 +151,9 @@
         /// Gets or sets the ID of the user who deleted the venue, if applicable.
         /// </summary>
         /// <remarks>
-        /// <para>Example: 3 for the user who performed the deletion.</para>
+        /// <para>Example: "auth0|12345" for the user who performed the deletion.</para>
         /// </remarks>
-        public long? DeletedByUserId { get; set; }
+        public string? DeletedByUserId { get; set; }
 
         /// <summary>
         /// Gets or sets the associated address.
@@ -162,14 +162,6 @@
         /// <para>Example: Address with Line1 "123 Main St".</para>
         /// </remarks>
         public required virtual Address Address { get; set; }
-
-        /// <summary>
-        /// Gets or sets the collection of users associated with this venue.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: Users with roles like "Venue Manager" for this venue.</para>
-        /// </remarks>
-        public virtual ICollection<VenueUser> Users { get; set; } = [];
 
         /// <summary>
         /// Gets or sets the collection of business hours for this venue.
@@ -186,29 +178,5 @@
         /// <para>Example: Specials like "Half-Price Wings Happy Hour".</para>
         /// </remarks>
         public virtual ICollection<Special> Specials { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets the user who created the venue.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: User with UserObjectId "auth0|12345".</para>
-        /// </remarks>
-        public required virtual ApplicationUser CreatedByUser { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user who last updated the venue, if applicable.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: User with UserObjectId "auth0|67890".</para>
-        /// </remarks>
-        public virtual ApplicationUser? UpdatedByUser { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user who deleted the venue, if applicable.
-        /// </summary>
-        /// <remarks>
-        /// <para>Example: User with UserObjectId "auth0|99999".</para>
-        /// </remarks>
-        public virtual ApplicationUser? DeletedByUser { get; set; }
     }
 }
