@@ -2,9 +2,20 @@ using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cache = builder.AddRedis("cache");
+var cache = builder.AddRedis("mirthsystems-pulse-cache")
+    .WithDataBindMount(
+        source: @"..\..\resources\cache",
+        isReadOnly: false
+    )
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithRedisInsight();
 
-var apiService = builder.AddProject<Projects.MirthSystems_Pulse_Services_API>("api");
+var dbMigrations = builder.AddProject<Projects.MirthSystems_Pulse_Services_DatabaseMigrations>("mirthsystems-pulse-migrations");
+
+var apiService = builder.AddProject<Projects.MirthSystems_Pulse_Services_API>("mirthsystems-pulse-api")
+    .WaitFor(dbMigrations)
+    .WithReference(cache)
+    .WaitFor(cache);
 
 builder.AddNpmApp("client", "../MirthSystems.Pulse.Client", "dev")
     .WithExternalHttpEndpoints()

@@ -24,9 +24,7 @@
                 }
                 else
                 {
-                    Log.Logger = new LoggerConfiguration()
-                        .ReadFrom.Configuration(serilogConfigurationSection)
-                        .CreateLogger();
+                    ConfigureLogger();
                 }
             }
             catch (Exception ex)
@@ -37,32 +35,47 @@
                 Log.Logger.Information("Falling back to default logging configuration");
             }
 
-            services.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.ClearProviders();
-                loggingBuilder.AddSerilog(dispose: true);
-            });
-
             return services;
+
+            void ConfigureLogger()
+            {
+                services.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.AddSerilog(
+                        logger: 
+                            Log.Logger = new LoggerConfiguration()
+                                .ReadFrom.Configuration(serilogConfigurationSection)
+                                .CreateLogger(), 
+                        dispose: true
+                    );
+                });
+            }
 
             void ConfigureDefaultLogger()
             {
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Information()
-                    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                    .MinimumLevel.Override("System", LogEventLevel.Warning)
-                    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-                    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-                    .Enrich.FromLogContext()
-                    .Enrich.WithMachineName()
-                    .Enrich.WithThreadId()
-                    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-                    .WriteTo.File(
-                        path: "logs/mirth-pulse-.log",
-                        rollingInterval: RollingInterval.Day,
-                        retainedFileCountLimit: 7,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Properties:j}{NewLine}{Exception}")
-                    .CreateLogger();
+                services.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.AddSerilog(
+                        logger:
+                            Log.Logger = new LoggerConfiguration()
+                                .MinimumLevel.Information()
+                                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                                .Enrich.FromLogContext()
+                                .Enrich.WithMachineName()
+                                .Enrich.WithThreadId()
+                                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                                .WriteTo.File(
+                                    path: "logs/mirthsystems-pulse-.log",
+                                    rollingInterval: RollingInterval.Day,
+                                    retainedFileCountLimit: 7,
+                                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Properties:j}{NewLine}{Exception}")
+                                .CreateLogger(), 
+                        dispose: true
+                    );
+                });
             }
         }
 
@@ -84,8 +97,6 @@
                     npg.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                     npg.UseNodaTime();
                     npg.UseNetTopologySuite();
-                    npg.EnableRetryOnFailure(3);
-                    npg.MaxBatchSize(100);
                 })
                 .UseSnakeCaseNamingConvention();
 

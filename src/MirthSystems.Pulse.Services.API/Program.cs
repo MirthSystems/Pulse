@@ -1,12 +1,18 @@
 
 using Microsoft.OpenApi.Models;
 
+using MirthSystems.Pulse.Infrastructure.Extensions;
+
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.AddServiceDefaults();
+
+        builder.Services.AddApplicationLogging(builder.Configuration.GetSection("Serilog"));
+        builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
         builder.Services.AddAuthentication().AddJwtBearer();
         builder.Services.AddAuthorization();
 

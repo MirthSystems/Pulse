@@ -28,7 +28,7 @@
         /// <para>- "10 Downing Street" (UK)</para>
         /// <para>- "35 Rue du Faubourg Saint-Honoré" (France)</para>
         /// </remarks>
-        public required string AddressLine1 { get; set; }
+        public required string StreetAddress { get; set; }
 
         /// <summary>
         /// This optional field captures additional address details like suite or unit numbers.
@@ -39,7 +39,7 @@
         /// <para>- "Flat 3" (UK)</para>
         /// <para>- "Apartment 12B" (General)</para>
         /// </remarks>
-        public string? AddressLine2 { get; set; }
+        public string? SecondaryAddress { get; set; }
 
         /// <summary>
         /// The city, town, or locality where the address is located.

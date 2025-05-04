@@ -3,38 +3,6 @@
 	  {
 		"path": "..",
 		"name": "MirthSystems.Pulse"
-	  },
-	  {
-		"path": "../src/MirthSystems.Pulse.AppHost",
-		"name": "AppHost"
-	  },
-	  {
-		"path": "../src/MirthSystems.Pulse.ServiceDefaults",
-		"name": "ServiceDefaults"
-	  },
-	  {
-		"path": "../src/MirthSystems.Pulse.Services.API",
-		"name": "API Service"
-	  },
-	  {
-		"path": "../src/MirthSystems.Pulse.Core",
-		"name": "Core"
-	  },
-	  {
-		"path": "../src/MirthSystems.Pulse.Infrastructure",
-		"name": "Infrastructure"
-	  },
-	  {
-		"path": "../src/MirthSystems.Pulse.Client",
-		"name": "Client"
-	  },
-	  {
-		"path": "../tests/MirthSystems.Pulse.UnitTests",
-		"name": "Unit Tests"
-	  },
-	  {
-		"path": "../tests/MirthSystems.Pulse.IntegrationTests",
-		"name": "Integration Tests"
 	  }
 	],
 	"settings": {

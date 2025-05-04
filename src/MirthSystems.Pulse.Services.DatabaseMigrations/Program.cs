@@ -12,11 +12,11 @@ namespace MirthSystems.Pulse.Services.DatabaseMigrations
         {
             var builder = Host.CreateApplicationBuilder(args);
 
-            var serilogConfigurationSection = builder.Configuration.GetSection("Serilog");
-            var dbConnectionString = builder.Configuration.GetConnectionString("PostgresDbConnection");
+            builder.AddServiceDefaults();            
 
-            builder.Services.AddApplicationLogging(serilogConfigurationSection);
-            builder.Services.AddApplicationDbContext(dbConnectionString);
+            builder.Services.AddApplicationLogging(builder.Configuration.GetSection("Serilog"));
+            builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
+
             builder.Services.AddHostedService<Worker>();
 
             var host = builder.Build();

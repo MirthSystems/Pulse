@@ -14,12 +14,14 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.2.1" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.2.1" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.2.1" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.2.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MirthSystems.Pulse.Client\MirthSystems.Pulse.Client.esproj" />
     <ProjectReference Include="..\MirthSystems.Pulse.Services.API\MirthSystems.Pulse.Services.API.csproj" />
-    <ProjectReference Include="..\pulse-client\MirthSystems.Pulse.Client.esproj" />
+    <ProjectReference Include="..\MirthSystems.Pulse.Services.DatabaseMigrations\MirthSystems.Pulse.Services.DatabaseMigrations.csproj" />
   </ItemGroup>
 
 </Project>

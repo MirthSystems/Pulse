@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MirthSystems.Pulse.Core\MirthSystems.Pulse.Core.csproj" />
     <ProjectReference Include="..\MirthSystems.Pulse.Infrastructure\MirthSystems.Pulse.Infrastructure.csproj" />
+    <ProjectReference Include="..\MirthSystems.Pulse.ServiceDefaults\MirthSystems.Pulse.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

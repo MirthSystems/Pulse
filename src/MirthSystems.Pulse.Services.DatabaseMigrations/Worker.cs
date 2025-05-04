@@ -2,63 +2,44 @@ namespace MirthSystems.Pulse.Services.DatabaseMigrations
 {
     using System.ComponentModel;
     using System.Diagnostics;
+
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.EntityFrameworkCore.Storage;
 
     using MirthSystems.Pulse.Infrastructure.Data;
 
-    public class Worker(
-        IServiceProvider serviceProvider,
-        IHostEnvironment hostEnvironment,
-        IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
+    using Serilog;
+
+    public class Worker : BackgroundService
     {
-        private readonly ActivitySource _activitySource = new(hostEnvironment.ApplicationName);
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<Worker> _logger;
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger)
         {
-            using var activity = _activitySource.StartActivity(hostEnvironment.ApplicationName, ActivityKind.Client);
-
-            try
-            {
-                using var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                await EnsureDatabaseAsync(dbContext, cancellationToken);
-                await RunMigrationAsync(dbContext, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                activity?.AddException(ex);
-                throw;
-            }
-
-            hostApplicationLifetime.StopApplication();
+            this._serviceProvider = serviceProvider;
+            this._logger = logger;
         }
 
-        private static async Task EnsureDatabaseAsync(ApplicationDbContext dbContext, CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var dbCreator = dbContext.GetService<IRelationalDatabaseCreator>();
-
-            var strategy = dbContext.Database.CreateExecutionStrategy();
-            await strategy.ExecuteAsync(async () =>
+            using (var scope = this._serviceProvider.CreateScope())
             {
-                if (!await dbCreator.ExistsAsync(cancellationToken))
+                this._logger.LogInformation("Starting database migration check...");
+
+                try
                 {
-                    await dbCreator.CreateAsync(cancellationToken);
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    await dbContext.Database.MigrateAsync(stoppingToken);
+                    this._logger.LogInformation("Database migrations applied successfully.");
                 }
-            });
-        }
-
-        private static async Task RunMigrationAsync(ApplicationDbContext dbContext, CancellationToken cancellationToken)
-        {
-            var strategy = dbContext.Database.CreateExecutionStrategy();
-            await strategy.ExecuteAsync(async () =>
-            {
-                await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-                await dbContext.Database.MigrateAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-            });
+                catch (Exception ex)
+                {
+                    this._logger.LogError(ex, "Migration failed.");
+                    throw;
+                }
+            }
         }
     }
 }

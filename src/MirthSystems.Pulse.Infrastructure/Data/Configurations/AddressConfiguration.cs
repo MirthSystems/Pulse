@@ -18,14 +18,14 @@
                 .ValueGeneratedOnAdd()
                 .HasComment("The unique identifier for the address. This is the primary key for the address entity in the database.");
 
-            builder.Property(a => a.AddressLine1)
+            builder.Property(a => a.StreetAddress)
                 .IsRequired()
-                .HasColumnName("address_line_1")
+                .HasColumnName("street_address")
                 .HasMaxLength(255)
                 .HasComment("This required field captures the primary address information, typically including the street number and name. Examples include: '123 Main St' (USA), '10 Downing Street' (UK), '35 Rue du Faubourg Saint-Honoré' (France).");
 
-            builder.Property(a => a.AddressLine2)
-                .HasColumnName("address_line_2")
+            builder.Property(a => a.SecondaryAddress)
+                .HasColumnName("secondary_address")
                 .HasMaxLength(255)
                 .HasComment("This optional field captures additional address details like suite or unit numbers. Examples include: 'Suite 200' (USA), 'Flat 3' (UK), 'Apartment 12B' (General).");
 
