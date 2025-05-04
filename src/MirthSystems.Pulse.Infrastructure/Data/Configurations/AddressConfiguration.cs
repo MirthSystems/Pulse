@@ -2,7 +2,7 @@
 {
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
     using Microsoft.EntityFrameworkCore;
-    using MirthSystems.Pulse.Core.Models.Entities;
+    using MirthSystems.Pulse.Core.Entities;
 
     public class AddressConfiguration : IEntityTypeConfiguration<Address>
     {

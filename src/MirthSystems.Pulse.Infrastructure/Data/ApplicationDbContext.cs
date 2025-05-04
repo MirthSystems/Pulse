@@ -1,9 +1,11 @@
 ﻿namespace MirthSystems.Pulse.Infrastructure.Data
 {
     using System.Reflection;
+
     using Microsoft.EntityFrameworkCore;
+
+    using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Enums;
-    using MirthSystems.Pulse.Core.Models.Entities;
 
     public class ApplicationDbContext : DbContext
     {

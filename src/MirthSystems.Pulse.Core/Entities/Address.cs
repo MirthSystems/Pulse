@@ -1,4 +1,4 @@
-﻿namespace MirthSystems.Pulse.Core.Models.Entities
+﻿namespace MirthSystems.Pulse.Core.Entities
 {
     using NetTopologySuite.Geometries;
 
