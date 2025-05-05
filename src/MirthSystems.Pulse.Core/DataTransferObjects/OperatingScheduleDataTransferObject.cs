@@ -1,6 +1,7 @@
 ﻿namespace MirthSystems.Pulse.Core.DataTransferObjects
 {
     using System;
+    using NodaTime;
 
     public class OperatingScheduleDataTransferObject
     {
@@ -26,13 +27,13 @@
         /// The time when the venue opens on this day (in 24-hour format)
         /// </summary>
         /// <remarks>e.g. 09:00</remarks>
-        public TimeSpan TimeOfOpen { get; set; }
+        public LocalTime TimeOfOpen { get; set; }
 
         /// <summary>
         /// The time when the venue closes on this day (in 24-hour format)
         /// </summary>
         /// <remarks>e.g. 22:00</remarks>
-        public TimeSpan TimeOfClose { get; set; }
+        public LocalTime TimeOfClose { get; set; }
 
         /// <summary>
         /// Whether the venue is closed on this day

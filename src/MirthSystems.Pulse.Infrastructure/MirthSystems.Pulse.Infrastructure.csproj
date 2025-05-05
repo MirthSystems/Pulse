@@ -23,6 +23,7 @@
   <ItemGroup>
     <PackageReference Include="Auth0.AuthenticationApi" Version="7.36.0" />
     <PackageReference Include="Auth0.ManagementApi" Version="7.36.0" />
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Azure.Maps.Common" Version="1.0.0-beta.4" />
     <PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />
@@ -45,6 +46,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />

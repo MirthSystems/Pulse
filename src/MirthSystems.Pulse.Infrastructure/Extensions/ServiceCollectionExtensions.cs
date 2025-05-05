@@ -45,7 +45,7 @@
                 services.AddSerilog(
                     logger: Log.Logger = new LoggerConfiguration()
                                 .ReadFrom.Configuration(serilogConfigurationSection)
-                                .CreateLogger(),
+                                .CreateBootstrapLogger(),
                     dispose: true
                 );
             }
@@ -57,9 +57,7 @@
                             Log.Logger = new LoggerConfiguration()
                                 .MinimumLevel.Information()
                                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-                                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                                 .Enrich.FromLogContext()
                                 .Enrich.WithMachineName()
                                 .Enrich.WithThreadId()
@@ -69,7 +67,7 @@
                                     rollingInterval: RollingInterval.Day,
                                     retainedFileCountLimit: 7,
                                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Properties:j}{NewLine}{Exception}")
-                                .CreateLogger(),
+                                .CreateBootstrapLogger(),
                         dispose: true
                 );
             }
