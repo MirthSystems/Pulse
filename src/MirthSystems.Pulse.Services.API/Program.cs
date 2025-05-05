@@ -12,7 +12,7 @@ internal class Program
 
         builder.AddServiceDefaults();
 
-        builder.Services.AddApplicationLogging(builder.Configuration.GetSection("Serilog"));
+        builder.Services.AddApplicationLogging(builder.Configuration.GetSection("Logging:Serilog"));
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
         builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
         builder.Services.AddAuthentication().AddJwtBearer();
