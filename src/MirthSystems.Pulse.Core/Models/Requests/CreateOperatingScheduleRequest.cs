@@ -12,6 +12,7 @@
         /// </summary>
         /// <remarks>e.g. 5</remarks>
         [Required]
+        [Range(1, long.MaxValue, ErrorMessage = "VenueId must be a positive number.")]
         public long? VenueId { get; set; }
 
         /// <summary>

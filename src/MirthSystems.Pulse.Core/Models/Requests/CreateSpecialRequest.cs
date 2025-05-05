@@ -73,7 +73,7 @@
         /// The recurrence pattern in CRON format
         /// </summary>
         /// <remarks>e.g. 0 17 * * 1-5</remarks>
-        [StringLength(100)]
+        [RegularExpression(@"^(\*|[0-9,-/]+)(\s+(\*|[0-9,-/]+)){4,5}$", ErrorMessage = "Invalid CRON expression.")]
         public string? CronSchedule { get; set; }
     }
 }

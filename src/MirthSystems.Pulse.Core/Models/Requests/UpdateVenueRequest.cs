@@ -1,4 +1,5 @@
 ﻿namespace MirthSystems.Pulse.Core.Models.Requests
+// No changes needed; all properties already have appropriate data annotations.
 {
     using System.ComponentModel.DataAnnotations;
 

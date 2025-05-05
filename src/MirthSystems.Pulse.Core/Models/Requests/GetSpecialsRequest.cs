@@ -8,18 +8,12 @@
     public class GetSpecialsRequest
     {
         /// <summary>
-        /// The latitude coordinate to search around
+        /// The address to search around
         /// </summary>
-        /// <remarks>e.g. 41.8781</remarks>
-        [Range(-90, 90)]
-        public double? Latitude { get; set; }
-
-        /// <summary>
-        /// The longitude coordinate to search around
-        /// </summary>
-        /// <remarks>e.g. -87.6298</remarks>
-        [Range(-180, 180)]
-        public double? Longitude { get; set; }
+        /// <remarks>e.g. "123 Main St, Chicago, IL"</remarks>
+        [Required]
+        [StringLength(250, ErrorMessage = "Address cannot exceed 250 characters.")]
+        public string Address { get; set; } = string.Empty;
 
         /// <summary>
         /// The search radius in miles (default: 5)
@@ -31,25 +25,29 @@
         /// <summary>
         /// The date and time to check if specials are running (default: now)
         /// </summary>
-        /// <remarks>e.g. 2025-05-05T18:30:00Z</remarks>
-        public DateTimeOffset? DateTime { get; set; }
+        /// <remarks>e.g. "2025-05-05T18:30:00Z"</remarks>
+        [RegularExpression(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$", ErrorMessage = "Invalid date-time format. Use ISO 8601 format (e.g., 2025-05-05T18:30:00Z).")]
+        public string? SearchDateTime { get; set; }
 
         /// <summary>
         /// The venue ID to filter by, if applicable
         /// </summary>
         /// <remarks>e.g. 5</remarks>
+        [Range(1, long.MaxValue, ErrorMessage = "VenueId must be a positive number.")]
         public long? VenueId { get; set; }
 
         /// <summary>
         /// Filter by type of special
         /// </summary>
         /// <remarks>e.g. 1</remarks>
+        [Range(1, int.MaxValue, ErrorMessage = "SpecialTypeId must be a positive number.")]
         public int? SpecialTypeId { get; set; }
 
         /// <summary>
         /// Whether to only return currently running specials
         /// </summary>
         /// <remarks>e.g. true</remarks>
+        [Required(ErrorMessage = "IsCurrentlyRunning must be specified.")]
         public bool? IsCurrentlyRunning { get; set; }
 
         /// <summary>

@@ -64,6 +64,7 @@
         /// The operating hours for each day of the week
         /// </summary>
         [Required]
+        [MinLength(1, ErrorMessage = "At least one operating schedule must be provided.")]
         public required ICollection<CreateOperatingScheduleRequest> BusinessHours { get; set; }
     }
 }
