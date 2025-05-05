@@ -1,4 +1,6 @@
 
+using System.Reflection;
+
 using Microsoft.OpenApi.Models;
 
 using MirthSystems.Pulse.Infrastructure.Extensions;
@@ -24,7 +26,7 @@ internal class Program
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "MirthSystems.Pulse.Services.API",
+                Title = "Pulse API",
                 Description = "Learn how to protect your .NET applications with Auth0",
                 Contact = new OpenApiContact
                 {
@@ -51,9 +53,16 @@ internal class Program
             options.AddSecurityDefinition("Bearer", securitySchema);
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                  {
-                  { securitySchema, new[] { "Bearer" } }
-                  });
+            {
+                { securitySchema, new[] { "Bearer" } }
+            });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                options.IncludeXmlComments(xmlPath);
+            }
         });
 
         var app = builder.Build();

@@ -1,14 +1,9 @@
 ﻿namespace MirthSystems.Pulse.Core.Models
 {
-    using System.Collections.Generic;
-
-    /// <summary>
-    /// Response model for venue business hours
-    /// </summary>
-    public class BusinessHours
+    public class VenueSpecials
     {
         /// <summary>
-        /// The venue ID these business hours belong to
+        /// The venue ID these specials belong to
         /// </summary>
         /// <remarks>e.g. 5</remarks>
         public long VenueId { get; set; }
@@ -20,8 +15,8 @@
         public required string VenueName { get; set; }
 
         /// <summary>
-        /// The operating schedules for each day of the week
+        /// The list of specials associated with this venue
         /// </summary>
-        public required ICollection<OperatingScheduleListItem> ScheduleItems { get; set; }
+        public required ICollection<SpecialListItem> Specials { get; set; }
     }
 }
