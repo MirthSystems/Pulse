@@ -219,21 +219,23 @@ For our initial release, we're focusing on delivering these essential features:
 
 ### Frontend:
 
-- Progressive Web App (PWA) for cross-platform compatibility for MVP
+- Progressive Web App (PWA) built with **React**, using **Vite** as the build tool for fast development and optimized production builds.
   - Installable on mobile devices
   - Offline capabilities
   - Push notifications (with user permission)
   - Responsive design for all screen sizes
-- Future native mobile applications planned post-MVP (iOS & Android)
-- Web portal for venue management
-- Technologies: Blazor WASM, HTML, CSS, JavaScript frameworks
+- Written in **TypeScript** for improved code quality and developer experience.
+- State management handled by **Redux**, providing a predictable state container.
+- User interface components from **MUI (Material-UI)**, implementing Material Design for a consistent and modern look.
+- Future native mobile applications planned post-MVP (iOS & Android).
+- Web portal for venue management.
 
 ### Backend:
 
 - .NET Core (C#) API services
 - PostgreSQL database for data storage and initial recommendation engine
 - Real-time messaging infrastructure for instant updates
-- Auth0 integration for authentication and authorization services
+- **Auth0** integration for authentication and authorization services
   - Secure user registration and login
   - Social login options (Google, Facebook, etc.)
   - JWT token-based authentication
@@ -246,16 +248,15 @@ For our initial release, we're focusing on delivering these essential features:
 ### Identity and Authentication:
 
 - **Auth0 as Identity Provider:**
-  - Centralized user authentication and management
-  - Secure credential storage and handling
-  - Multi-factor authentication support
-  - User profile management
-  - Password policies and account recovery
-  - Compliance with security best practices
-  - Venue owner verification workflows
-  - Role assignment and management (users, venue owners, administrators)
-  - Authentication API integration with frontend and backend services
-  - User session management and token handling
+  - Centralized user authentication and management using Auth0's identity platform.
+  - Secure credential storage and handling.
+  - Support for multi-factor authentication.
+  - User profile management.
+  - Compliance with security best practices.
+  - Venue owner verification workflows.
+  - Role assignment and management (users, venue owners, administrators).
+  - Integration with frontend and backend services via OAuth/OpenID Connect.
+  - User session management and token handling.
 
 ### Authentication & Authorization Model:
 
@@ -304,7 +305,7 @@ This hybrid approach allows granular control over which users can manage specifi
 - **VenueUserToPermissionLink**: Links venue users with specific permissions
 - **ApplicationUser**: User account data and application-specific information
   - Id: Auto-incrementing primary key in our database
-  - ExternalId: Auth0 identifier for linking to external identity provider
+  - Auth0Id: Auth0 identifier for linking to external identity provider
   - Account creation and last login timestamps
   - Default location and search radius preferences
   - Location services opt-in status
@@ -317,7 +318,6 @@ This hybrid approach allows granular control over which users can manage specifi
 - Containerized deployment with Docker
 - Scalable microservices architecture
 - Real-time data synchronization
-- Auth0 tenant configuration and integration
 - Secure API communication with Auth0
 
 ## MVP Constraints & Limitations
@@ -413,7 +413,7 @@ After successful MVP launch and validation, we plan to implement:
     - International markets
 
 8. **Enhanced Authentication and User Management:**
-    - Advanced Auth0 Rules and Actions for user onboarding
+    - Advanced authentication rules and actions for user onboarding
     - Custom authentication flows for specific user segments
     - Enterprise SSO options for venue chains
     - Expanded user profile capabilities
@@ -469,8 +469,8 @@ For our upcoming playtesting phase, we'll focus on:
     - Auth0-based account management
 
 3. **Technical Validation:**
-    - Performance under various load conditions
-    - Real-time update delivery speed
+    - Performance of the React application under various load conditions
+    - Real-time update delivery speed in the React frontend
     - Address geocoding accuracy
     - Content expiration system reliability
     - Category indexing and search performance
@@ -478,7 +478,7 @@ For our upcoming playtesting phase, we'll focus on:
     - Database query performance for recommendations
     - PWA performance across different devices and browsers
     - Auth0 integration reliability and performance
-    - Authentication flow and session management
+    - Authentication flow and session management in the React app
 
 ## Success Metrics
 

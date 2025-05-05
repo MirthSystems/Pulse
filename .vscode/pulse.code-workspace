@@ -1,0 +1,268 @@
+{
+	"folders": [
+	  {
+		"path": "..",
+		"name": "MirthSystems.Pulse"
+	  }
+	],
+	"settings": {
+	  "dotnet.defaultSolution": "Pulse.sln",
+	  "editor.formatOnSave": true,
+	  "editor.codeActionsOnSave": {
+		"source.organizeImports": "explicit"
+	  },
+	  "omnisharp.enableRoslynAnalyzers": true,
+	  "dotnet.server.useOmnisharp": true,
+	  "csharp.format.enable": true,
+	  "[csharp]": {
+		"editor.defaultFormatter": "ms-dotnettools.csdevkit"
+	  },
+	  "[typescript]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features"
+	  },
+	  "[json]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	  },
+	  "[CSS]": {
+		"editor.defaultFormatter": "vscode.css-language-features"
+	  },
+	  "[HTML]": {
+		"editor.defaultFormatter": "vscode.html-language-features"
+	  },
+	  "[typescriptreact]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features"
+	  },
+	  "files.exclude": {
+		"**/bin": true,
+		"**/obj": true,
+		"**/.vs": true,
+		"**/node_modules": true
+	  },
+	  "search.exclude": {
+		"**/bin": true,
+		"**/obj": true
+	  },
+	  "database.connections": [
+		{
+		  "type": "postgres",
+		  "name": "Pulse Development",
+		  "host": "localhost",
+		  "port": 5432,
+		  "user": "${env:POSTGRES_USER}",
+		  "password": "${env:POSTGRES_PASSWORD}",
+		  "database": "pulse"
+		}
+	  ]
+	},
+	"extensions": {
+	  "recommendations": [
+		"ms-dotnettools.csharp",
+		"ms-dotnettools.csdevkit",
+		"ms-azuretools.vscode-docker",
+		"ms-vsliveshare.vsliveshare",
+		"ms-mssql.mssql",
+		"ckolkman.vscode-postgres",
+		"mtxr.sqltools",
+		"mtxr.sqltools-driver-pg",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint",
+		"redhat.vscode-yaml",
+		"mikestead.dotenv",
+		"formulahendry.dotnet-test-explorer",
+		"ms-dotnettools.aspire"
+	  ]
+	},
+	"tasks": {
+	  "version": "2.0.0",
+	  "tasks": [
+		{
+		  "label": "build",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"build",
+			"${workspaceFolder}/Pulse.sln",
+			"/property:GenerateFullPaths=true",
+			"/consoleloggerparameters:NoSummary;ForceNoAlign"
+		  ],
+		  "problemMatcher": "$msCompile",
+		  "group": {
+			"kind": "build",
+			"isDefault": true
+		  }
+		},
+		{
+		  "label": "publish",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"publish",
+			"${workspaceFolder}/Pulse.sln",
+			"/property:GenerateFullPaths=true",
+			"/consoleloggerparameters:NoSummary;ForceNoAlign"
+		  ],
+		  "problemMatcher": "$msCompile"
+		},
+		{
+		  "label": "watch",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"watch",
+			"run",
+			"--project",
+			"${workspaceFolder}/Pulse.sln"
+		  ],
+		  "problemMatcher": "$msCompile",
+		  "group": "build"
+		},
+		{
+		  "label": "ef migrations add",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"ef",
+			"migrations",
+			"add",
+			"${input:migrationName}",
+			"--project",
+			"${workspaceFolder}/src/MirthSystems.Pulse.Infrastructure/MirthSystems.Pulse.Infrastructure.csproj"
+		  ],
+		  "problemMatcher": "$msCompile"
+		},
+		{
+		  "label": "run database migrations",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"run",
+			"--project",
+			"${workspaceFolder}/src/MirthSystems.Pulse.Services.DatabaseMigrations/MirthSystems.Pulse.Services.DatabaseMigrations.csproj"
+		  ],
+		  "problemMatcher": "$msCompile"
+		},
+		{
+		  "label": "aspire run",
+		  "command": "dotnet",
+		  "type": "shell",
+		  "args": [
+			"run",
+			"--project",
+			"${workspaceFolder}/src/MirthSystems.Pulse.AppHost/MirthSystems.Pulse.AppHost.csproj"
+		  ],
+		  "problemMatcher": "$msCompile",
+		  "group": "none"
+		},
+		{
+		  "label": "run unit tests",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"test",
+			"${workspaceFolder}/tests/MirthSystems.Pulse.UnitTests/MirthSystems.Pulse.UnitTests.csproj"
+		  ],
+		  "problemMatcher": "$msCompile",
+		  "group": "test"
+		},
+		{
+		  "label": "run integration tests",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"test",
+			"${workspaceFolder}/tests/MirthSystems.Pulse.IntegrationTests/MirthSystems.Pulse.IntegrationTests.csproj"
+		  ],
+		  "problemMatcher": "$msCompile",
+		  "group": "test"
+		},
+		{
+		  "label": "run all tests",
+		  "command": "dotnet",
+		  "type": "process",
+		  "args": [
+			"test",
+			"${workspaceFolder}/Pulse.sln"
+		  ],
+		  "problemMatcher": "$msCompile",
+		  "group": {
+			"kind": "test",
+			"isDefault": true
+		  }
+		}
+	  ]
+	},
+	"launch": {
+	  "version": "0.2.0",
+	  "configurations": [
+		{
+		  "name": "Launch Aspire AppHost",
+		  "type": "coreclr",
+		  "request": "launch",
+		  "preLaunchTask": "build",
+		  "program": "${workspaceFolder}/src/MirthSystems.Pulse.AppHost/bin/Debug/net9.0/MirthSystems.Pulse.AppHost.dll",
+		  "args": [],
+		  "cwd": "${workspaceFolder}/src/MirthSystems.Pulse.AppHost",
+		  "stopAtEntry": false,
+		  "env": {
+			"ASPNETCORE_ENVIRONMENT": "Development",
+			"DOTNET_ENVIRONMENT": "Development"
+		  }
+		},
+		{
+		  "name": ".NET Core Launch (web)",
+		  "type": "coreclr",
+		  "request": "launch",
+		  "preLaunchTask": "build",
+		  "program": "${workspaceFolder}/src/MirthSystems.Pulse.Services.API/bin/Debug/net9.0/MirthSystems.Pulse.Services.API.dll",
+		  "args": [],
+		  "cwd": "${workspaceFolder}/src/MirthSystems.Pulse.Services.API",
+		  "stopAtEntry": false,
+		  "env": {
+			"ASPNETCORE_ENVIRONMENT": "Development"
+		  }
+		},
+		{
+		  "name": "Client (npm)",
+		  "type": "node",
+		  "request": "launch",
+		  "cwd": "${workspaceFolder}/src/MirthSystems.Pulse.Client",
+		  "runtimeExecutable": "npm",
+		  "runtimeArgs": ["run", "dev"],
+		  "skipFiles": ["<node_internals>/**"]
+		},
+		{
+		  "name": "Run Unit Tests",
+		  "type": "coreclr",
+		  "request": "launch",
+		  "preLaunchTask": "build",
+		  "program": "dotnet",
+		  "args": [
+			"test",
+			"${workspaceFolder}/tests/MirthSystems.Pulse.UnitTests/MirthSystems.Pulse.UnitTests.csproj"
+		  ],
+		  "cwd": "${workspaceFolder}",
+		  "console": "internalConsole",
+		  "stopAtEntry": false
+		},
+		{
+		  "name": "Run Integration Tests",
+		  "type": "coreclr",
+		  "request": "launch",
+		  "preLaunchTask": "build",
+		  "program": "dotnet",
+		  "args": [
+			"test",
+			"${workspaceFolder}/tests/MirthSystems.Pulse.IntegrationTests/MirthSystems.Pulse.IntegrationTests.csproj"
+		  ],
+		  "cwd": "${workspaceFolder}",
+		  "console": "internalConsole",
+		  "stopAtEntry": false
+		},
+		{
+		  "name": ".NET Core Attach",
+		  "type": "coreclr",
+		  "request": "attach"
+		}
+	  ],
+	},
+}

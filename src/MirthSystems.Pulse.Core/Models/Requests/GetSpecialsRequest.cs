@@ -1,0 +1,69 @@
+﻿namespace MirthSystems.Pulse.Core.Models.Requests
+{
+    using System.ComponentModel.DataAnnotations;
+
+    /// <summary>
+    /// Query parameters for filtering specials
+    /// </summary>
+    public class GetSpecialsRequest
+    {
+        /// <summary>
+        /// The latitude coordinate to search around
+        /// </summary>
+        /// <remarks>e.g. 41.8781</remarks>
+        [Range(-90, 90)]
+        public double? Latitude { get; set; }
+
+        /// <summary>
+        /// The longitude coordinate to search around
+        /// </summary>
+        /// <remarks>e.g. -87.6298</remarks>
+        [Range(-180, 180)]
+        public double? Longitude { get; set; }
+
+        /// <summary>
+        /// The search radius in miles (default: 5)
+        /// </summary>
+        /// <remarks>e.g. 10</remarks>
+        [Range(0.1, 100)]
+        public double Radius { get; set; } = 5;
+
+        /// <summary>
+        /// The date and time to check if specials are running (default: now)
+        /// </summary>
+        /// <remarks>e.g. 2025-05-05T18:30:00Z</remarks>
+        public DateTimeOffset? DateTime { get; set; }
+
+        /// <summary>
+        /// The venue ID to filter by, if applicable
+        /// </summary>
+        /// <remarks>e.g. 5</remarks>
+        public long? VenueId { get; set; }
+
+        /// <summary>
+        /// Filter by type of special
+        /// </summary>
+        /// <remarks>e.g. 1</remarks>
+        public int? SpecialTypeId { get; set; }
+
+        /// <summary>
+        /// Whether to only return currently running specials
+        /// </summary>
+        /// <remarks>e.g. true</remarks>
+        public bool? IsCurrentlyRunning { get; set; }
+
+        /// <summary>
+        /// Page number for pagination (default: 1)
+        /// </summary>
+        /// <remarks>e.g. 1</remarks>
+        [Range(1, int.MaxValue)]
+        public int Page { get; set; } = 1;
+
+        /// <summary>
+        /// Number of items per page (default: 20, max: 100)
+        /// </summary>
+        /// <remarks>e.g. 20</remarks>
+        [Range(1, 100)]
+        public int PageSize { get; set; } = 20;
+    }
+}
