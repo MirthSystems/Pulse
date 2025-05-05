@@ -4,13 +4,21 @@ using Microsoft.OpenApi.Models;
 
 using MirthSystems.Pulse.Infrastructure.Extensions;
 
+using Serilog;
+
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddApplicationLogging(builder.Configuration.GetSection("Logging:Serilog"));
+        builder.Logging.AddSerilog(
+                logger: Log.Logger = new LoggerConfiguration()
+                            .ReadFrom.Configuration(builder.Configuration.GetSection("Logging:Serilog"))
+                            .CreateBootstrapLogger(),
+                dispose: true
+            );
+
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
         builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
         builder.Services.AddAuthentication().AddJwtBearer();

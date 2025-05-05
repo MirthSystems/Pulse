@@ -17,64 +17,6 @@
 
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddApplicationLogging(
-            this IServiceCollection services,
-            IConfigurationSection? serilogConfigurationSection = null)
-        {
-            try
-            {
-                if (serilogConfigurationSection == null)
-                {
-                    ConfigureDefaultLogger();
-                }
-                else
-                {
-                    ConfigureLogger();
-                }
-            }
-            catch (Exception ex)
-            {
-                ConfigureDefaultLogger();
-
-                Log.Logger.Warning("Failed to configure Serilog from configuration section: {ErrorMessage}", ex.Message);
-                Log.Logger.Information("Falling back to default logging configuration");
-            }
-
-            return services;
-
-            void ConfigureLogger()
-            {
-                services.AddSerilog(
-                    logger: Log.Logger = new LoggerConfiguration()
-                                .ReadFrom.Configuration(serilogConfigurationSection)
-                                .CreateBootstrapLogger(),
-                    dispose: true
-                );
-            }
-
-            void ConfigureDefaultLogger()
-            {
-                services.AddSerilog(
-                        logger:
-                            Log.Logger = new LoggerConfiguration()
-                                .MinimumLevel.Information()
-                                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                                .Enrich.FromLogContext()
-                                .Enrich.WithMachineName()
-                                .Enrich.WithThreadId()
-                                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-                                .WriteTo.File(
-                                    path: "logs/mirthsystems-pulse-.log",
-                                    rollingInterval: RollingInterval.Day,
-                                    retainedFileCountLimit: 7,
-                                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Properties:j}{NewLine}{Exception}")
-                                .CreateBootstrapLogger(),
-                        dispose: true
-                );
-            }
-        }
-
         public static IServiceCollection AddApplicationDbContext(
             this IServiceCollection services,
             string? postgresConnectionString = null)
