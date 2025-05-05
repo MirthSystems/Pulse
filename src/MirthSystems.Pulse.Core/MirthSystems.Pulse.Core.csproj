@@ -14,6 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Maps.Common" Version="1.0.0-beta.4" />
+    <PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />
+    <PackageReference Include="Azure.Maps.Search" Version="2.0.0-beta.5" />
+    <PackageReference Include="Azure.Maps.TimeZones" Version="1.0.0-beta.1" />
     <PackageReference Include="FluentValidation" Version="12.0.0" />
     <PackageReference Include="NetTopologySuite" Version="2.6.0" />
     <PackageReference Include="NodaTime" Version="3.2.2" />

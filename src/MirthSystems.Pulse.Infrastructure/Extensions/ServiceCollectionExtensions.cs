@@ -12,6 +12,8 @@
     using Azure;
     using Azure.Maps.Search;
     using Azure.Maps.TimeZones;
+    using MirthSystems.Pulse.Core.Interfaces;
+    using MirthSystems.Pulse.Infrastructure.Services;
 
     public static class ServiceCollectionExtensions
     {
@@ -118,8 +120,8 @@
 
             var azureMapsKeyCredential = new AzureKeyCredential(azureMapsSubscriptionKey);
 
-            services.AddSingleton(serviceProvider => new MapsSearchClient(azureMapsKeyCredential));
-            services.AddSingleton(serviceProvider => new MapsTimeZoneClient(azureMapsKeyCredential));
+            services.AddSingleton<IAzureMapsApiService>(serviceProvider =>
+                new AzureMapsApiService(azureMapsKeyCredential));
 
             return services;
         }
