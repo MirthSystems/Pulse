@@ -54,6 +54,7 @@
                 .HasComment("The country where the address is located. This required field helps determine address formatting and timezone derivation. Examples include: 'United States', 'Canada', 'United Kingdom', 'Australia'. Use the full country name rather than abbreviations or codes.");
 
             builder.Property(a => a.Location)
+                .IsRequired()
                 .HasColumnName("location")
                 .HasColumnType("geometry(Point, 4326)")
                 .HasComment("The geographical coordinates (latitude and longitude) of the address. Used for mapping and location-based features. This uses NetTopologySuite.Geometries.Point to store geographic coordinates. Example: new Point(-87.6298, 41.8781) { SRID = 4326 } for Chicago.");

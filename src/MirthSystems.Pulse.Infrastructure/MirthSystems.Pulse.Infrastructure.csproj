@@ -17,7 +17,7 @@
     <Folder Include="Data\Queries\" />
     <Folder Include="Data\Repositories\" />
     <Folder Include="Configurations\" />
-    <Folder Include="Services\Geocoding\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>

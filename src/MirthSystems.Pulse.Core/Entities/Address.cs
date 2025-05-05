@@ -105,7 +105,7 @@
         /// <para>Note: SRID 4326 is the spatial reference system for WGS 84, the standard for GPS.</para>
         /// <para>Important: Point constructor takes (longitude, latitude) in that order, not (latitude, longitude).</para>
         /// </remarks>
-        public Point? Location { get; set; }
+        public required Point Location { get; set; }
 
         public virtual Venue? Venue { get; set; }
     }
