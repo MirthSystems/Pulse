@@ -9,6 +9,9 @@
     using Serilog;
     using Serilog.Events;
     using System;
+    using Azure;
+    using Azure.Maps.Search;
+    using Azure.Maps.TimeZones;
 
     public static class ServiceCollectionExtensions
     {
@@ -39,23 +42,17 @@
 
             void ConfigureLogger()
             {
-                services.AddLogging(loggingBuilder =>
-                {
-                    loggingBuilder.AddSerilog(
-                        logger: 
-                            Log.Logger = new LoggerConfiguration()
+                services.AddSerilog(
+                    logger: Log.Logger = new LoggerConfiguration()
                                 .ReadFrom.Configuration(serilogConfigurationSection)
-                                .CreateLogger(), 
-                        dispose: true
-                    );
-                });
+                                .CreateLogger(),
+                    dispose: true
+                );
             }
 
             void ConfigureDefaultLogger()
             {
-                services.AddLogging(loggingBuilder =>
-                {
-                    loggingBuilder.AddSerilog(
+                services.AddSerilog(
                         logger:
                             Log.Logger = new LoggerConfiguration()
                                 .MinimumLevel.Information()
@@ -72,10 +69,9 @@
                                     rollingInterval: RollingInterval.Day,
                                     retainedFileCountLimit: 7,
                                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Properties:j}{NewLine}{Exception}")
-                                .CreateLogger(), 
+                                .CreateLogger(),
                         dispose: true
-                    );
-                });
+                );
             }
         }
 
@@ -109,6 +105,23 @@
                     }
                 }
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddAzureMaps(
+            this IServiceCollection services,
+            string? azureMapsSubscriptionKey = null)
+        {
+            if (string.IsNullOrEmpty(azureMapsSubscriptionKey))
+            {
+                throw new ArgumentException("Azure Subscription key is required.", nameof(azureMapsSubscriptionKey));
+            }
+
+            var azureMapsKeyCredential = new AzureKeyCredential(azureMapsSubscriptionKey);
+
+            services.AddSingleton(serviceProvider => new MapsSearchClient(azureMapsKeyCredential));
+            services.AddSingleton(serviceProvider => new MapsTimeZoneClient(azureMapsKeyCredential));
 
             return services;
         }

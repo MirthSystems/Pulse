@@ -15,6 +15,7 @@ internal class Program
 
         builder.Services.AddApplicationLogging(builder.Configuration.GetSection("Serilog"));
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
+        builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
         builder.Services.AddAuthentication().AddJwtBearer();
         builder.Services.AddAuthorization();
 
