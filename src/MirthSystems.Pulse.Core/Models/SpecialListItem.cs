@@ -1,73 +1,43 @@
 ﻿namespace MirthSystems.Pulse.Core.Models
 {
+    using System.ComponentModel.DataAnnotations;
+
     using MirthSystems.Pulse.Core.Enums;
 
     public class SpecialListItem
     {
-        /// <summary>
-        /// The unique identifier for the special
-        /// </summary>
-        /// <remarks>e.g. 1</remarks>
-        public long Id { get; set; }
+        [RegularExpression(@"^\d+$", ErrorMessage = "Id must be a positive integer")]
+        public string Id { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The venue ID this special belongs to
-        /// </summary>
-        /// <remarks>e.g. 5</remarks>
-        public long VenueId { get; set; }
+        [RegularExpression(@"^\d+$", ErrorMessage = "VenueId must be a positive integer")]
+        public string VenueId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The name of the venue this special belongs to
-        /// </summary>
-        /// <remarks>e.g. The Rusty Anchor Pub</remarks>
-        public required string VenueName { get; set; }
+        [Required]
+        [StringLength(255)]
+        public string VenueName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Brief description of the special
-        /// </summary>
-        /// <remarks>e.g. Half-Price Wings Happy Hour</remarks>
-        public required string Content { get; set; }
+        [Required]
+        [StringLength(500)]
+        public string Content { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The category of the special
-        /// </summary>
-        /// <remarks>e.g. Drink</remarks>
         public SpecialTypes Type { get; set; }
 
-        /// <summary>
-        /// The category name of the special
-        /// </summary>
-        /// <remarks>e.g. Drink</remarks>
-        public required string TypeName { get; set; }
+        [Required]
+        public string TypeName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The starting date of the special
-        /// </summary>
-        /// <remarks>e.g. 2025-05-01</remarks>
-        public required string StartDate { get; set; }
+        [Required]
+        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Date must be in format YYYY-MM-DD")]
+        public string StartDate { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The time when the special starts
-        /// </summary>
-        /// <remarks>e.g. 17:00</remarks>
-        public required string StartTime { get; set; }
+        [Required]
+        [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Time must be in format HH:mm")]
+        public string StartTime { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The time when the special ends, if applicable
-        /// </summary>
-        /// <remarks>e.g. 20:00</remarks>
-        public string? EndTime { get; set; }
+        [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Time must be in format HH:mm")]
+        public string EndTime { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Whether the special is currently active
-        /// </summary>
-        /// <remarks>e.g. true</remarks>
         public bool IsCurrentlyRunning { get; set; }
 
-        /// <summary>
-        /// Whether the special occurs regularly
-        /// </summary>
-        /// <remarks>e.g. true</remarks>
         public bool IsRecurring { get; set; }
     }
 }

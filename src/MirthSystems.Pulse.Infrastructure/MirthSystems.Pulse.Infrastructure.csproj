@@ -12,16 +12,15 @@
 
   <ItemGroup>
     <Folder Include="Auth\" />
+    <Folder Include="Configurations\" />
     <Folder Include="Data\Handlers\" />
     <Folder Include="Data\Migrations\" />
     <Folder Include="Data\Queries\" />
-    <Folder Include="Configurations\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Auth0.AuthenticationApi" Version="7.36.0" />
     <PackageReference Include="Auth0.ManagementApi" Version="7.36.0" />
-    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Azure.Maps.Common" Version="1.0.0-beta.4" />
     <PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />

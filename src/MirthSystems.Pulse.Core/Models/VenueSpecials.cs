@@ -1,22 +1,16 @@
 ﻿namespace MirthSystems.Pulse.Core.Models
 {
+    using System.ComponentModel.DataAnnotations;
     public class VenueSpecials
     {
-        /// <summary>
-        /// The venue ID these specials belong to
-        /// </summary>
-        /// <remarks>e.g. 5</remarks>
-        public long VenueId { get; set; }
+        [RegularExpression(@"^\d+$", ErrorMessage = "Id must be a positive integer")]
+        public string VenueId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The name of the venue
-        /// </summary>
-        /// <remarks>e.g. The Rusty Anchor Pub</remarks>
-        public required string VenueName { get; set; }
+        [Required]
+        [StringLength(255)]
+        public string VenueName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The list of specials associated with this venue
-        /// </summary>
-        public required ICollection<SpecialListItem> Specials { get; set; }
+        [Required]
+        public ICollection<SpecialListItem> Specials { get; set; } = new List<SpecialListItem>();
     }
 }

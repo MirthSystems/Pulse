@@ -6,6 +6,7 @@
     using MirthSystems.Pulse.Core.Models.Requests;
     using MirthSystems.Pulse.Core.Models;
     using NodaTime;
+    using MirthSystems.Pulse.Core.Extensions;
 
     public class OperatingScheduleService : IOperatingScheduleService
     {
@@ -20,18 +21,22 @@
             _logger = logger;
         }
 
-        public async Task<OperatingScheduleDetail?> GetOperatingScheduleByIdAsync(long id)
+        public async Task<OperatingScheduleDetail?> GetOperatingScheduleByIdAsync(string id)
         {
             try
             {
-                var schedule = await _unitOfWork.OperatingSchedules.GetByIdAsync(id);
+                if (!long.TryParse(id, out long scheduleId))
+                {
+                    _logger.LogWarning("Invalid schedule ID format: {Id}", id);
+                    return null;
+                }
+                var schedule = await _unitOfWork.OperatingSchedules.GetByIdAsync(scheduleId);
                 if (schedule == null)
                 {
                     return null;
                 }
-
                 var venue = await _unitOfWork.Venues.GetByIdAsync(schedule.VenueId);
-                return MapToOperatingScheduleDetail(schedule, venue?.Name ?? "Unknown Venue");
+                return schedule.MapToOperatingScheduleDetail(venue?.Name ?? "Unknown Venue");
             }
             catch (Exception ex)
             {
@@ -44,31 +49,22 @@
         {
             try
             {
-                // Verify venue exists
-                var venue = await _unitOfWork.Venues.GetByIdAsync(request.VenueId);
+                if (!long.TryParse(request.VenueId, out long venueId))
+                {
+                    throw new ArgumentException("Invalid venue ID format");
+                }
+                var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
                 if (venue == null)
                 {
                     throw new KeyNotFoundException($"Venue with ID {request.VenueId} not found");
                 }
 
-                // Parse times
-                var timeOfOpen = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen));
-                var timeOfClose = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose));
-
-                // Create new operating schedule
-                var schedule = new OperatingSchedule
-                {
-                    VenueId = request.VenueId,
-                    DayOfWeek = (DayOfWeek)request.DayOfWeek,
-                    TimeOfOpen = timeOfOpen,
-                    TimeOfClose = timeOfClose,
-                    IsClosed = request.IsClosed,
-                };
+                var schedule = request.MapToNewOperatingSchedule();
 
                 await _unitOfWork.OperatingSchedules.AddAsync(schedule);
                 await _unitOfWork.SaveChangesAsync();
 
-                return MapToOperatingScheduleDetail(schedule, venue.Name);
+                return schedule.MapToOperatingScheduleDetail(venue.Name ?? "Unknown Venue");
             }
             catch (Exception ex)
             {
@@ -77,29 +73,27 @@
             }
         }
 
-        public async Task<OperatingScheduleDetail> UpdateOperatingScheduleAsync(long id, UpdateOperatingScheduleRequest request, string userId)
+        public async Task<OperatingScheduleDetail> UpdateOperatingScheduleAsync(string id, UpdateOperatingScheduleRequest request, string userId)
         {
-            var schedule = await _unitOfWork.OperatingSchedules.GetByIdAsync(id);
-            if (schedule == null)
-            {
-                throw new KeyNotFoundException($"Operating schedule with ID {id} not found");
-            }
-
             try
             {
-                // Parse times
-                var timeOfOpen = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen));
-                var timeOfClose = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose));
-                schedule.TimeOfOpen = timeOfOpen;
-                schedule.TimeOfClose = timeOfClose;
-                schedule.IsClosed = request.IsClosed;
+                if (!long.TryParse(id, out long scheduleId))
+                {
+                    throw new ArgumentException("Invalid schedule ID format");
+                }
+                var schedule = await _unitOfWork.OperatingSchedules.GetByIdAsync(scheduleId);
+                if (schedule == null)
+                {
+                    throw new KeyNotFoundException($"Operating schedule with ID {id} not found");
+                }
+
+                request.MapAndUpdateExistingOperatingSchedule(schedule);
 
                 _unitOfWork.OperatingSchedules.Update(schedule);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Get venue name
                 var venue = await _unitOfWork.Venues.GetByIdAsync(schedule.VenueId);
-                return MapToOperatingScheduleDetail(schedule, venue?.Name ?? "Unknown Venue");
+                return schedule.MapToOperatingScheduleDetail(venue?.Name ?? "Unknown Venue");
             }
             catch (Exception ex)
             {
@@ -108,11 +102,16 @@
             }
         }
 
-        public async Task<bool> DeleteOperatingScheduleAsync(long id, string userId)
+        public async Task<bool> DeleteOperatingScheduleAsync(string id, string userId)
         {
             try
             {
-                return await _unitOfWork.OperatingSchedules.DeleteAsync(id);
+                if (!long.TryParse(id, out long scheduleId))
+                {
+                    _logger.LogWarning("Invalid schedule ID format: {Id}", id);
+                    return false;
+                }
+                return await _unitOfWork.OperatingSchedules.DeleteAsync(scheduleId);
             }
             catch (Exception ex)
             {
@@ -121,18 +120,23 @@
             }
         }
 
-        public async Task<List<OperatingScheduleDetail>> GetVenueOperatingSchedulesAsync(long venueId)
+        public async Task<List<OperatingScheduleDetail>> GetVenueOperatingSchedulesAsync(string venueId)
         {
             try
             {
-                var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
+                if (!long.TryParse(venueId, out long parsedVenueId))
+                {
+                    _logger.LogWarning("Invalid venue ID format: {Id}", venueId);
+                    return new List<OperatingScheduleDetail>();
+                }
+                var venue = await _unitOfWork.Venues.GetByIdAsync(parsedVenueId);
                 if (venue == null)
                 {
                     return new List<OperatingScheduleDetail>();
                 }
 
-                var schedules = await _unitOfWork.OperatingSchedules.GetSchedulesByVenueIdAsync(venueId);
-                return schedules.Select(s => MapToOperatingScheduleDetail(s, venue.Name)).ToList();
+                var schedules = await _unitOfWork.OperatingSchedules.GetSchedulesByVenueIdAsync(parsedVenueId);
+                return schedules.Select(s => s.MapToOperatingScheduleDetail(venue.Name ?? "Unknown Venue")).ToList();
             }
             catch (Exception ex)
             {
@@ -141,40 +145,34 @@
             }
         }
 
-        public async Task<bool> CreateOperatingSchedulesForVenueAsync(long venueId, List<CreateOperatingScheduleRequest> requests, string userId)
+        public async Task<bool> CreateOperatingSchedulesForVenueAsync(string venueId, List<CreateOperatingScheduleRequest> requests, string userId)
         {
             try
             {
-                // Verify venue exists
-                var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
+                if (!long.TryParse(venueId, out long parsedVenueId))
+                {
+                    throw new ArgumentException("Invalid venue ID format");
+                }
+                var venue = await _unitOfWork.Venues.GetByIdAsync(parsedVenueId);
                 if (venue == null)
                 {
                     throw new KeyNotFoundException($"Venue with ID {venueId} not found");
                 }
 
-                // Get existing schedules
-                var existingSchedules = await _unitOfWork.OperatingSchedules.GetSchedulesByVenueIdAsync(venueId);
-
-                // Delete existing schedules
+                var existingSchedules = await _unitOfWork.OperatingSchedules.GetSchedulesByVenueIdAsync(parsedVenueId);
                 foreach (var schedule in existingSchedules)
                 {
                     await _unitOfWork.OperatingSchedules.DeleteAsync(schedule.Id);
                 }
 
-                // Create new schedules
                 foreach (var request in requests)
                 {
-                    var timeOfOpen = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen));
-                    var timeOfClose = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose));
-
-                    var schedule = new OperatingSchedule
+                    if (!long.TryParse(request.VenueId, out long requestVenueId) || requestVenueId != parsedVenueId)
                     {
-                        VenueId = venueId,
-                        DayOfWeek = (DayOfWeek)request.DayOfWeek,
-                        TimeOfOpen = timeOfOpen,
-                        TimeOfClose = timeOfClose,
-                        IsClosed = request.IsClosed,
-                    };
+                        throw new ArgumentException("Invalid or mismatched venue ID in request");
+                    }
+
+                    var schedule = request.MapToNewOperatingSchedule();
 
                     await _unitOfWork.OperatingSchedules.AddAsync(schedule);
                 }
@@ -188,24 +186,5 @@
                 return false;
             }
         }
-
-        #region Mapping Methods
-
-        private OperatingScheduleDetail MapToOperatingScheduleDetail(OperatingSchedule schedule, string venueName)
-        {
-            return new OperatingScheduleDetail
-            {
-                Id = schedule.Id,
-                VenueId = schedule.VenueId,
-                VenueName = venueName,
-                DayOfWeek = schedule.DayOfWeek,
-                DayName = schedule.DayOfWeek.ToString(),
-                OpenTime = schedule.TimeOfOpen.ToString("HH:mm", null),
-                CloseTime = schedule.TimeOfClose.ToString("HH:mm", null),
-                IsClosed = schedule.IsClosed
-            };
-        }
-
-        #endregion
     }
 }

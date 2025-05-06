@@ -15,6 +15,8 @@
     using NodaTime;
     using NetTopologySuite.Geometries;
     using Azure.Maps.Search.Models;
+    using Microsoft.IdentityModel.Tokens;
+    using MirthSystems.Pulse.Core.Extensions;
 
     public class SpecialService : ISpecialService
     {
@@ -42,13 +44,10 @@
                 if (!string.IsNullOrEmpty(request.Address))
                 {
                     var geocodeResponse = await _mapsApiService.SearchClient.GetGeocodingAsync(request.Address);
-
                     if (geocodeResponse.Value.Features.Count > 0)
                     {
                         var result = geocodeResponse.Value.Features[0];
-                        searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude);
-
-                        // Convert radius from miles to meters (1 mile = 1609.34 meters)
+                        searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude) { SRID = 4326 };
                         radiusInMeters = request.Radius * 1609.34;
                     }
                     else
@@ -86,7 +85,7 @@
                 var specialListItems = await Task.WhenAll(specials.Select(async s =>
                 {
                     var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(s.Id, searchDateTimeInstant);
-                    return MapToSpecialListItem(s, isCurrentlyRunning);
+                    return s.MapToSpecialListItem(isCurrentlyRunning);
                 }));
 
                 if (request.IsCurrentlyRunning.HasValue && request.IsCurrentlyRunning.Value)
@@ -94,9 +93,9 @@
                     specialListItems = specialListItems.Where(s => s.IsCurrentlyRunning).ToArray();
                 }
 
-                if (request.VenueId.HasValue)
+                if (!string.IsNullOrEmpty(request.VenueId) && long.TryParse(request.VenueId, out long venueId))
                 {
-                    specialListItems = specialListItems.Where(s => s.VenueId == request.VenueId.Value).ToArray();
+                    specialListItems = specialListItems.Where(s => s.VenueId == venueId.ToString()).ToArray();
                 }
 
                 return PagedApiResponse<SpecialListItem>.CreateSuccess(
@@ -113,20 +112,22 @@
             }
         }
 
-        public async Task<SpecialDetail?> GetSpecialByIdAsync(long id)
+        public async Task<SpecialDetail?> GetSpecialByIdAsync(string id)
         {
             try
             {
-                var special = await _unitOfWork.Specials.GetSpecialWithVenueAsync(id);
+                if (!long.TryParse(id, out long specialId))
+                {
+                    _logger.LogWarning("Invalid special ID format: {Id}", id);
+                    return null;
+                }
+                var special = await _unitOfWork.Specials.GetSpecialWithVenueAsync(specialId);
                 if (special == null)
                 {
                     return null;
                 }
-
-                var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(
-                    special.Id, SystemClock.Instance.GetCurrentInstant());
-
-                return MapToSpecialDetail(special, isCurrentlyRunning);
+                var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(specialId, SystemClock.Instance.GetCurrentInstant());
+                return special.MapToSpecialDetail(isCurrentlyRunning);
             }
             catch (Exception ex)
             {
@@ -139,49 +140,28 @@
         {
             try
             {
-                var venue = await _unitOfWork.Venues.GetByIdAsync(request.VenueId);
+                if (!long.TryParse(request.VenueId, out long venueId))
+                {
+                    throw new ArgumentException("Invalid venue ID format");
+                }
+                var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
                 if (venue == null)
                 {
                     throw new KeyNotFoundException($"Venue with ID {request.VenueId} not found");
                 }
 
-                var startDate = LocalDate.FromDateOnly(DateOnly.Parse(request.StartDate));
-                var startTime = LocalTime.FromTimeOnly(TimeOnly.Parse(request.StartTime));
-                LocalTime? endTime = null;
-                if (!string.IsNullOrEmpty(request.EndTime))
-                {
-                    endTime = LocalTime.FromTimeOnly(TimeOnly.Parse(request.EndTime));
-                }
-
-                LocalDate? expirationDate = null;
-                if (!string.IsNullOrEmpty(request.ExpirationDate))
-                {
-                    expirationDate = LocalDate.FromDateOnly(DateOnly.Parse(request.ExpirationDate));
-                }
-
-                var special = new Special
-                {
-                    VenueId = request.VenueId,
-                    Content = request.Content,
-                    Type = request.Type,
-                    StartDate = startDate,
-                    StartTime = startTime,
-                    EndTime = endTime,
-                    ExpirationDate = expirationDate,
-                    IsRecurring = request.IsRecurring,
-                    CronSchedule = request.CronSchedule,
-                    CreatedAt = SystemClock.Instance.GetCurrentInstant(),
-                    CreatedByUserId = userId
-                };
+                var special = request.MapToNewSpecial(userId);
 
                 await _unitOfWork.Specials.AddAsync(special);
                 await _unitOfWork.SaveChangesAsync();
 
                 var createdSpecial = await _unitOfWork.Specials.GetSpecialWithVenueAsync(special.Id);
-                var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(
-                    special.Id, SystemClock.Instance.GetCurrentInstant());
-
-                return MapToSpecialDetail(createdSpecial!, isCurrentlyRunning);
+                if (createdSpecial == null)
+                {
+                    throw new InvalidOperationException("Failed to retrieve created special");
+                }
+                var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(special.Id, SystemClock.Instance.GetCurrentInstant());
+                return createdSpecial.MapToSpecialDetail(isCurrentlyRunning);
             }
             catch (Exception ex)
             {
@@ -190,49 +170,34 @@
             }
         }
 
-        public async Task<SpecialDetail> UpdateSpecialAsync(long id, UpdateSpecialRequest request, string userId)
+        public async Task<SpecialDetail> UpdateSpecialAsync(string id, UpdateSpecialRequest request, string userId)
         {
-            var special = await _unitOfWork.Specials.GetSpecialWithVenueAsync(id);
-            if (special == null)
-            {
-                throw new KeyNotFoundException($"Special with ID {id} not found");
-            }
-
             try
             {
-                var startDate = LocalDate.FromDateOnly(DateOnly.Parse(request.StartDate));
-                var startTime = LocalTime.FromTimeOnly(TimeOnly.Parse(request.StartTime));
-                LocalTime? endTime = null;
-                if (!string.IsNullOrEmpty(request.EndTime))
+                if (!long.TryParse(id, out long specialId))
                 {
-                    endTime = LocalTime.FromTimeOnly(TimeOnly.Parse(request.EndTime));
+                    throw new ArgumentException("Invalid special ID format");
+                }
+                var special = await _unitOfWork.Specials.GetSpecialWithVenueAsync(specialId);
+                if (special == null)
+                {
+                    throw new KeyNotFoundException($"Special with ID {id} not found");
                 }
 
-                LocalDate? expirationDate = null;
-                if (!string.IsNullOrEmpty(request.ExpirationDate))
-                {
-                    expirationDate = LocalDate.FromDateOnly(DateOnly.Parse(request.ExpirationDate));
-                }
-
-                special.Content = request.Content;
-                special.Type = request.Type;
-                special.StartDate = startDate;
-                special.StartTime = startTime;
-                special.EndTime = endTime;
-                special.ExpirationDate = expirationDate;
-                special.IsRecurring = request.IsRecurring;
-                special.CronSchedule = request.CronSchedule;
+                request.MapAndUpdateExistingSpecial(special);
                 special.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
                 special.UpdatedByUserId = userId;
 
                 _unitOfWork.Specials.Update(special);
                 await _unitOfWork.SaveChangesAsync();
 
-                var updatedSpecial = await _unitOfWork.Specials.GetSpecialWithVenueAsync(id);
-                var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(
-                    id, SystemClock.Instance.GetCurrentInstant());
-
-                return MapToSpecialDetail(updatedSpecial!, isCurrentlyRunning);
+                var updatedSpecial = await _unitOfWork.Specials.GetSpecialWithVenueAsync(specialId);
+                if (updatedSpecial == null)
+                {
+                    throw new InvalidOperationException("Failed to retrieve updated special");
+                }
+                var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(specialId, SystemClock.Instance.GetCurrentInstant());
+                return updatedSpecial.MapToSpecialDetail(isCurrentlyRunning);
             }
             catch (Exception ex)
             {
@@ -241,23 +206,27 @@
             }
         }
 
-        public async Task<bool> DeleteSpecialAsync(long id, string userId)
+        public async Task<bool> DeleteSpecialAsync(string id, string userId)
         {
-            var special = await _unitOfWork.Specials.GetByIdAsync(id);
-            if (special == null)
-            {
-                return false;
-            }
-
             try
             {
+                if (!long.TryParse(id, out long specialId))
+                {
+                    _logger.LogWarning("Invalid special ID format: {Id}", id);
+                    return false;
+                }
+                var special = await _unitOfWork.Specials.GetByIdAsync(specialId);
+                if (special == null)
+                {
+                    return false;
+                }
+
                 special.IsDeleted = true;
                 special.DeletedAt = SystemClock.Instance.GetCurrentInstant();
                 special.DeletedByUserId = userId;
 
                 _unitOfWork.Specials.Update(special);
                 await _unitOfWork.SaveChangesAsync();
-
                 return true;
             }
             catch (Exception ex)
@@ -267,22 +236,19 @@
             }
         }
 
-        public async Task<bool> IsSpecialCurrentlyRunningAsync(long specialId, DateTimeOffset? referenceTime = null)
+        public async Task<bool> IsSpecialCurrentlyRunningAsync(string specialId, DateTimeOffset? referenceTime = null)
         {
             try
             {
-                Instant instant;
-
-                if (referenceTime.HasValue)
+                if (!long.TryParse(specialId, out long parsedSpecialId))
                 {
-                    instant = Instant.FromDateTimeOffset(referenceTime.Value);
+                    _logger.LogWarning("Invalid special ID format: {Id}", specialId);
+                    return false;
                 }
-                else
-                {
-                    instant = SystemClock.Instance.GetCurrentInstant();
-                }
-
-                return await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(specialId, instant);
+                Instant instant = referenceTime.HasValue
+                    ? Instant.FromDateTimeOffset(referenceTime.Value)
+                    : SystemClock.Instance.GetCurrentInstant();
+                return await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(parsedSpecialId, instant);
             }
             catch (Exception ex)
             {
@@ -290,49 +256,5 @@
                 return false;
             }
         }
-
-        #region Mapping Methods
-
-        private SpecialListItem MapToSpecialListItem(Special special, bool isCurrentlyRunning)
-        {
-            return new SpecialListItem
-            {
-                Id = special.Id,
-                VenueId = special.VenueId,
-                VenueName = special.Venue?.Name ?? string.Empty,
-                Content = special.Content,
-                Type = special.Type,
-                TypeName = special.Type.ToString(),
-                StartDate = special.StartDate.ToString("yyyy-MM-dd", null),
-                StartTime = special.StartTime.ToString("HH:mm", null),
-                EndTime = special.EndTime?.ToString("HH:mm", null),
-                IsCurrentlyRunning = isCurrentlyRunning,
-                IsRecurring = special.IsRecurring
-            };
-        }
-
-        private SpecialDetail MapToSpecialDetail(Special special, bool isCurrentlyRunning)
-        {
-            return new SpecialDetail
-            {
-                Id = special.Id,
-                VenueId = special.VenueId,
-                VenueName = special.Venue?.Name ?? string.Empty,
-                Content = special.Content,
-                Type = special.Type,
-                TypeName = special.Type.ToString(),
-                StartDate = special.StartDate.ToString("yyyy-MM-dd", null),
-                StartTime = special.StartTime.ToString("HH:mm", null),
-                EndTime = special.EndTime?.ToString("HH:mm", null),
-                ExpirationDate = special.ExpirationDate?.ToString("yyyy-MM-dd", null),
-                IsRecurring = special.IsRecurring,
-                CronSchedule = special.CronSchedule,
-                IsCurrentlyRunning = isCurrentlyRunning,
-                CreatedAt = special.CreatedAt.ToDateTimeOffset(),
-                UpdatedAt = special.UpdatedAt?.ToDateTimeOffset()
-            };
-        }
-
-        #endregion
     }
 }

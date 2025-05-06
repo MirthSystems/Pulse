@@ -1,44 +1,25 @@
 ﻿namespace MirthSystems.Pulse.Core.Models
 {
-    /// <summary>
-    /// Response model for an operating schedule in a list
-    /// </summary>
+    using System.ComponentModel.DataAnnotations;
+
     public class OperatingScheduleListItem
     {
-        /// <summary>
-        /// The unique identifier for the operating schedule
-        /// </summary>
-        /// <remarks>e.g. 1</remarks>
-        public long Id { get; set; }
+        [RegularExpression(@"^\d+$", ErrorMessage = "Id must be a positive integer")]
+        public string Id { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The day of the week this schedule applies to
-        /// </summary>
-        /// <remarks>e.g. Monday</remarks>
         public DayOfWeek DayOfWeek { get; set; }
 
-        /// <summary>
-        /// The name of the day of week
-        /// </summary>
-        /// <remarks>e.g. Monday</remarks>
-        public required string DayName { get; set; }
+        [Required]
+        public string DayName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The time when the venue opens on this day (in HH:mm format)
-        /// </summary>
-        /// <remarks>e.g. 09:00</remarks>
-        public required string OpenTime { get; set; }
+        [Required]
+        [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Time must be in format HH:mm")]
+        public string OpenTime { get; set; } = string.Empty;
 
-        /// <summary>
-        /// The time when the venue closes on this day (in HH:mm format)
-        /// </summary>
-        /// <remarks>e.g. 22:00</remarks>
-        public required string CloseTime { get; set; }
+        [Required]
+        [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Time must be in format HH:mm")]
+        public string CloseTime { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Whether the venue is closed on this day
-        /// </summary>
-        /// <remarks>e.g. false</remarks>
         public bool IsClosed { get; set; }
     }
 }
