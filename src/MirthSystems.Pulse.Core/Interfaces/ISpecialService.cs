@@ -23,7 +23,7 @@
         /// </summary>
         /// <param name="id">The special ID</param>
         /// <returns>The special details</returns>
-        Task<SpecialDetail> GetSpecialByIdAsync(long id);
+        Task<SpecialDetail?> GetSpecialByIdAsync(long id);
 
         /// <summary>
         /// Creates a new special

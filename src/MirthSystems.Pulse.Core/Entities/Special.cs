@@ -173,6 +173,6 @@
         /// The venue associated with the special.
         /// This navigation property provides access to the venue's details, such as its location for timezone derivation.
         /// </summary>
-        public required virtual Venue Venue { get; set; }
+        public virtual Venue? Venue { get; set; }
     }
 }

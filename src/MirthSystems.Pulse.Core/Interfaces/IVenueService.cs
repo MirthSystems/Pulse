@@ -19,14 +19,14 @@
         /// </summary>
         /// <param name="id">The venue ID</param>
         /// <returns>The venue with details</returns>
-        Task<VenueDetail> GetVenueByIdAsync(long id);
+        Task<VenueDetail?> GetVenueByIdAsync(long id);
 
         /// <summary>
         /// Gets the business hours for a venue
         /// </summary>
         /// <param name="id">The venue ID</param>
         /// <returns>The venue's business hours</returns>
-        Task<BusinessHours> GetVenueBusinessHoursAsync(long id);
+        Task<BusinessHours?> GetVenueBusinessHoursAsync(long id);
 
         /// <summary>
         /// Gets the specials for a venue
@@ -34,7 +34,7 @@
         /// <param name="id">The venue ID</param>
         /// <param name="includeCurrentStatus">Whether to calculate if specials are currently running</param>
         /// <returns>The venue's specials</returns>
-        Task<VenueSpecials> GetVenueSpecialsAsync(long id, bool includeCurrentStatus = true);
+        Task<VenueSpecials?> GetVenueSpecialsAsync(long id, bool includeCurrentStatus = true);
 
         /// <summary>
         /// Creates a new venue

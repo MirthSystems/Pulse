@@ -75,6 +75,6 @@
         /// <para>This navigation property links to the venue to which these business hours apply.</para>
         /// <para>It provides access to the venue's details such as name, address, and other properties.</para>
         /// </remarks>
-        public required virtual Venue Venue { get; set; }
+        public virtual Venue? Venue { get; set; }
     }
 }
