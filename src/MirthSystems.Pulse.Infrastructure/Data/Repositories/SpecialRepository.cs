@@ -26,7 +26,7 @@
         {
             return await _context.Specials
                 .Include(s => s.Venue)
-                .ThenInclude(v => v.Address)
+                .ThenInclude(v => v!.Address)
                 .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
         }
 
@@ -44,14 +44,14 @@
 
             var query = _context.Specials
                 .Include(s => s.Venue)
-                .ThenInclude(v => v.Address)
-                .Where(s => !s.IsDeleted && !s.Venue.IsDeleted);
+                .ThenInclude(v => v!.Address)
+                .Where(s => !s.IsDeleted && !s.Venue!.IsDeleted);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 searchTerm = searchTerm.ToLower();
                 query = query.Where(s => s.Content.ToLower().Contains(searchTerm) ||
-                                        s.Venue.Name.ToLower().Contains(searchTerm));
+                                        s.Venue!.Name.ToLower().Contains(searchTerm));
             }
 
             if (type.HasValue)
@@ -61,7 +61,7 @@
 
             if (location != null && distanceInMeters.HasValue)
             {
-                query = query.Where(s => s.Venue.Address.Location.Distance(location) <= distanceInMeters.Value);
+                query = query.Where(s => s.Venue!.Address.Location.Distance(location) <= distanceInMeters.Value);
             }
 
             if (!includeExpired)
@@ -70,7 +70,7 @@
             }
 
             query = query.OrderByDescending(s => s.CreatedAt)
-                         .ThenBy(s => s.Venue.Name);
+                         .ThenBy(s => s.Venue!.Name);
 
             var totalCount = await query.CountAsync();
 

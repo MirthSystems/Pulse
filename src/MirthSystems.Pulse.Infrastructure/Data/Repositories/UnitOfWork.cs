@@ -20,17 +20,17 @@
             _addressRepository = new AddressRepository(_context);
         }
 
-        public IVenueRepository Venues => _venueRepository;
-        public ISpecialRepository Specials => _specialRepository;
-        public IOperatingScheduleRepository OperatingSchedules => _operatingScheduleRepository;
-        public IAddressRepository Addresses => _addressRepository;
+        public virtual IVenueRepository Venues => _venueRepository;
+        public virtual ISpecialRepository Specials => _specialRepository;
+        public virtual IOperatingScheduleRepository OperatingSchedules => _operatingScheduleRepository;
+        public virtual IAddressRepository Addresses => _addressRepository;
 
-        public async Task<int> SaveChangesAsync()
+        public virtual async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
