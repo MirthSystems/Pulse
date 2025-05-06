@@ -84,6 +84,8 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.MapDefaultEndpoints();
+
         app.MapControllers();
         app.MapFallbackToFile("index.html");
 
