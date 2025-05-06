@@ -23,6 +23,11 @@
         {
             services.AddSingleton<IClock>(SystemClock.Instance);
 
+            services.AddScoped<IVenueService, VenueService>();
+            services.AddScoped<IOperatingScheduleService, OperatingScheduleService>();
+            services.AddScoped<ISpecialService, SpecialService>();
+
+
             return services;
         }
 

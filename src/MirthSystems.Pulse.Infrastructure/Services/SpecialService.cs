@@ -36,7 +36,6 @@
         {
             try
             {
-                // Geocode the user's address to get the search location
                 Point? searchLocation = null;
                 double? radiusInMeters = null;
 
@@ -58,7 +57,6 @@
                     }
                 }
 
-                // Parse search date time if provided, otherwise use current time
                 Instant searchDateTimeInstant;
                 if (!string.IsNullOrEmpty(request.SearchDateTime))
                 {
@@ -76,30 +74,26 @@
                     searchDateTimeInstant = SystemClock.Instance.GetCurrentInstant();
                 }
 
-                // Get specials with filtering
                 var (specials, totalCount) = await _unitOfWork.Specials.GetPagedSpecialsAsync(
                     request.Page,
                     request.PageSize,
                     searchLocation,
                     radiusInMeters,
-                    null,  // search term not provided in GetSpecialsRequest
+                    request.SearchTerm,
                     request.SpecialTypeId.HasValue ? (Core.Enums.SpecialTypes)request.SpecialTypeId.Value : null,
                     !request.IsCurrentlyRunning.HasValue || !request.IsCurrentlyRunning.Value);
 
-                // Map and check if each special is currently running
                 var specialListItems = await Task.WhenAll(specials.Select(async s =>
                 {
                     var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(s.Id, searchDateTimeInstant);
                     return MapToSpecialListItem(s, isCurrentlyRunning);
                 }));
 
-                // If IsCurrentlyRunning filter is applied, filter the results
                 if (request.IsCurrentlyRunning.HasValue && request.IsCurrentlyRunning.Value)
                 {
                     specialListItems = specialListItems.Where(s => s.IsCurrentlyRunning).ToArray();
                 }
 
-                // Filter by venue ID if provided
                 if (request.VenueId.HasValue)
                 {
                     specialListItems = specialListItems.Where(s => s.VenueId == request.VenueId.Value).ToArray();

@@ -30,6 +30,13 @@
         public string? SearchDateTime { get; set; }
 
         /// <summary>
+        /// Search term for filtering specials by content or venue name
+        /// </summary>
+        /// <remarks>e.g. "Happy Hour" or "Burger"</remarks>
+        [StringLength(100, ErrorMessage = "Search term cannot exceed 100 characters.")]
+        public string? SearchTerm { get; set; }
+
+        /// <summary>
         /// The venue ID to filter by, if applicable
         /// </summary>
         /// <remarks>e.g. 5</remarks>
@@ -47,8 +54,7 @@
         /// Whether to only return currently running specials
         /// </summary>
         /// <remarks>e.g. true</remarks>
-        [Required(ErrorMessage = "IsCurrentlyRunning must be specified.")]
-        public bool? IsCurrentlyRunning { get; set; }
+        public bool? IsCurrentlyRunning { get; set; } = true;
 
         /// <summary>
         /// Page number for pagination (default: 1)
