@@ -19,6 +19,7 @@ internal class Program
                 dispose: true
             );
 
+        builder.Services.AddServiceDefaults();
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
         builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
         builder.Services.AddAuthentication().AddJwtBearer();

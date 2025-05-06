@@ -14,9 +14,18 @@
     using Azure.Maps.TimeZones;
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Infrastructure.Services;
+    using MirthSystems.Pulse.Infrastructure.Data.Repositories;
+    using NodaTime;
 
     public static class ServiceCollectionExtensions
     {
+        public static IServiceCollection AddServiceDefaults(this IServiceCollection services)
+        {
+            services.AddSingleton<IClock>(SystemClock.Instance);
+
+            return services;
+        }
+
         public static IServiceCollection AddApplicationDbContext(
             this IServiceCollection services,
             string? postgresConnectionString = null)
@@ -47,6 +56,8 @@
                     }
                 }
             });
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

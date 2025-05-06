@@ -15,7 +15,6 @@
     <Folder Include="Data\Handlers\" />
     <Folder Include="Data\Migrations\" />
     <Folder Include="Data\Queries\" />
-    <Folder Include="Data\Repositories\" />
     <Folder Include="Configurations\" />
   </ItemGroup>
 
@@ -28,8 +27,10 @@
     <PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />
     <PackageReference Include="Azure.Maps.Search" Version="2.0.0-beta.5" />
     <PackageReference Include="Azure.Maps.TimeZones" Version="1.0.0-beta.1" />
+    <PackageReference Include="Cronos" Version="0.10.0" />
     <PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="9.0.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
