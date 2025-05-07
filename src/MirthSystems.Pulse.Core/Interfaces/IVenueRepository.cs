@@ -1,6 +1,7 @@
 ﻿namespace MirthSystems.Pulse.Core.Interfaces
 {
     using MirthSystems.Pulse.Core.Entities;
+    using MirthSystems.Pulse.Core.Models;
 
     using NetTopologySuite.Geometries;
 
@@ -39,7 +40,7 @@
         /// <para>Each venue includes its basic information and address for display purposes.</para>
         /// <para>Soft-deleted venues are excluded from the results.</para>
         /// </remarks>
-        Task<(List<Venue> venues, int totalCount)> GetPagedVenuesAsync(int page, int pageSize);
+        Task<PagedList<Venue>> GetPagedVenuesAsync(int page, int pageSize);
 
         /// <summary>
         /// Finds venues near a specific geographic location within a given distance.

@@ -6,6 +6,7 @@
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Enums;
     using MirthSystems.Pulse.Core.Interfaces;
+    using MirthSystems.Pulse.Core.Models;
 
     using NetTopologySuite.Geometries;
 
@@ -83,7 +84,7 @@
         /// <para>Only non-deleted specials from non-deleted venues are included in the results.</para>
         /// <para>Text search is case-insensitive and matches partial content in special descriptions or venue names.</para>
         /// </remarks>
-        public async Task<(List<Special> specials, int totalCount)> GetPagedSpecialsAsync(
+        public async Task<PagedList<Special>> GetPagedSpecialsAsync(
             int page,
             int pageSize,
             Point? location = null,
@@ -127,12 +128,11 @@
 
             var totalCount = await query.CountAsync();
 
-            var specials = await query
+            var specials = query
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .Take(pageSize);
 
-            return (specials, totalCount);
+            return await PagedList<Special>.CreateAsync(specials, page, pageSize);
         }
 
         /// <summary>

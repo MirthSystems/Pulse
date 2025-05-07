@@ -2,6 +2,7 @@
 {
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Enums;
+    using MirthSystems.Pulse.Core.Models;
 
     using NetTopologySuite.Geometries;
 
@@ -50,7 +51,7 @@
         /// <para>- Expiration filtering to exclude expired specials</para>
         /// <para>Results are ordered by creation date (newest first) and venue name.</para>
         /// </remarks>
-        Task<(List<Special> specials, int totalCount)> GetPagedSpecialsAsync(
+        Task<PagedList<Special>> GetPagedSpecialsAsync(
             int page,
             int pageSize,
             Point? location = null,

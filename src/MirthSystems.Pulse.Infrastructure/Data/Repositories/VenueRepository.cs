@@ -3,6 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Interfaces;
+    using MirthSystems.Pulse.Core.Models;
 
     using NetTopologySuite.Geometries;
 
@@ -72,7 +73,7 @@
         /// <para>Venues are ordered by creation date (newest first) and include their address information.</para>
         /// <para>Only non-deleted venues are included in the results.</para>
         /// </remarks>
-        public async Task<(List<Venue> venues, int totalCount)> GetPagedVenuesAsync(int page, int pageSize)
+        public async Task<PagedList<Venue>> GetPagedVenuesAsync(int page, int pageSize)
         {
             var query = _context.Venues
                 .Include(v => v.Address)
@@ -81,12 +82,11 @@
 
             var totalCount = await query.CountAsync();
 
-            var venues = await query
+            var venues = query
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .Take(pageSize);
 
-            return (venues, totalCount);
+            return await PagedList<Venue>.CreateAsync(venues, page, pageSize);
         }
 
         /// <summary>
