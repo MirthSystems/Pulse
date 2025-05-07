@@ -82,11 +82,7 @@
 
             var totalCount = await query.CountAsync();
 
-            var venues = query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
-
-            return await PagedList<Venue>.CreateAsync(venues, page, pageSize);
+            return await PagedList<Venue>.CreateAsync(query, page, pageSize);
         }
 
         /// <summary>

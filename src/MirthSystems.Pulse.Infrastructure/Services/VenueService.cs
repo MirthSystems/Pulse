@@ -31,13 +31,12 @@
         {
             try
             {
-                var (venues, totalCount) = await _unitOfWork.Venues.GetPagedVenuesAsync(page, pageSize);
-                var venueListItems = venues.Select(v => v.MapToVenueListItem()).ToList();
+                var venues = await _unitOfWork.Venues.GetPagedVenuesAsync(page, pageSize);
                 return PagedApiResponse<VenueListItem>.CreateSuccess(
-                    venueListItems,
-                    page,
-                    pageSize,
-                    totalCount,
+                    venues.Select(v => v.MapToVenueListItem()).ToList(),
+                    venues.CurrentPage,
+                    venues.PageSize,
+                    venues.TotalCount,
                     "Venues retrieved successfully");
             }
             catch (Exception ex)

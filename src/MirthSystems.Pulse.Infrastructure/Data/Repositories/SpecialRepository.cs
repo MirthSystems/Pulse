@@ -128,11 +128,7 @@
 
             var totalCount = await query.CountAsync();
 
-            var specials = query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
-
-            return await PagedList<Special>.CreateAsync(specials, page, pageSize);
+            return await PagedList<Special>.CreateAsync(query, page, pageSize);
         }
 
         /// <summary>
