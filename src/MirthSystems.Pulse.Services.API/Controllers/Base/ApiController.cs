@@ -5,8 +5,6 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
-    using MirthSystems.Pulse.Core.Models.Responses;
-
     [ApiController]
     [Produces("application/json")]
     public abstract class ApiController : ControllerBase

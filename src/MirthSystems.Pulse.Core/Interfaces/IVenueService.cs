@@ -1,115 +1,103 @@
 ﻿namespace MirthSystems.Pulse.Core.Interfaces
 {
-    using MirthSystems.Pulse.Core.Models.Requests;
-    using MirthSystems.Pulse.Core.Models.Responses;
     using MirthSystems.Pulse.Core.Models;
+    using MirthSystems.Pulse.Core.Models.Requests;
 
     /// <summary>
-    /// Service interface for venue-related business operations.
+    /// Service interface for venue operations, providing venue management functionality.
     /// </summary>
     /// <remarks>
-    /// <para>This interface defines the contract for venue-related business logic.</para>
-    /// <para>It provides methods for retrieving, creating, updating, and deleting venues.</para>
-    /// <para>It also includes methods for accessing related data such as business hours and specials.</para>
-    /// <para>Implementations handle the coordination between repositories, external services, and mapping to response models.</para>
+    /// <para>This interface defines business logic operations related to venues, including:</para>
+    /// <para>- Retrieving venues (individual or paginated listings)</para>
+    /// <para>- Creating new venues with address information</para>
+    /// <para>- Updating existing venue details</para>
+    /// <para>- Deleting venues (soft delete)</para>
+    /// <para>- Accessing venue-related information like business hours and specials</para>
+    /// <para>Implementations handle data validation, database operations, and external service integration.</para>
     /// </remarks>
     public interface IVenueService
     {
         /// <summary>
-        /// Gets a paged list of venues.
+        /// Retrieves a paginated list of venues.
         /// </summary>
         /// <param name="page">The page number (1-based).</param>
-        /// <param name="pageSize">The number of venues per page.</param>
-        /// <returns>A paged API response containing venue list items and pagination metadata.</returns>
+        /// <param name="pageSize">The page size (items per page).</param>
+        /// <returns>A paginated list of venue list items.</returns>
         /// <remarks>
-        /// <para>This method retrieves venues in pages for efficient data transfer.</para>
-        /// <para>The response includes venue summary information suitable for listings and search results.</para>
-        /// <para>Results are typically ordered by creation date (newest first).</para>
+        /// <para>This method returns venues with minimal information suitable for listing.</para>
+        /// <para>Use GetVenueByIdAsync for detailed venue information.</para>
         /// </remarks>
-        Task<PagedApiResponse<VenueListItem>> GetVenuesAsync(int page = 1, int pageSize = 20);
+        Task<PagedResult<VenueListItem>> GetVenuesAsync(int page = 1, int pageSize = 20);
 
         /// <summary>
-        /// Gets detailed information about a specific venue by ID.
+        /// Retrieves a venue by its ID.
         /// </summary>
-        /// <param name="id">The ID of the venue to retrieve.</param>
-        /// <returns>Detailed venue information if found; otherwise, null.</returns>
+        /// <param name="id">The venue ID.</param>
+        /// <returns>The venue details if found, otherwise null.</returns>
         /// <remarks>
-        /// <para>This method retrieves comprehensive information about a venue including:</para>
-        /// <para>- Basic venue information (name, description, contact details)</para>
-        /// <para>- Address and location information</para>
-        /// <para>- Business hours</para>
-        /// <para>The response is suitable for venue detail pages and venue management interfaces.</para>
+        /// <para>This method returns comprehensive information about a venue.</para>
+        /// <para>Includes address, business hours, and other venue properties.</para>
         /// </remarks>
         Task<VenueDetail?> GetVenueByIdAsync(string id);
 
         /// <summary>
-        /// Gets the business hours for a specific venue.
+        /// Retrieves business hours for a venue by its ID.
         /// </summary>
-        /// <param name="id">The ID of the venue.</param>
-        /// <returns>The venue's business hours if found; otherwise, null.</returns>
+        /// <param name="id">The venue ID.</param>
+        /// <returns>The business hours information if found, otherwise null.</returns>
         /// <remarks>
-        /// <para>This method retrieves the operating schedules for each day of the week for a venue.</para>
-        /// <para>The response includes information about opening times, closing times, and closed days.</para>
-        /// <para>Results are ordered by day of week, starting from Sunday (0) through Saturday (6).</para>
+        /// <para>This method returns the operating schedule for a venue.</para>
+        /// <para>Includes hours for each day of the week.</para>
         /// </remarks>
         Task<BusinessHours?> GetVenueBusinessHoursAsync(string id);
 
         /// <summary>
-        /// Gets the special promotions for a specific venue.
+        /// Retrieves specials for a venue by its ID.
         /// </summary>
-        /// <param name="id">The ID of the venue.</param>
-        /// <param name="includeCurrentStatus">Whether to include the current running status of each special.</param>
-        /// <returns>The venue's special promotions if found; otherwise, null.</returns>
+        /// <param name="id">The venue ID.</param>
+        /// <param name="includeCurrentStatus">Whether to include current running status for each special.</param>
+        /// <returns>The venue specials information if found, otherwise null.</returns>
         /// <remarks>
-        /// <para>This method retrieves all specials (promotions, events, deals) associated with a venue.</para>
-        /// <para>When includeCurrentStatus is true, each special includes a flag indicating if it's currently active.</para>
-        /// <para>This status determination accounts for start dates, end dates, and recurrence patterns.</para>
+        /// <para>This method returns all specials associated with a venue.</para>
+        /// <para>When includeCurrentStatus is true, requires additional processing to determine current status.</para>
         /// </remarks>
         Task<VenueSpecials?> GetVenueSpecialsAsync(string id, bool includeCurrentStatus = true);
 
         /// <summary>
         /// Creates a new venue.
         /// </summary>
-        /// <param name="request">The venue creation request containing venue details.</param>
+        /// <param name="request">The venue creation request.</param>
         /// <param name="userId">The ID of the user creating the venue.</param>
-        /// <returns>The created venue with generated IDs and metadata.</returns>
+        /// <returns>The created venue details.</returns>
         /// <remarks>
-        /// <para>This method handles the complete venue creation process including:</para>
-        /// <para>- Geocoding the venue's address to determine its geographic coordinates</para>
-        /// <para>- Creating the venue record with its address</para>
-        /// <para>- Creating operating schedule records for each day of the week</para>
-        /// <para>- Setting creation metadata (timestamp, user)</para>
+        /// <para>This method validates the request and persists a new venue.</para>
+        /// <para>Includes geocoding the provided address.</para>
         /// </remarks>
         Task<VenueDetail> CreateVenueAsync(CreateVenueRequest request, string userId);
 
         /// <summary>
         /// Updates an existing venue.
         /// </summary>
-        /// <param name="id">The ID of the venue to update.</param>
-        /// <param name="request">The venue update request containing the new venue details.</param>
+        /// <param name="id">The venue ID.</param>
+        /// <param name="request">The venue update request.</param>
         /// <param name="userId">The ID of the user updating the venue.</param>
         /// <returns>The updated venue details.</returns>
-        /// <exception cref="KeyNotFoundException">Thrown when a venue with the specified ID is not found.</exception>
         /// <remarks>
-        /// <para>This method handles the complete venue update process including:</para>
-        /// <para>- Geocoding the updated address if it has changed</para>
-        /// <para>- Updating the venue record and its associated address</para>
-        /// <para>- Setting update metadata (timestamp, user)</para>
-        /// <para>Note that this method does not update operating schedules, which are updated separately.</para>
+        /// <para>This method validates the request and updates an existing venue.</para>
+        /// <para>Includes re-geocoding the address if changed.</para>
+        /// <para>Throws KeyNotFoundException if the venue doesn't exist.</para>
         /// </remarks>
         Task<VenueDetail> UpdateVenueAsync(string id, UpdateVenueRequest request, string userId);
 
         /// <summary>
-        /// Soft-deletes a venue.
+        /// Deletes a venue (soft delete).
         /// </summary>
-        /// <param name="id">The ID of the venue to delete.</param>
+        /// <param name="id">The venue ID.</param>
         /// <param name="userId">The ID of the user deleting the venue.</param>
-        /// <returns>True if the venue was found and deleted; otherwise, false.</returns>
+        /// <returns>True if successfully deleted, otherwise false.</returns>
         /// <remarks>
-        /// <para>This method performs a soft delete, which means:</para>
-        /// <para>- The venue is marked as deleted but remains in the database</para>
-        /// <para>- The venue will be excluded from normal queries</para>
-        /// <para>- The deletion is recorded with a timestamp and user ID</para>
+        /// <para>This method performs a soft delete, marking the venue as deleted in the database.</para>
+        /// <para>The venue record remains in the database for audit purposes.</para>
         /// </remarks>
         Task<bool> DeleteVenueAsync(string id, string userId);
     }

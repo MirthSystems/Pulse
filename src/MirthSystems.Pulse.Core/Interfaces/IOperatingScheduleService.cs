@@ -1,32 +1,29 @@
 ﻿namespace MirthSystems.Pulse.Core.Interfaces
 {
+    using MirthSystems.Pulse.Core.Models;
     using MirthSystems.Pulse.Core.Models.Requests;
 
-    using MirthSystems.Pulse.Core.Models;
-    using MirthSystems.Pulse.Core.Models.Responses;
-
     /// <summary>
-    /// Service interface for operating schedule-related business operations.
+    /// Service interface for operating schedule operations, providing venue business hours management.
     /// </summary>
     /// <remarks>
-    /// <para>This interface defines the contract for operating schedule-related business logic.</para>
-    /// <para>It provides methods for retrieving, creating, updating, and deleting operating schedules.</para>
-    /// <para>It also includes methods for managing multiple operating schedules for a venue.</para>
-    /// <para>Implementations handle the coordination between repositories and mapping to response models.</para>
+    /// <para>This interface defines business logic operations related to venue operating schedules, including:</para>
+    /// <para>- Retrieving operating schedules (individual or by venue)</para>
+    /// <para>- Creating new operating schedules for venues</para>
+    /// <para>- Updating existing operating schedule details</para>
+    /// <para>- Deleting operating schedules</para>
+    /// <para>Implementations handle data validation, database operations, and business logic.</para>
     /// </remarks>
     public interface IOperatingScheduleService
     {
         /// <summary>
-        /// Gets detailed information about a specific operating schedule by ID.
+        /// Retrieves an operating schedule by its ID.
         /// </summary>
-        /// <param name="id">The ID of the operating schedule to retrieve.</param>
-        /// <returns>Detailed operating schedule information if found; otherwise, null.</returns>
+        /// <param name="id">The operating schedule ID.</param>
+        /// <returns>The operating schedule details if found, otherwise null.</returns>
         /// <remarks>
-        /// <para>This method retrieves comprehensive information about an operating schedule including:</para>
-        /// <para>- Day of week</para>
-        /// <para>- Opening and closing times</para>
-        /// <para>- Whether the venue is closed on this day</para>
-        /// <para>- Associated venue information</para>
+        /// <para>This method returns comprehensive information about an operating schedule.</para>
+        /// <para>Includes venue information and day/time details.</para>
         /// </remarks>
         Task<OperatingScheduleDetail?> GetOperatingScheduleByIdAsync(string id);
 
@@ -35,69 +32,59 @@
         /// </summary>
         /// <param name="request">The operating schedule creation request.</param>
         /// <param name="userId">The ID of the user creating the operating schedule.</param>
-        /// <returns>The created operating schedule with generated ID.</returns>
+        /// <returns>The created operating schedule details.</returns>
         /// <remarks>
-        /// <para>This method handles the complete operating schedule creation process including:</para>
-        /// <para>- Validating the associated venue exists</para>
-        /// <para>- Creating the operating schedule record</para>
-        /// <para>- Converting time strings to appropriate time representations</para>
+        /// <para>This method validates the request and persists a new operating schedule.</para>
+        /// <para>Supports setting open/close times and closed days.</para>
         /// </remarks>
         Task<OperatingScheduleDetail> CreateOperatingScheduleAsync(CreateOperatingScheduleRequest request, string userId);
 
         /// <summary>
         /// Updates an existing operating schedule.
         /// </summary>
-        /// <param name="id">The ID of the operating schedule to update.</param>
+        /// <param name="id">The operating schedule ID.</param>
         /// <param name="request">The operating schedule update request.</param>
         /// <param name="userId">The ID of the user updating the operating schedule.</param>
         /// <returns>The updated operating schedule details.</returns>
-        /// <exception cref="KeyNotFoundException">Thrown when an operating schedule with the specified ID is not found.</exception>
         /// <remarks>
-        /// <para>This method handles the operating schedule update process including:</para>
-        /// <para>- Validating the operating schedule exists</para>
-        /// <para>- Updating the open time, close time, and closed status</para>
-        /// <para>- Converting time strings to appropriate time representations</para>
+        /// <para>This method validates the request and updates an existing operating schedule.</para>
+        /// <para>Throws KeyNotFoundException if the operating schedule doesn't exist.</para>
         /// </remarks>
         Task<OperatingScheduleDetail> UpdateOperatingScheduleAsync(string id, UpdateOperatingScheduleRequest request, string userId);
 
         /// <summary>
         /// Deletes an operating schedule.
         /// </summary>
-        /// <param name="id">The ID of the operating schedule to delete.</param>
+        /// <param name="id">The operating schedule ID.</param>
         /// <param name="userId">The ID of the user deleting the operating schedule.</param>
-        /// <returns>True if the operating schedule was found and deleted; otherwise, false.</returns>
+        /// <returns>True if successfully deleted, otherwise false.</returns>
         /// <remarks>
-        /// <para>This method performs a physical delete of the operating schedule.</para>
-        /// <para>Note that deleting an operating schedule may create incomplete business hours for a venue.</para>
-        /// <para>Consider using CreateOperatingSchedulesForVenueAsync to replace the full set of schedules instead.</para>
+        /// <para>This method removes the operating schedule from the database.</para>
+        /// <para>Unlike venues and specials, operating schedules use physical deletion rather than soft deletion.</para>
         /// </remarks>
         Task<bool> DeleteOperatingScheduleAsync(string id, string userId);
 
         /// <summary>
-        /// Gets all operating schedules for a specific venue.
+        /// Retrieves all operating schedules for a venue.
         /// </summary>
-        /// <param name="venueId">The ID of the venue.</param>
+        /// <param name="venueId">The venue ID.</param>
         /// <returns>A list of operating schedule details for the venue.</returns>
         /// <remarks>
-        /// <para>This method retrieves all operating schedules for a venue, ordered by day of week.</para>
-        /// <para>A complete set typically includes seven entries, one for each day of the week.</para>
-        /// <para>Each entry includes opening time, closing time, and closed status for that day.</para>
+        /// <para>This method returns all operating schedules associated with a venue.</para>
+        /// <para>Typically includes one schedule for each day of the week.</para>
         /// </remarks>
         Task<List<OperatingScheduleDetail>> GetVenueOperatingSchedulesAsync(string venueId);
 
         /// <summary>
-        /// Creates a complete set of operating schedules for a venue, replacing any existing schedules.
+        /// Creates a complete set of operating schedules for a venue.
         /// </summary>
-        /// <param name="venueId">The ID of the venue.</param>
-        /// <param name="requests">The list of operating schedule creation requests, one for each day.</param>
+        /// <param name="venueId">The venue ID.</param>
+        /// <param name="requests">The list of operating schedule creation requests.</param>
         /// <param name="userId">The ID of the user creating the operating schedules.</param>
-        /// <returns>True if the operating schedules were created successfully; otherwise, false.</returns>
+        /// <returns>True if successfully created, otherwise false.</returns>
         /// <remarks>
-        /// <para>This method handles the batch creation process for a venue's complete operating schedule:</para>
-        /// <para>- Deletes any existing operating schedules for the venue</para>
-        /// <para>- Creates new operating schedules from the provided requests</para>
-        /// <para>- Validates that all requests are for the specified venue</para>
-        /// <para>This approach ensures consistency by replacing the entire schedule set in a single operation.</para>
+        /// <para>This method replaces all existing schedules for a venue with a new set.</para>
+        /// <para>Typically used to create or update the complete weekly schedule in one operation.</para>
         /// </remarks>
         Task<bool> CreateOperatingSchedulesForVenueAsync(string venueId, List<CreateOperatingScheduleRequest> requests, string userId);
     }

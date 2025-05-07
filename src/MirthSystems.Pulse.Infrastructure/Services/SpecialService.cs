@@ -10,7 +10,6 @@
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models.Requests;
-    using MirthSystems.Pulse.Core.Models.Responses;
     using MirthSystems.Pulse.Core.Models;
     using NodaTime;
     using NetTopologySuite.Geometries;
@@ -34,7 +33,7 @@
             _logger = logger;
         }
 
-        public async Task<PagedApiResponse<SpecialListItem>> GetSpecialsAsync(GetSpecialsRequest request)
+        public async Task<PagedResult<SpecialListItem>> GetSpecialsAsync(GetSpecialsRequest request)
         {
             try
             {
@@ -52,7 +51,7 @@
                     }
                     else
                     {
-                        return PagedApiResponse<SpecialListItem>.CreateError($"Could not geocode address: {request.Address}");
+                        throw new InvalidOperationException($"Could not geocode address: {request.Address}");
                     }
                 }
 
@@ -65,7 +64,7 @@
                     }
                     else
                     {
-                        return PagedApiResponse<SpecialListItem>.CreateError($"Invalid search date time format: {request.SearchDateTime}");
+                        throw new InvalidOperationException($"Invalid search date time format: {request.SearchDateTime}");
                     }
                 }
                 else
@@ -73,7 +72,7 @@
                     searchDateTimeInstant = SystemClock.Instance.GetCurrentInstant();
                 }
 
-                var (specials, totalCount) = await _unitOfWork.Specials.GetPagedSpecialsAsync(
+                var specials = await _unitOfWork.Specials.GetPagedSpecialsAsync(
                     request.Page,
                     request.PageSize,
                     searchLocation,
@@ -88,27 +87,41 @@
                     return s.MapToSpecialListItem(isCurrentlyRunning);
                 }));
 
+                var filteredItems = specialListItems.ToList();
+
+                // Additional filtering for runtime conditions not handled at database level
                 if (request.IsCurrentlyRunning.HasValue && request.IsCurrentlyRunning.Value)
                 {
-                    specialListItems = specialListItems.Where(s => s.IsCurrentlyRunning).ToArray();
+                    filteredItems = filteredItems.Where(s => s.IsCurrentlyRunning).ToList();
                 }
 
                 if (!string.IsNullOrEmpty(request.VenueId) && long.TryParse(request.VenueId, out long venueId))
                 {
-                    specialListItems = specialListItems.Where(s => s.VenueId == venueId.ToString()).ToArray();
+                    filteredItems = filteredItems.Where(s => s.VenueId == venueId.ToString()).ToList();
+                }
+                
+                int totalCount = 0;
+                // If we filtered items in memory, we need to adjust the total count accordingly
+                if (filteredItems.Count != specialListItems.Length)
+                {
+                    // Rough approximation of total count based on the filter ratio
+                    double filterRatio = (double)filteredItems.Count / specialListItems.Length;
+                    totalCount = (int)(specials.TotalCount * filterRatio);
                 }
 
-                return PagedApiResponse<SpecialListItem>.CreateSuccess(
-                    specialListItems.ToList(),
-                    request.Page,
-                    request.PageSize,
-                    totalCount,
-                    "Specials retrieved successfully");
+                return new PagedResult<SpecialListItem>
+                {
+                    Items = filteredItems,
+                    PagingInfo = PagingInfo.Create(
+                        request.Page,
+                        request.PageSize,
+                        totalCount)
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving specials");
-                return PagedApiResponse<SpecialListItem>.CreateError($"Failed to retrieve specials: {ex.Message}");
+                throw;
             }
         }
 

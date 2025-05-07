@@ -4,7 +4,6 @@
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models.Requests;
-    using MirthSystems.Pulse.Core.Models.Responses;
     using MirthSystems.Pulse.Core.Models;
     using NodaTime;
     using NetTopologySuite.Geometries;
@@ -27,22 +26,24 @@
             _logger = logger;
         }
 
-        public async Task<PagedApiResponse<VenueListItem>> GetVenuesAsync(int page = 1, int pageSize = 20)
+        public async Task<PagedResult<VenueListItem>> GetVenuesAsync(int page = 1, int pageSize = 20)
         {
             try
             {
                 var venues = await _unitOfWork.Venues.GetPagedVenuesAsync(page, pageSize);
-                return PagedApiResponse<VenueListItem>.CreateSuccess(
-                    venues.Select(v => v.MapToVenueListItem()).ToList(),
-                    venues.CurrentPage,
-                    venues.PageSize,
-                    venues.TotalCount,
-                    "Venues retrieved successfully");
+                return new PagedResult<VenueListItem>
+                {
+                    Items = venues.Select(v => v.MapToVenueListItem()).ToList(),
+                    PagingInfo = PagingInfo.Create(
+                        venues.CurrentPage,
+                        venues.PageSize,
+                        venues.TotalCount)
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving venues");
-                return PagedApiResponse<VenueListItem>.CreateError($"Failed to retrieve venues: {ex.Message}");
+                throw;
             }
         }
 

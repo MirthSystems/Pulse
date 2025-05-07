@@ -6,110 +6,97 @@
     using System.Text;
     using System.Threading.Tasks;
     using MirthSystems.Pulse.Core.Models.Requests;
-    using MirthSystems.Pulse.Core.Models.Responses;
     using MirthSystems.Pulse.Core.Models;
 
     /// <summary>
-    /// Service interface for special promotion-related business operations.
+    /// Service interface for special promotions and events operations.
     /// </summary>
     /// <remarks>
-    /// <para>This interface defines the contract for special-related business logic.</para>
-    /// <para>It provides methods for retrieving, creating, updating, and deleting special promotions.</para>
-    /// <para>It also includes methods for checking if specials are currently active based on their scheduling.</para>
-    /// <para>Implementations handle the coordination between repositories, external services, and mapping to response models.</para>
+    /// <para>This interface defines business logic operations related to venue specials, including:</para>
+    /// <para>- Retrieving specials (individual or paginated listings with filtering)</para>
+    /// <para>- Creating new specials with scheduling information</para>
+    /// <para>- Updating existing special details</para>
+    /// <para>- Deleting specials (soft delete)</para>
+    /// <para>- Determining if a special is currently active</para>
+    /// <para>Implementations handle data validation, database operations, and scheduling logic.</para>
     /// </remarks>
     public interface ISpecialService
     {
         /// <summary>
-        /// Gets a filtered and paged list of specials based on search criteria.
+        /// Retrieves a filtered, paginated list of specials.
         /// </summary>
-        /// <param name="request">The request containing filter, search, and pagination parameters.</param>
-        /// <returns>A paged API response containing special list items and pagination metadata.</returns>
+        /// <param name="request">The special search and filter request parameters.</param>
+        /// <returns>A paginated list of special list items.</returns>
         /// <remarks>
-        /// <para>This method provides advanced search and filtering capabilities including:</para>
-        /// <para>- Location-based search within a specified radius</para>
-        /// <para>- Text search in special content and venue names</para>
-        /// <para>- Filtering by special type (food, drink, entertainment)</para>
-        /// <para>- Filtering by current activity status</para>
-        /// <para>- Filtering by venue</para>
-        /// <para>- Pagination for efficient data retrieval</para>
+        /// <para>This method returns specials with filtering based on:</para>
+        /// <para>- Geographic location and radius</para>
+        /// <para>- Special type (food, drink, entertainment)</para>
+        /// <para>- Whether the special is currently running</para>
+        /// <para>- Text search terms</para>
+        /// <para>- Venue ID filtering</para>
         /// </remarks>
-        Task<PagedApiResponse<SpecialListItem>> GetSpecialsAsync(GetSpecialsRequest request);
+        Task<PagedResult<SpecialListItem>> GetSpecialsAsync(GetSpecialsRequest request);
 
         /// <summary>
-        /// Gets detailed information about a specific special by ID.
+        /// Retrieves a special by its ID.
         /// </summary>
-        /// <param name="id">The ID of the special to retrieve.</param>
-        /// <returns>Detailed special information if found; otherwise, null.</returns>
+        /// <param name="id">The special ID.</param>
+        /// <returns>The special details if found, otherwise null.</returns>
         /// <remarks>
-        /// <para>This method retrieves comprehensive information about a special including:</para>
-        /// <para>- Content and type</para>
-        /// <para>- Timing details (start/end times, expiration)</para>
-        /// <para>- Recurrence information</para>
-        /// <para>- Current activity status</para>
-        /// <para>- Associated venue information</para>
-        /// <para>The response is suitable for special detail pages and management interfaces.</para>
+        /// <para>This method returns comprehensive information about a special.</para>
+        /// <para>Includes venue information and current running status.</para>
         /// </remarks>
         Task<SpecialDetail?> GetSpecialByIdAsync(string id);
 
         /// <summary>
-        /// Creates a new special promotion.
+        /// Creates a new special.
         /// </summary>
-        /// <param name="request">The special creation request containing special details.</param>
+        /// <param name="request">The special creation request.</param>
         /// <param name="userId">The ID of the user creating the special.</param>
-        /// <returns>The created special with generated IDs and metadata.</returns>
+        /// <returns>The created special details.</returns>
         /// <remarks>
-        /// <para>This method handles the complete special creation process including:</para>
-        /// <para>- Validating the associated venue exists</para>
-        /// <para>- Creating the special record</para>
-        /// <para>- Setting creation metadata (timestamp, user)</para>
-        /// <para>- Determining the initial activity status based on scheduling information</para>
+        /// <para>This method validates the request and persists a new special.</para>
+        /// <para>Supports one-time and recurring specials with various scheduling options.</para>
         /// </remarks>
         Task<SpecialDetail> CreateSpecialAsync(CreateSpecialRequest request, string userId);
 
         /// <summary>
-        /// Updates an existing special promotion.
+        /// Updates an existing special.
         /// </summary>
-        /// <param name="id">The ID of the special to update.</param>
-        /// <param name="request">The special update request containing the new special details.</param>
+        /// <param name="id">The special ID.</param>
+        /// <param name="request">The special update request.</param>
         /// <param name="userId">The ID of the user updating the special.</param>
         /// <returns>The updated special details.</returns>
-        /// <exception cref="KeyNotFoundException">Thrown when a special with the specified ID is not found.</exception>
         /// <remarks>
-        /// <para>This method handles the complete special update process including:</para>
-        /// <para>- Updating the special record with new values</para>
-        /// <para>- Setting update metadata (timestamp, user)</para>
-        /// <para>- Recalculating the activity status based on updated scheduling information</para>
+        /// <para>This method validates the request and updates an existing special.</para>
+        /// <para>Throws KeyNotFoundException if the special doesn't exist.</para>
         /// </remarks>
         Task<SpecialDetail> UpdateSpecialAsync(string id, UpdateSpecialRequest request, string userId);
 
         /// <summary>
-        /// Soft-deletes a special promotion.
+        /// Deletes a special (soft delete).
         /// </summary>
-        /// <param name="id">The ID of the special to delete.</param>
+        /// <param name="id">The special ID.</param>
         /// <param name="userId">The ID of the user deleting the special.</param>
-        /// <returns>True if the special was found and deleted; otherwise, false.</returns>
+        /// <returns>True if successfully deleted, otherwise false.</returns>
         /// <remarks>
-        /// <para>This method performs a soft delete, which means:</para>
-        /// <para>- The special is marked as deleted but remains in the database</para>
-        /// <para>- The special will be excluded from normal queries</para>
-        /// <para>- The deletion is recorded with a timestamp and user ID</para>
+        /// <para>This method performs a soft delete, marking the special as deleted in the database.</para>
+        /// <para>The special record remains in the database for audit purposes.</para>
         /// </remarks>
         Task<bool> DeleteSpecialAsync(string id, string userId);
 
         /// <summary>
-        /// Determines if a special is currently running at a specific point in time.
+        /// Checks if a special is currently running at a specific time.
         /// </summary>
-        /// <param name="specialId">The ID of the special to check.</param>
-        /// <param name="referenceTime">The time to check against, or null to use the current time.</param>
-        /// <returns>True if the special is currently active; otherwise, false.</returns>
+        /// <param name="specialId">The special ID.</param>
+        /// <param name="referenceTime">The reference time to check against, or null for current time.</param>
+        /// <returns>True if the special is currently active, otherwise false.</returns>
         /// <remarks>
-        /// <para>This method determines whether a special is active by evaluating:</para>
+        /// <para>This method determines if a special is active based on:</para>
         /// <para>- Start date and time</para>
-        /// <para>- End time if specified</para>
-        /// <para>- Expiration date if specified</para>
-        /// <para>- Recurrence pattern (CRON schedule) if the special is recurring</para>
-        /// <para>This is useful for filtering active specials and displaying status indicators.</para>
+        /// <para>- End time (if specified)</para>
+        /// <para>- Expiration date (if specified)</para>
+        /// <para>- Recurrence schedule for recurring specials</para>
         /// </remarks>
         Task<bool> IsSpecialCurrentlyRunningAsync(string specialId, DateTimeOffset? referenceTime = null);
     }
