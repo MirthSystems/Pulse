@@ -10,7 +10,7 @@
     /// <para>It includes options for location-based searches, text search, time-based filtering, and pagination.</para>
     /// <para>Used primarily for API endpoints that retrieve lists of specials.</para>
     /// </remarks>
-    public class GetSpecialsRequest
+    public class GetSpecialsRequest : PageQueryParams
     {
         /// <summary>
         /// Gets or sets the address to search near.
@@ -92,26 +92,5 @@
         /// <para>Default is true.</para>
         /// </remarks>
         public bool? IsCurrentlyRunning { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the page number for pagination.
-        /// </summary>
-        /// <remarks>
-        /// <para>This is a 1-based index (first page is 1, not 0).</para>
-        /// <para>Default is 1.</para>
-        /// </remarks>
-        [Range(1, int.MaxValue)]
-        public int Page { get; set; } = 1;
-
-        /// <summary>
-        /// Gets or sets the number of items per page for pagination.
-        /// </summary>
-        /// <remarks>
-        /// <para>Defines how many specials are returned per page.</para>
-        /// <para>Default is 20.</para>
-        /// <para>Maximum allowed value is 100.</para>
-        /// </remarks>
-        [Range(1, 100)]
-        public int PageSize { get; set; } = 20;
     }
 }

@@ -22,12 +22,10 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedApiResponse<VenueListItem>))]
-        public async Task<ActionResult<PagedApiResponse<VenueListItem>>> GetVenues(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+        public async Task<ActionResult<PagedApiResponse<VenueListItem>>> GetVenues([FromQuery] PageQueryParams pageQuery)
         {
-            pageSize = pageSize > 100 ? 100 : pageSize;
-            var venues = await _venueService.GetVenuesAsync(page, pageSize);
+            pageQuery.PageSize = pageQuery.PageSize > 10000 ? 10000 : pageQuery.PageSize;
+            var venues = await _venueService.GetVenuesAsync(pageQuery.Page, pageQuery.PageSize);
             return Ok(venues);
         }
 
