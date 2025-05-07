@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Typography, Box, TextField, Paper } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { decrement, increment, incrementByAmount } from '../counterSlice';
+import { decrement, increment, incrementByAmount } from '../redux/counterSlice';
 
 export const Counter = () => {
   const count = useAppSelector((state) => state.counter.value);
