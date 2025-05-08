@@ -1,40 +1,16 @@
-import { useCallback, useState } from 'react';
-import { apiClient } from '../client';
+import { useCallback } from 'react';
 import { IVenue, IVenueResponse, Venue, IOperatingScheduleResponse, ISpecialResponse } from '../types/models';
-import { useAuth } from '../../user/hooks/useAuth';
+import { apiClient, useApiClient } from './useApiClient';
 
 /**
  * Hook providing access to venue-related API endpoints
  */
 export function useVenuesApi() {
-  const { getToken } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Handles API request execution with authentication and error handling
-   */
-  const executeRequest = useCallback(async <T>(
-    requestFn: () => Promise<T>
-  ): Promise<T> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Ensure we have a valid token
-      await getToken();
-      return await requestFn();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getToken]);
+  const { isLoading, error, executeRequest, executeProtectedRequest } = useApiClient();
 
   /**
    * Get all venues with optional pagination
+   * [AllowAnonymous] endpoint
    */
   const getVenues = useCallback((page?: number, pageSize?: number) => {
     const queryParams: Record<string, unknown> = {};
@@ -48,6 +24,7 @@ export function useVenuesApi() {
 
   /**
    * Get a specific venue by ID
+   * [AllowAnonymous] endpoint
    */
   const getVenue = useCallback((id: string) => {
     return executeRequest(() => 
@@ -57,6 +34,7 @@ export function useVenuesApi() {
 
   /**
    * Create a new venue
+   * [Authorize(Roles = "System.Administrator")] endpoint
    */
   const createVenue = useCallback((venue: Venue | IVenue) => {
     const request = venue instanceof Venue
@@ -77,14 +55,15 @@ export function useVenuesApi() {
         }
       : venue;
     
-    return executeRequest(async () => {
+    return executeProtectedRequest(async () => {
       const response = await apiClient.post<{ id: string }>('/api/venues', request);
       return response.id;
     });
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Update an existing venue
+   * [Authorize(Roles = "System.Administrator")] endpoint
    */
   const updateVenue = useCallback((id: string, venue: Venue | IVenue) => {
     const request = venue instanceof Venue
@@ -99,22 +78,24 @@ export function useVenuesApi() {
         }
       : venue;
     
-    return executeRequest(() => 
+    return executeProtectedRequest(() => 
       apiClient.put<void>(`/api/venues/${id}`, request)
     );
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Delete a venue
+   * [Authorize(Roles = "System.Administrator")] endpoint
    */
   const deleteVenue = useCallback((id: string) => {
-    return executeRequest(() => 
+    return executeProtectedRequest(() => 
       apiClient.delete<void>(`/api/venues/${id}`)
     );
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Get business hours for a venue
+   * [AllowAnonymous] endpoint
    */
   const getBusinessHours = useCallback((venueId: string) => {
     return executeRequest(() => 
@@ -124,6 +105,7 @@ export function useVenuesApi() {
 
   /**
    * Get specials for a venue
+   * [AllowAnonymous] endpoint
    */
   const getVenueSpecials = useCallback((venueId: string) => {
     return executeRequest(() => 

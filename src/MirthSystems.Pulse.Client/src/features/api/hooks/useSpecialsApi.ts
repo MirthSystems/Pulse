@@ -1,41 +1,17 @@
-import { useCallback, useState } from 'react';
-import { apiClient } from '../client';
+import { useCallback } from 'react';
 import { ISpecial, ISpecialQueryParams, ISpecialResponse, Special } from '../types/models';
 import { DateTime } from 'luxon';
-import { useAuth } from '../../user/hooks/useAuth';
+import { apiClient, useApiClient } from './useApiClient';
 
 /**
  * Hook providing access to specials-related API endpoints
  */
 export function useSpecialsApi() {
-  const { getToken } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Handles API request execution with authentication and error handling
-   */
-  const executeRequest = useCallback(async <T>(
-    requestFn: () => Promise<T>
-  ): Promise<T> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Ensure we have a valid token
-      await getToken();
-      return await requestFn();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getToken]);
+  const { isLoading, error, executeRequest, executeProtectedRequest } = useApiClient();
 
   /**
    * Get specials with query parameters
+   * [AllowAnonymous] endpoint
    */
   const getSpecials = useCallback((params: ISpecialQueryParams) => {
     const queryParams = { ...params };
@@ -52,6 +28,7 @@ export function useSpecialsApi() {
 
   /**
    * Search specials with more friendly parameters
+   * [AllowAnonymous] endpoint
    */
   const searchSpecials = useCallback((
     address: string,
@@ -86,6 +63,7 @@ export function useSpecialsApi() {
 
   /**
    * Get a specific special by ID
+   * [AllowAnonymous] endpoint
    */
   const getSpecial = useCallback((id: string) => {
     return executeRequest(() => 
@@ -95,6 +73,7 @@ export function useSpecialsApi() {
 
   /**
    * Create a new special
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const createSpecial = useCallback((special: Special | ISpecial) => {
     const request = special instanceof Special
@@ -111,14 +90,15 @@ export function useSpecialsApi() {
         }
       : special;
     
-    return executeRequest(async () => {
+    return executeProtectedRequest(async () => {
       const response = await apiClient.post<{ id: string }>('/api/specials', request);
       return response.id;
     });
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Update an existing special
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const updateSpecial = useCallback((id: string, special: Special | ISpecial) => {
     const request = special instanceof Special
@@ -134,19 +114,20 @@ export function useSpecialsApi() {
         }
       : special;
     
-    return executeRequest(() => 
+    return executeProtectedRequest(() => 
       apiClient.put<void>(`/api/specials/${id}`, request)
     );
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Delete a special
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const deleteSpecial = useCallback((id: string) => {
-    return executeRequest(() => 
+    return executeProtectedRequest(() => 
       apiClient.delete<void>(`/api/specials/${id}`)
     );
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   return {
     // API state

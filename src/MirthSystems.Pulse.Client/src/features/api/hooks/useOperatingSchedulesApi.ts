@@ -1,40 +1,16 @@
-import { useCallback, useState } from 'react';
-import { apiClient } from '../client';
+import { useCallback } from 'react';
 import { IOperatingSchedule, IOperatingScheduleResponse, OperatingSchedule } from '../types/models';
-import { useAuth } from '../../user/hooks/useAuth';
+import { apiClient, useApiClient } from './useApiClient';
 
 /**
  * Hook providing access to operating schedule-related API endpoints
  */
 export function useOperatingSchedulesApi() {
-  const { getToken } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Handles API request execution with authentication and error handling
-   */
-  const executeRequest = useCallback(async <T>(
-    requestFn: () => Promise<T>
-  ): Promise<T> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Ensure we have a valid token
-      await getToken();
-      return await requestFn();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getToken]);
+  const { isLoading, error, executeRequest, executeProtectedRequest } = useApiClient();
 
   /**
    * Get operating schedules for a venue
+   * [AllowAnonymous] endpoint
    */
   const getVenueOperatingSchedules = useCallback((venueId: string) => {
     return executeRequest(() => 
@@ -44,6 +20,7 @@ export function useOperatingSchedulesApi() {
 
   /**
    * Get a specific operating schedule by ID
+   * [AllowAnonymous] endpoint
    */
   const getOperatingSchedule = useCallback((id: string) => {
     return executeRequest(() => 
@@ -53,6 +30,7 @@ export function useOperatingSchedulesApi() {
 
   /**
    * Create a new operating schedule
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const createOperatingSchedule = useCallback((schedule: OperatingSchedule | IOperatingSchedule) => {
     const request = schedule instanceof OperatingSchedule
@@ -65,14 +43,15 @@ export function useOperatingSchedulesApi() {
         }
       : schedule;
     
-    return executeRequest(async () => {
+    return executeProtectedRequest(async () => {
       const response = await apiClient.post<{ id: string }>('/api/operating-schedules', request);
       return response.id;
     });
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Update an existing operating schedule
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const updateOperatingSchedule = useCallback((id: string, schedule: OperatingSchedule | IOperatingSchedule) => {
     const request = schedule instanceof OperatingSchedule
@@ -83,22 +62,24 @@ export function useOperatingSchedulesApi() {
         }
       : schedule;
     
-    return executeRequest(() => 
+    return executeProtectedRequest(() => 
       apiClient.put<void>(`/api/operating-schedules/${id}`, request)
     );
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Delete an operating schedule
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const deleteOperatingSchedule = useCallback((id: string) => {
-    return executeRequest(() => 
+    return executeProtectedRequest(() => 
       apiClient.delete<void>(`/api/operating-schedules/${id}`)
     );
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   /**
    * Post multiple business hours for a venue
+   * [Authorize(Roles = "Content.Manager,System.Administrator")] endpoint
    */
   const postVenueBusinessHours = useCallback((venueId: string, schedules: OperatingSchedule[] | IOperatingSchedule[]) => {
     const requests = schedules.map(schedule => 
@@ -112,11 +93,11 @@ export function useOperatingSchedulesApi() {
         : schedule
     );
     
-    return executeRequest(async () => {
+    return executeProtectedRequest(async () => {
       const response = await apiClient.post<{ ids: string[] }>(`/api/operating-schedules/venue/${venueId}`, requests);
       return response.ids;
     });
-  }, [executeRequest]);
+  }, [executeProtectedRequest]);
 
   return {
     // API state

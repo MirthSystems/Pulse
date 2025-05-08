@@ -20,7 +20,7 @@ export class ApiError extends Error {
 /**
  * Core API client service that handles HTTP requests with authentication
  */
-class ApiClientService {
+export class ApiClient {
   private config: ApiConfig;
   private authToken?: string;
 
@@ -46,11 +46,52 @@ class ApiClientService {
   }
 
   /**
+   * Executes an API request that doesn't require authentication
+   * @param method The HTTP method to use (GET, POST, PUT, DELETE)
+   * @param endpoint The API endpoint to call
+   * @param data Optional data to send with the request
+   * @param queryParams Optional query parameters
+   * @returns A promise with the API response
+   */
+  async executeRequest<T>(
+    method: string,
+    endpoint: string,
+    data?: unknown,
+    queryParams?: Record<string, unknown>
+  ): Promise<T> {
+    const url = this.buildUrl(endpoint, queryParams);
+    return this.request<T>(method, url, data, false);
+  }
+
+  /**
+   * Executes an API request that requires authentication
+   * @param method The HTTP method to use (GET, POST, PUT, DELETE)
+   * @param endpoint The API endpoint to call
+   * @param data Optional data to send with the request
+   * @param queryParams Optional query parameters
+   * @returns A promise with the API response
+   * @throws ApiError if no auth token is available
+   */
+  async executeProtectedRequest<T>(
+    method: string,
+    endpoint: string,
+    data?: unknown,
+    queryParams?: Record<string, unknown>
+  ): Promise<T> {
+    if (!this.authToken) {
+      throw new ApiError('Authentication required', 401);
+    }
+
+    const url = this.buildUrl(endpoint, queryParams);
+    return this.request<T>(method, url, data, true);
+  }
+
+  /**
    * Performs a GET request
    */
   async get<T>(endpoint: string, queryParams?: Record<string, unknown>): Promise<T> {
     const url = this.buildUrl(endpoint, queryParams);
-    return this.request<T>('GET', url);
+    return this.request<T>('GET', url, undefined, false);
   }
 
   /**
@@ -58,7 +99,7 @@ class ApiClientService {
    */
   async post<T>(endpoint: string, data?: unknown): Promise<T> {
     const url = this.buildUrl(endpoint);
-    return this.request<T>('POST', url, data);
+    return this.request<T>('POST', url, data, false);
   }
 
   /**
@@ -66,7 +107,7 @@ class ApiClientService {
    */
   async put<T>(endpoint: string, data?: unknown): Promise<T> {
     const url = this.buildUrl(endpoint);
-    return this.request<T>('PUT', url, data);
+    return this.request<T>('PUT', url, data, false);
   }
 
   /**
@@ -74,7 +115,7 @@ class ApiClientService {
    */
   async delete<T>(endpoint: string): Promise<T> {
     const url = this.buildUrl(endpoint);
-    return this.request<T>('DELETE', url);
+    return this.request<T>('DELETE', url, undefined, false);
   }
 
   /**
@@ -113,13 +154,15 @@ class ApiClientService {
   private async request<T>(
     method: string, 
     url: string, 
-    data?: unknown
+    data?: unknown,
+    requireAuth: boolean = true
   ): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
-    if (this.authToken) {
+    // Only add auth header if we're making an authenticated request and we have a token
+    if (requireAuth && this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
 
@@ -169,6 +212,3 @@ class ApiClientService {
     throw new ApiError(errorMessage, response.status, errorBody);
   }
 }
-
-// Export a singleton instance
-export const apiClient = new ApiClientService();
