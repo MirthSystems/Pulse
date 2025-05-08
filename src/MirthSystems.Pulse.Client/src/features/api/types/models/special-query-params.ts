@@ -6,7 +6,7 @@ export interface ISpecialQueryParams {
   searchDateTime?: string;
   searchTerm?: string;
   venueId?: string;
-  specialTypeId?: number | SpecialTypes; // Accept either number or enum for flexibility
+  specialTypeId?: number | SpecialTypes;
   isCurrentlyRunning?: boolean;
   page?: number;
   pageSize?: number;

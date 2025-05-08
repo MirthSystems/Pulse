@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { apiClient } from '../../api';
+import { apiClient } from '../../api/client'
 import { setAuthenticated, setToken, setUserInfo } from '../redux/userSlice';
 import { jwtDecode } from 'jwt-decode';
 

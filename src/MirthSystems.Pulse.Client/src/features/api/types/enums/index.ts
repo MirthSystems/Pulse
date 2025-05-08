@@ -1,2 +1,2 @@
-export { DayOfWeek } from './DayOfWeek';
-export { SpecialTypes } from './SpecialTypes';
+export { DayOfWeek } from './day-of-week';
+export { SpecialTypes } from './special-types';

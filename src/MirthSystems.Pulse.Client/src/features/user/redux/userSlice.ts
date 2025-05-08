@@ -1,68 +1,61 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-interface UserState {
-  isInitialized: boolean;
+export interface UserState {
   isAuthenticated: boolean;
   token: string | null;
+  lastTokenRefresh: number | null;
   userId: string | null;
   userName: string | null;
   userEmail: string | null;
   userRoles: string[];
-  lastTokenRefresh: number | null;
 }
 
 const initialState: UserState = {
-  isInitialized: false,
   isAuthenticated: false,
   token: null,
+  lastTokenRefresh: null,
   userId: null,
   userName: null,
   userEmail: null,
-  userRoles: [],
-  lastTokenRefresh: null,
+  userRoles: []
 };
+
+export interface UserInfo {
+  userId: string;
+  userName: string | null;
+  userEmail: string | null;
+  userRoles: string[];
+}
 
 export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setInitialized: (state, action: PayloadAction<boolean>) => {
-      state.isInitialized = action.payload;
-    },
-    
     setAuthenticated: (state, action: PayloadAction<boolean>) => {
       state.isAuthenticated = action.payload;
-      // If logging out, clear user info
       if (!action.payload) {
+        // Clear user state on logout
         state.token = null;
+        state.lastTokenRefresh = null;
         state.userId = null;
         state.userName = null;
         state.userEmail = null;
         state.userRoles = [];
-        state.lastTokenRefresh = null;
       }
     },
-    
-    setToken: (state, action: PayloadAction<string | null>) => {
+    setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
-      state.lastTokenRefresh = action.payload ? Date.now() : null;
+      state.lastTokenRefresh = Date.now();
     },
-    
-    setUserInfo: (state, action: PayloadAction<{ 
-      userId: string; 
-      userName: string | null; 
-      userEmail: string | null;
-      userRoles?: string[];
-    }>) => {
+    setUserInfo: (state, action: PayloadAction<UserInfo>) => {
       state.userId = action.payload.userId;
       state.userName = action.payload.userName;
       state.userEmail = action.payload.userEmail;
-      if (action.payload.userRoles) {
-        state.userRoles = action.payload.userRoles;
-      }
-    },
-  },
+      state.userRoles = action.payload.userRoles;
+    }
+  }
 });
 
-export const { setInitialized, setAuthenticated, setToken, setUserInfo } = userSlice.actions;
+export const { setAuthenticated, setToken, setUserInfo } = userSlice.actions;
+
 export default userSlice.reducer;

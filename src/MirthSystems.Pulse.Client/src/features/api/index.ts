@@ -1,25 +1,9 @@
-// Export main client
-export { PulseApiClient } from './client';
+// Export API client
+export { apiClient, ApiError } from './client';
 
-// Export models for easy access
-export * from './types/models';
-
-// Export enums
-export * from './types/enums';
-
-// Export services and errors
-export { ApiError } from './services';
-
-// Export Redux API hooks
-export * from './redux';
-
-// Export custom hooks
+// Export hooks for API access
 export * from './hooks';
 
-// Export config
-export type { ApiConfig } from './config/apiConfig';
-
-// Create and export default client instance
-import { PulseApiClient } from './client';
-export const apiClient = new PulseApiClient();
-export default apiClient;
+// Export models and types
+export * from './types/models';
+export * from './types/enums';

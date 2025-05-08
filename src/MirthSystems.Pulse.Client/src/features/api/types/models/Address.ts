@@ -26,9 +26,6 @@ export class Address implements IAddress {
     this.country = data.country || '';
   }
 
-  /**
-   * Creates an Address instance from API response
-   */
   static fromResponse(response: IAddress & { id?: string }): Address {
     return new Address({
       id: response.id,
@@ -41,9 +38,6 @@ export class Address implements IAddress {
     });
   }
 
-  /**
-   * Gets the full address as a formatted string
-   */
   getFormattedAddress(): string {
     const parts = [
       this.streetAddress,

@@ -1,10 +1,6 @@
-export * from './Address';
-export * from './OperatingSchedule';
-export * from './Special';
-export * from './Venue';
-export * from './SpecialQueryParams';
-export * from './ProblemDetails';
-export { Address } from './Address';
-export { OperatingSchedule } from './OperatingSchedule';
-export { Special } from './Special';
-export { Venue } from './Venue';
+export * from './address';
+export * from './operating-schedule';
+export * from './special';
+export * from './venue';
+export * from './special-query-params';
+export * from './problem-details';

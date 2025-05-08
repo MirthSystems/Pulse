@@ -1,5 +1,5 @@
-import { IAddress, Address } from './Address';
-import { IOperatingSchedule, OperatingSchedule } from './OperatingSchedule';
+import { IAddress, Address } from './address';
+import { IOperatingSchedule, OperatingSchedule } from './operating-schedule';
 
 export interface IVenue {
   id?: string;
