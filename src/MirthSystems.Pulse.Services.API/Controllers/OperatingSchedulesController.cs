@@ -7,6 +7,7 @@
     using MirthSystems.Pulse.Core.Models.Requests;
     using MirthSystems.Pulse.Core.Models;
     using MirthSystems.Pulse.Services.API.Controllers.Base;
+    using NSwag.Annotations;
 
     [Route("api/operating-schedules")]
     public class OperatingSchedulesController : ApiController
