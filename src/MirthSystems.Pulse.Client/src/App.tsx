@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Container, CssBaseline, AppBar, Toolbar, Typography, Box, ThemeProvider, createTheme, Divider } from '@mui/material';
+import { Container, CssBaseline, AppBar, Toolbar, Typography, Box, ThemeProvider, createTheme, Divider, Paper } from '@mui/material';
 import { Provider as ReduxProvider } from 'react-redux';
 import { LoginButton, LogoutButton, Profile } from './features/user';
 import { Counter } from './features/counter';
+import { VenueList } from './features/venues';
+import { UserSpecials } from './features/specials';
 import { store, DateTimeProvider, AuthProvider } from './app/index';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
@@ -44,10 +46,20 @@ function App() {
               <Container component="main" sx={{ mt: 4, mb: 4, flex: '1 0 auto' }}>
                 <Profile />
                 
+                {/* Authentication-aware component that shows user's specials */}
+                <Paper elevation={3} sx={{ p: 3, my: 3 }}>
+                  <UserSpecials />
+                </Paper>
+                
                 {/* Redux Counter Example */}
                 <Counter />
                 
                 <Divider sx={{ my: 4 }} />
+                
+                {/* Demo of our venue list using RTK Query */}
+                <Paper elevation={3} sx={{ p: 3, my: 3 }}>
+                  <VenueList />
+                </Paper>
                 
                 <div>
                   <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">

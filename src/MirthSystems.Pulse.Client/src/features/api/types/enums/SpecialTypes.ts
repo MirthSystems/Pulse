@@ -1,5 +1,10 @@
+/**
+ * Enum representing the different types of special promotions
+ */
 export enum SpecialTypes {
-  Food = 0,
-  Drink = 1,
-  Entertainment = 2
+  Food = 1,
+  Drink = 2,
+  Entertainment = 3,
+  Event = 4,
+  Other = 5
 }
