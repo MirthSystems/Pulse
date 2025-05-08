@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
-import { IOperatingSchedule, IOperatingScheduleResponse, OperatingSchedule } from '../types/models';
-import { apiClient, useApiClient } from './useApiClient';
+import { IOperatingSchedule, OperatingSchedule } from '../types/models';
+import { useApiClient } from './useApiClient';
+import { operatingSchedulesService } from '../services';
 
 /**
  * Hook providing access to operating schedule-related API endpoints
@@ -14,7 +15,7 @@ export function useOperatingSchedulesApi() {
    */
   const getVenueOperatingSchedules = useCallback((venueId: string) => {
     return executeRequest(() => 
-      apiClient.get<IOperatingScheduleResponse[]>(`/api/operating-schedules/venue/${venueId}`)
+      operatingSchedulesService.getVenueOperatingSchedules(venueId)
     );
   }, [executeRequest]);
 
@@ -24,7 +25,7 @@ export function useOperatingSchedulesApi() {
    */
   const getOperatingSchedule = useCallback((id: string) => {
     return executeRequest(() => 
-      apiClient.get<IOperatingScheduleResponse>(`/api/operating-schedules/${id}`)
+      operatingSchedulesService.getById(id)
     );
   }, [executeRequest]);
 
@@ -43,10 +44,9 @@ export function useOperatingSchedulesApi() {
         }
       : schedule;
     
-    return executeProtectedRequest(async () => {
-      const response = await apiClient.post<{ id: string }>('/api/operating-schedules', request);
-      return response.id;
-    });
+    return executeProtectedRequest(() => 
+      operatingSchedulesService.create(request)
+    );
   }, [executeProtectedRequest]);
 
   /**
@@ -63,7 +63,7 @@ export function useOperatingSchedulesApi() {
       : schedule;
     
     return executeProtectedRequest(() => 
-      apiClient.put<void>(`/api/operating-schedules/${id}`, request)
+      operatingSchedulesService.update(id, request)
     );
   }, [executeProtectedRequest]);
 
@@ -73,7 +73,7 @@ export function useOperatingSchedulesApi() {
    */
   const deleteOperatingSchedule = useCallback((id: string) => {
     return executeProtectedRequest(() => 
-      apiClient.delete<void>(`/api/operating-schedules/${id}`)
+      operatingSchedulesService.delete(id)
     );
   }, [executeProtectedRequest]);
 
@@ -93,10 +93,9 @@ export function useOperatingSchedulesApi() {
         : schedule
     );
     
-    return executeProtectedRequest(async () => {
-      const response = await apiClient.post<{ ids: string[] }>(`/api/operating-schedules/venue/${venueId}`, requests);
-      return response.ids;
-    });
+    return executeProtectedRequest(() => 
+      operatingSchedulesService.postVenueBusinessHours(venueId, requests)
+    );
   }, [executeProtectedRequest]);
 
   return {

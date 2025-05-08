@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
-import { IVenue, IVenueResponse, Venue, IOperatingScheduleResponse, ISpecialResponse } from '../types/models';
-import { apiClient, useApiClient } from './useApiClient';
+import { useApiClient } from './useApiClient';
+import { venuesService } from '../services';
+import { IVenue, Venue } from '../types/models';
 
 /**
- * Hook providing access to venue-related API endpoints
+ * Hook providing access to venue-related API endpoints with loading and error handling
  */
 export function useVenuesApi() {
   const { isLoading, error, executeRequest, executeProtectedRequest } = useApiClient();
@@ -13,12 +14,8 @@ export function useVenuesApi() {
    * [AllowAnonymous] endpoint
    */
   const getVenues = useCallback((page?: number, pageSize?: number) => {
-    const queryParams: Record<string, unknown> = {};
-    if (page !== undefined) queryParams.page = page;
-    if (pageSize !== undefined) queryParams.pageSize = pageSize;
-    
     return executeRequest(() => 
-      apiClient.get<IVenueResponse[]>('/api/venues', queryParams)
+      venuesService.getAll(page, pageSize)
     );
   }, [executeRequest]);
 
@@ -28,7 +25,7 @@ export function useVenuesApi() {
    */
   const getVenue = useCallback((id: string) => {
     return executeRequest(() => 
-      apiClient.get<IVenueResponse>(`/api/venues/${id}`)
+      venuesService.getById(id)
     );
   }, [executeRequest]);
 
@@ -55,10 +52,9 @@ export function useVenuesApi() {
         }
       : venue;
     
-    return executeProtectedRequest(async () => {
-      const response = await apiClient.post<{ id: string }>('/api/venues', request);
-      return response.id;
-    });
+    return executeProtectedRequest(() => 
+      venuesService.create(request)
+    );
   }, [executeProtectedRequest]);
 
   /**
@@ -79,7 +75,7 @@ export function useVenuesApi() {
       : venue;
     
     return executeProtectedRequest(() => 
-      apiClient.put<void>(`/api/venues/${id}`, request)
+      venuesService.update(id, request)
     );
   }, [executeProtectedRequest]);
 
@@ -89,7 +85,7 @@ export function useVenuesApi() {
    */
   const deleteVenue = useCallback((id: string) => {
     return executeProtectedRequest(() => 
-      apiClient.delete<void>(`/api/venues/${id}`)
+      venuesService.delete(id)
     );
   }, [executeProtectedRequest]);
 
@@ -99,7 +95,7 @@ export function useVenuesApi() {
    */
   const getBusinessHours = useCallback((venueId: string) => {
     return executeRequest(() => 
-      apiClient.get<IOperatingScheduleResponse[]>(`/api/venues/${venueId}/business-hours`)
+      venuesService.getBusinessHours(venueId)
     );
   }, [executeRequest]);
 
@@ -109,7 +105,7 @@ export function useVenuesApi() {
    */
   const getVenueSpecials = useCallback((venueId: string) => {
     return executeRequest(() => 
-      apiClient.get<ISpecialResponse[]>(`/api/venues/${venueId}/specials`)
+      venuesService.getSpecials(venueId)
     );
   }, [executeRequest]);
 

@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { apiClient } from '../../api/hooks/useApiClient';
+import { apiClient } from '../../api/client';
 import { setAuthenticated, setToken, setUserInfo } from '../redux/userSlice';
 import { jwtDecode } from 'jwt-decode';
 
@@ -10,6 +10,8 @@ interface JwtTokenPayload {
   name?: string;
   email?: string;
   'https://pulse.mirth-systems.com/roles'?: string[];
+  exp?: number; // Expiration time
+  iat?: number; // Issued at time
   [key: string]: unknown;
 }
 
@@ -49,7 +51,9 @@ export const useAuth = () => {
     }
   }, [isAuthenticated, getAccessTokenSilently, dispatch]);
 
-  // Extract user info from token and update Redux state
+  /**
+   * Extract user info from token and update Redux state
+   */
   const updateUserInfo = useCallback((token: string) => {
     try {
       const decodedToken = jwtDecode<JwtTokenPayload>(token);
@@ -63,6 +67,19 @@ export const useAuth = () => {
       console.error('Error decoding token:', error);
     }
   }, [dispatch]);
+
+  /**
+   * Get token expiration time in milliseconds
+   */
+  const getTokenExpirationTime = useCallback((token: string): number => {
+    try {
+      const decodedToken = jwtDecode<JwtTokenPayload>(token);
+      return decodedToken.exp ? decodedToken.exp * 1000 : 0; // Convert to milliseconds
+    } catch (error) {
+      console.error('Error decoding token expiration:', error);
+      return 0;
+    }
+  }, []);
 
   // Effect to update auth state when Auth0 state changes
   useEffect(() => {
@@ -84,24 +101,34 @@ export const useAuth = () => {
     updateToken();
   }, [isAuthenticated, getToken, dispatch, updateUserInfo]);
 
-  // Check if token needs refreshing (token exists but is 50+ minutes old)
+  // Check if token needs refreshing based on actual token expiration
   useEffect(() => {
     const refreshTokenIfNeeded = async () => {
-      if (token && lastTokenRefresh) {
-        // Token refresh threshold: 50 minutes (3000000 milliseconds)
-        // Auth0 tokens typically expire after 60 minutes
-        const refreshThreshold = 3000000; 
+      if (token) {
         const now = Date.now();
+        const expirationTime = getTokenExpirationTime(token);
         
-        if (now - lastTokenRefresh > refreshThreshold) {
-          console.log('Token refresh needed');
-          await getToken();
+        if (expirationTime) {
+          // Refresh token 5 minutes (300000 ms) before it expires
+          const bufferTime = 5 * 60 * 1000;
+          
+          if (now + bufferTime > expirationTime) {
+            console.log('Token refresh needed - expiring soon');
+            await getToken();
+          }
+        } else if (lastTokenRefresh) {
+          // Fallback to time-based refresh if expiration cannot be determined
+          const refreshThreshold = 45 * 60 * 1000; // 45 minutes
+          if (now - lastTokenRefresh > refreshThreshold) {
+            console.log('Token refresh needed - time-based fallback');
+            await getToken();
+          }
         }
       }
     };
     
     refreshTokenIfNeeded();
-  }, [token, lastTokenRefresh, getToken]);
+  }, [token, lastTokenRefresh, getToken, getTokenExpirationTime]);
 
   return {
     ...auth0,

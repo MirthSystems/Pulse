@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { ISpecial, ISpecialQueryParams, ISpecialResponse, Special } from '../types/models';
+import { ISpecial, ISpecialQueryParams, Special } from '../types/models';
 import { DateTime } from 'luxon';
-import { apiClient, useApiClient } from './useApiClient';
+import { useApiClient } from './useApiClient';
+import { specialsService } from '../services';
 
 /**
  * Hook providing access to specials-related API endpoints
@@ -14,15 +15,8 @@ export function useSpecialsApi() {
    * [AllowAnonymous] endpoint
    */
   const getSpecials = useCallback((params: ISpecialQueryParams) => {
-    const queryParams = { ...params };
-    
-    // Convert DateTime objects to ISO strings
-    if (params.searchDateTime && typeof params.searchDateTime === 'object' && 'toISO' in params.searchDateTime) {
-      queryParams.searchDateTime = (params.searchDateTime as DateTime).toISO() || undefined;
-    }
-    
     return executeRequest(() => 
-      apiClient.get<ISpecialResponse[]>('/api/specials', queryParams)
+      specialsService.getSpecials(params)
     );
   }, [executeRequest]);
 
@@ -67,7 +61,7 @@ export function useSpecialsApi() {
    */
   const getSpecial = useCallback((id: string) => {
     return executeRequest(() => 
-      apiClient.get<ISpecialResponse>(`/api/specials/${id}`)
+      specialsService.getById(id)
     );
   }, [executeRequest]);
 
@@ -90,10 +84,9 @@ export function useSpecialsApi() {
         }
       : special;
     
-    return executeProtectedRequest(async () => {
-      const response = await apiClient.post<{ id: string }>('/api/specials', request);
-      return response.id;
-    });
+    return executeProtectedRequest(() => 
+      specialsService.create(request)
+    );
   }, [executeProtectedRequest]);
 
   /**
@@ -115,7 +108,7 @@ export function useSpecialsApi() {
       : special;
     
     return executeProtectedRequest(() => 
-      apiClient.put<void>(`/api/specials/${id}`, request)
+      specialsService.update(id, request)
     );
   }, [executeProtectedRequest]);
 
@@ -125,7 +118,7 @@ export function useSpecialsApi() {
    */
   const deleteSpecial = useCallback((id: string) => {
     return executeProtectedRequest(() => 
-      apiClient.delete<void>(`/api/specials/${id}`)
+      specialsService.delete(id)
     );
   }, [executeProtectedRequest]);
 

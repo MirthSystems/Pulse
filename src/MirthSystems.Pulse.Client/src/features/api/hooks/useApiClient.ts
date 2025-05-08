@@ -1,13 +1,14 @@
 import { useCallback, useState } from 'react';
 import { useAuth } from '../../user/hooks/useAuth';
-import { ApiClient } from '../client';
+import { ApiError } from '../client';
 
-export const apiClient = new ApiClient();
-
+/**
+ * Hook for interacting with API resources that provides error handling and loading state
+ */
 export function useApiClient() {
   const { getToken } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   /**
    * Executes a request with error handling
@@ -22,9 +23,12 @@ export function useApiClient() {
     try {
       return await requestFn();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      throw err;
+      const apiError = err instanceof ApiError 
+        ? err 
+        : new ApiError(err instanceof Error ? err.message : 'An unknown error occurred', 500);
+      
+      setError(apiError);
+      throw apiError;
     } finally {
       setIsLoading(false);
     }
@@ -45,9 +49,26 @@ export function useApiClient() {
       await getToken();
       return await requestFn();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      throw err;
+      const apiError = err instanceof ApiError 
+        ? err 
+        : new ApiError(err instanceof Error ? err.message : 'An unknown error occurred', 500);
+      
+      setError(apiError);
+      
+      // Handle authentication errors specially
+      if (apiError.isAuthError()) {
+        // Try to refresh the token once
+        try {
+          await getToken();
+          // If token refresh succeeded, retry the request
+          return await requestFn();
+        } catch {
+          // If token refresh fails, throw the original error
+          throw apiError;
+        }
+      }
+      
+      throw apiError;
     } finally {
       setIsLoading(false);
     }

@@ -1,106 +1,198 @@
-import { DateTime as LuxonDateTime, DurationUnit } from 'luxon';
+import { DateTime, WeekdayNumbers } from 'luxon';
 
 /**
- * DateTime utility class that provides consistent date and time operations
- * throughout the application using the luxon library.
+ * Utility functions for working with dates and times consistently
+ * across the application using Luxon DateTime library
  */
-export class DateTime {
-  /**
-   * Gets the current date and time.
-   */
-  static now(): LuxonDateTime {
-    return LuxonDateTime.now();
-  }
 
-  /**
-   * Creates a DateTime from an ISO string.
-   */
-  static fromISO(isoString: string): LuxonDateTime {
-    return LuxonDateTime.fromISO(isoString);
-  }
+/**
+ * Format options for displaying dates and times
+ */
+export const DateTimeFormats = {
+  DATE_ONLY: 'MM/dd/yyyy',
+  SHORT_DATE: 'M/d/yy',
+  DATE_WITH_WEEKDAY: 'ccc, MMM d, yyyy',
+  TIME_ONLY: 'h:mm a',
+  TIME_WITH_SECONDS: 'h:mm:ss a',
+  DATE_TIME: 'MM/dd/yyyy h:mm a',
+  ISO_DATE: 'yyyy-MM-dd',
+  ISO_TIME: 'HH:mm:ss',
+  ISO_DATE_TIME: "yyyy-MM-dd'T'HH:mm:ss",
+  RELATIVE: 'relative',
+};
 
-  /**
-   * Creates a DateTime from a JavaScript Date object.
-   */
-  static fromJSDate(date: Date): LuxonDateTime {
-    return LuxonDateTime.fromJSDate(date);
-  }
+/**
+ * Get the current date and time
+ * @param timezone Optional timezone (defaults to local timezone)
+ */
+export const now = (timezone?: string): DateTime => {
+  return timezone ? DateTime.now().setZone(timezone) : DateTime.now();
+};
 
-  /**
-   * Formats a date using the specified format string.
-   * @see https://moment.github.io/luxon/#/formatting for format options
-   */
-  static format(date: LuxonDateTime, format: string): string {
-    return date.toFormat(format);
+/**
+ * Parse a string to a DateTime object
+ * @param dateString String representation of date
+ * @param format Optional format string for parsing
+ */
+export const parseDate = (dateString: string, format?: string): DateTime => {
+  if (format) {
+    return DateTime.fromFormat(dateString, format);
   }
+  
+  // Try common formats
+  const dateTime = DateTime.fromISO(dateString);
+  if (dateTime.isValid) return dateTime;
 
-  /**
-   * Returns a formatted date string in localized format.
-   */
-  static formatDate(date: LuxonDateTime): string {
-    return date.toLocaleString(LuxonDateTime.DATE_FULL);
-  }
+  return DateTime.fromSQL(dateString);
+};
 
-  /**
-   * Returns a formatted time string in localized format.
-   */
-  static formatTime(date: LuxonDateTime): string {
-    return date.toLocaleString(LuxonDateTime.TIME_SIMPLE);
+/**
+ * Format a DateTime object to a string
+ * @param date The DateTime object to format
+ * @param format The format to use (from DateTimeFormats)
+ * @param timezone Optional timezone for display
+ */
+export const formatDateTime = (
+  date: DateTime,
+  format: string = DateTimeFormats.DATE_TIME,
+  timezone?: string
+): string => {
+  const dateInZone = timezone ? date.setZone(timezone) : date;
+  
+  if (format === DateTimeFormats.RELATIVE) {
+    return dateInZone.toRelative() || '';
   }
+  
+  return dateInZone.toFormat(format);
+};
 
-  /**
-   * Returns a formatted date and time string in localized format.
-   */
-  static formatDateTime(date: LuxonDateTime): string {
-    return date.toLocaleString(LuxonDateTime.DATETIME_FULL);
-  }
+/**
+ * Convert a time string (e.g., "19:30:00") to a formatted time string (e.g., "7:30 PM")
+ * @param timeString Time string in 24-hour format (HH:mm:ss or HH:mm)
+ */
+export const formatTimeString = (
+  timeString: string, 
+  format: string = DateTimeFormats.TIME_ONLY
+): string => {
+  // Create a DateTime object for today with the specified time
+  const today = DateTime.now().startOf('day');
+  
+  // Split the time string into hours, minutes, and optional seconds
+  const parts = timeString.split(':');
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  const seconds = parts.length > 2 ? parseInt(parts[2], 10) : 0;
+  
+  const dateTime = today.set({ hour: hours, minute: minutes, second: seconds });
+  
+  return dateTime.toFormat(format);
+};
 
-  /**
-   * Adds the specified amount of time to a date.
-   */
-  static add(date: LuxonDateTime, amount: number, unit: DurationUnit): LuxonDateTime {
-    return date.plus({ [unit]: amount });
-  }
+/**
+ * Check if a DateTime is in the past
+ */
+export const isPast = (date: DateTime): boolean => {
+  return date < DateTime.now();
+};
 
-  /**
-   * Subtracts the specified amount of time from a date.
-   */
-  static subtract(date: LuxonDateTime, amount: number, unit: DurationUnit): LuxonDateTime {
-    return date.minus({ [unit]: amount });
-  }
+/**
+ * Check if a DateTime is in the future
+ */
+export const isFuture = (date: DateTime): boolean => {
+  return date > DateTime.now();
+};
 
-  /**
-   * Calculates the difference between two dates.
-   */
-  static diff(date1: LuxonDateTime, date2: LuxonDateTime, unit: DurationUnit = 'milliseconds'): number {
-    return date2.diff(date1).as(unit);
-  }
+/**
+ * Check if two DateTimes are on the same day
+ */
+export const isSameDay = (date1: DateTime, date2: DateTime): boolean => {
+  return date1.hasSame(date2, 'day');
+};
 
-  /**
-   * Checks if a date is before another date.
-   */
-  static isBefore(date1: LuxonDateTime, date2: LuxonDateTime): boolean {
-    return date1 < date2;
-  }
+/**
+ * Get the days difference between two dates
+ */
+export const daysBetween = (date1: DateTime, date2: DateTime): number => {
+  return Math.abs(
+    Math.floor(date2.diff(date1, 'days').days)
+  );
+};
 
-  /**
-   * Checks if a date is after another date.
-   */
-  static isAfter(date1: LuxonDateTime, date2: LuxonDateTime): boolean {
-    return date1 > date2;
+/**
+ * Creates a range of dates
+ * @param startDate Start of the range
+ * @param endDate End of the range
+ * @param step Step in days (defaults to 1)
+ */
+export const createDateRange = (
+  startDate: DateTime,
+  endDate: DateTime,
+  step: number = 1
+): DateTime[] => {
+  const range: DateTime[] = [];
+  let currentDate = startDate;
+  
+  while (currentDate <= endDate) {
+    range.push(currentDate);
+    currentDate = currentDate.plus({ days: step });
   }
+  
+  return range;
+};
 
-  /**
-   * Checks if a date is between two other dates.
-   */
-  static isBetween(date: LuxonDateTime, start: LuxonDateTime, end: LuxonDateTime): boolean {
-    return date >= start && date <= end;
-  }
+/**
+ * Find the next occurrence of a day of the week
+ * @param dayOfWeek 0 for Sunday, 1 for Monday, etc.
+ * @param startFrom Optional starting date (defaults to today)
+ */
+export const nextDayOfWeek = (
+  dayOfWeek: number,
+  startFrom: DateTime = DateTime.now()
+): DateTime => {
+  // Convert JS day of week (0-6) to Luxon weekday (1-7)
+  const luxonWeekday = dayOfWeek === 0 ? 7 : dayOfWeek;
+  const result = startFrom.set({ weekday: luxonWeekday as WeekdayNumbers });
+  return result <= startFrom ? result.plus({ weeks: 1 }) : result;
+};
 
-  /**
-   * Returns a relative time string (e.g., "2 hours ago", "in 3 days").
-   */
-  static toRelative(date: LuxonDateTime): string | null {
-    return date.toRelative();
+/**
+ * Check if a time is between two other times on the same day
+ * @param time The time to check
+ * @param startTime The start time
+ * @param endTime The end time
+ */
+export const isTimeBetween = (
+  time: DateTime,
+  startTime: DateTime,
+  endTime: DateTime
+): boolean => {
+  // Normalize all times to the same day for comparison
+  const baseDay = DateTime.now().startOf('day');
+  
+  const normalizedTime = baseDay.set({
+    hour: time.hour,
+    minute: time.minute,
+    second: time.second
+  });
+  
+  const normalizedStartTime = baseDay.set({
+    hour: startTime.hour,
+    minute: startTime.minute,
+    second: startTime.second
+  });
+  
+  const normalizedEndTime = baseDay.set({
+    hour: endTime.hour,
+    minute: endTime.minute,
+    second: endTime.second
+  });
+  
+  // Handle cases where end time is on the next day (e.g., 1:00 AM)
+  if (normalizedEndTime < normalizedStartTime) {
+    return normalizedTime >= normalizedStartTime || 
+           normalizedTime <= normalizedEndTime;
   }
-}
+  
+  return normalizedTime >= normalizedStartTime && 
+         normalizedTime <= normalizedEndTime;
+};
