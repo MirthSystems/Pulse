@@ -8,7 +8,7 @@ export class OperatingScheduleApiService extends ApiService {
   private readonly basePath = '/api/operating-schedules';
 
   async getVenueOperatingSchedules(venueId: string): Promise<IOperatingScheduleResponse[]> {
-    const endpoint = `/api/venues/${venueId}/business-hours`;
+    const endpoint = `${this.basePath}/venue/${venueId}`;
     const response = await this.get<IOperatingScheduleResponse[]>(endpoint);
     return response;
   }
@@ -42,8 +42,8 @@ export class OperatingScheduleApiService extends ApiService {
     await this.delete<void>(endpoint);
   }
 
-  async createBatchOperatingSchedules(venueId: string, schedules: OperatingSchedule[] | IOperatingSchedule[]): Promise<string[]> {
-    const endpoint = `/api/venues/${venueId}/business-hours/batch`;
+  async postVenueBusinessHours(venueId: string, schedules: OperatingSchedule[] | IOperatingSchedule[]): Promise<string[]> {
+    const endpoint = `${this.basePath}/venue/${venueId}`;
     
     const requests = schedules.map(schedule => 
       schedule instanceof OperatingSchedule ? { ...schedule } : schedule

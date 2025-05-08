@@ -97,7 +97,7 @@ export class VenuesApiService extends ApiService {
   }
 
   async getBusinessHours(venueId: string): Promise<IOperatingScheduleResponse[]> {
-    const endpoint = `${this.basePath}/${venueId}/operatingschedules`;
+    const endpoint = `${this.basePath}/${venueId}/business-hours`;
     const response = await this.get<IOperatingScheduleResponse[]>(endpoint);
     return response;
   }

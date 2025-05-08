@@ -20,6 +20,7 @@ export interface ISpecialResponse {
     venueName?: string;
     content: string;
     type: SpecialTypes;
+    typeName?: string;
     startDate: string;
     startTime: string;
     endTime?: string | null;
@@ -34,6 +35,7 @@ export class Special implements ISpecial {
   venueName?: string;
   content: string;
   type: SpecialTypes;
+  typeName?: string;
   startDate: string;
   startTime: string;
   endTime?: string | null;
@@ -50,6 +52,7 @@ export class Special implements ISpecial {
     this.venueName = data.venueName;
     this.content = data.content || '';
     this.type = data.type !== undefined ? data.type : SpecialTypes.Food;
+    this.typeName = data.typeName;
     this.startDate = data.startDate || '';
     this.startTime = data.startTime || '';
     this.endTime = data.endTime;
@@ -65,6 +68,7 @@ export class Special implements ISpecial {
       venueName: response.venueName,
       content: response.content,
       type: response.type,
+      typeName: response.typeName,
       startDate: response.startDate,
       startTime: response.startTime,
       endTime: response.endTime,
