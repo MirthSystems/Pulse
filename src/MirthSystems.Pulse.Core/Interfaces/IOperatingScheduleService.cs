@@ -63,29 +63,5 @@
         /// <para>Unlike venues and specials, operating schedules use physical deletion rather than soft deletion.</para>
         /// </remarks>
         Task<bool> DeleteOperatingScheduleAsync(string id, string userId);
-
-        /// <summary>
-        /// Retrieves all operating schedules for a venue.
-        /// </summary>
-        /// <param name="venueId">The venue ID.</param>
-        /// <returns>A list of operating schedule details for the venue.</returns>
-        /// <remarks>
-        /// <para>This method returns all operating schedules associated with a venue.</para>
-        /// <para>Typically includes one schedule for each day of the week.</para>
-        /// </remarks>
-        Task<List<OperatingScheduleDetail>> GetVenueOperatingSchedulesAsync(string venueId);
-
-        /// <summary>
-        /// Creates a complete set of operating schedules for a venue.
-        /// </summary>
-        /// <param name="venueId">The venue ID.</param>
-        /// <param name="requests">The list of operating schedule creation requests.</param>
-        /// <param name="userId">The ID of the user creating the operating schedules.</param>
-        /// <returns>True if successfully created, otherwise false.</returns>
-        /// <remarks>
-        /// <para>This method replaces all existing schedules for a venue with a new set.</para>
-        /// <para>Typically used to create or update the complete weekly schedule in one operation.</para>
-        /// </remarks>
-        Task<bool> CreateOperatingSchedulesForVenueAsync(string venueId, List<CreateOperatingScheduleRequest> requests, string userId);
     }
 }

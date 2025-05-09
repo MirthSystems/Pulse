@@ -35,7 +35,7 @@
         /// <para>- "Upscale cocktail bar with rotating seasonal menu."</para>
         /// </remarks>
         [StringLength(500)]
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; }
 
         /// <summary>
         /// Gets or sets the venue's phone number.
@@ -47,7 +47,7 @@
         /// </remarks>
         [Phone]
         [StringLength(20)]
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Gets or sets the venue's website URL.
@@ -59,7 +59,7 @@
         /// </remarks>
         [Url]
         [StringLength(255)]
-        public string Website { get; set; } = string.Empty;
+        public string? Website { get; set; }
 
         /// <summary>
         /// Gets or sets the venue's email address.
@@ -71,7 +71,7 @@
         /// </remarks>
         [EmailAddress]
         [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         /// <summary>
         /// Gets or sets the URL to the venue's profile image.
@@ -83,7 +83,7 @@
         /// </remarks>
         [Url]
         [StringLength(255)]
-        public string ProfileImage { get; set; } = string.Empty;
+        public string? ProfileImage { get; set; }
 
         /// <summary>
         /// Gets or sets the address information for the venue.
@@ -93,7 +93,7 @@
         /// <para>The address will be geocoded to determine the venue's geographic coordinates.</para>
         /// </remarks>
         [Required]
-        public CreateAddressRequest Address { get; set; } = new CreateAddressRequest();
+        public AddressRequest Address { get; set; } = new AddressRequest();
 
         /// <summary>
         /// Gets or sets the collection of operating schedule entries for the venue.
@@ -105,6 +105,6 @@
         /// </remarks>
         [Required]
         [MinLength(1, ErrorMessage = "At least one operating schedule must be provided.")]
-        public ICollection<CreateOperatingScheduleRequest> BusinessHours { get; set; } = new List<CreateOperatingScheduleRequest>();
+        public ICollection<OperatingHours> BusinessHours { get; set; } = new List<OperatingHours>();
     }
 }

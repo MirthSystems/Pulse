@@ -26,11 +26,59 @@
             _logger = logger;
         }
 
-        public async Task<PagedResult<VenueListItem>> GetVenuesAsync(int page = 1, int pageSize = 20)
+        public async Task<PagedResult<VenueListItem>> GetVenuesAsync(GetVenuesRequest request)
         {
             try
             {
-                var venues = await _unitOfWork.Venues.GetPagedVenuesAsync(page, pageSize);
+                Point? searchLocation = null;
+                double? distanceInMeters = null;
+
+                // Convert address to coordinates if provided
+                if (!string.IsNullOrEmpty(request.Address))
+                {
+                    try
+                    {
+                        var geocodeResponse = await _mapsApiService.SearchClient.GetGeocodingAsync(request.Address);
+                        if (geocodeResponse.Value.Features.Count > 0)
+                        {
+                            var result = geocodeResponse.Value.Features[0];
+                            searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude) { SRID = 4326 };
+                            
+                            // Convert radius from miles to meters if provided
+                            if (request.RadiusInMiles.HasValue)
+                            {
+                                distanceInMeters = request.RadiusInMiles.Value * 1609.34;
+                            }
+                            else
+                            {
+                                // Default to 5 miles if address is provided but no radius
+                                distanceInMeters = 5 * 1609.34;
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Could not geocode address: {Address}", request.Address);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error geocoding address: {Address}", request.Address);
+                    }
+                }
+
+                // Query the repository with all filters
+                var venues = await _unitOfWork.Venues.GetPagedVenuesAsync(
+                    request.Page,
+                    request.PageSize,
+                    searchLocation,
+                    distanceInMeters,
+                    request.SearchText,
+                    request.OpenOnDayOfWeek,
+                    request.TimeOfDay,
+                    request.HasActiveSpecials,
+                    request.SpecialTypeId);
+
+                // Map to response model
                 return new PagedResult<VenueListItem>
                 {
                     Items = venues.Select(v => v.MapToVenueListItem()).ToList(),
@@ -42,7 +90,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving venues");
+                _logger.LogError(ex, "Error retrieving venues with filters");
                 throw;
             }
         }
@@ -164,6 +212,11 @@
                 }
 
                 var venue = request.MapToNewVenue(userId, geocodedPoint);
+
+                if (request.BusinessHours != null)
+                {
+                    venue.BusinessHours = request.BusinessHours.Select(oh => oh.MapToNewOperatingSchedule(venue.Id)).ToList();
+                }
 
                 await _unitOfWork.Venues.AddAsync(venue);
                 await _unitOfWork.SaveChangesAsync();

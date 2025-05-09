@@ -86,7 +86,7 @@
         /// <para>If this time is earlier than StartTime, it's interpreted as crossing midnight into the next day.</para>
         /// </remarks>
         [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Time must be in format HH:mm")]
-        public string EndTime { get; set; } = string.Empty;
+        public string? EndTime { get; set; }
 
         /// <summary>
         /// Gets or sets the expiration date of the special.
@@ -99,7 +99,7 @@
         /// <para>May be empty for ongoing specials with no defined end date.</para>
         /// </remarks>
         [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Date must be in format YYYY-MM-DD")]
-        public string ExpirationDate { get; set; } = string.Empty;
+        public string? ExpirationDate { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the special recurs over time.
@@ -124,6 +124,6 @@
         /// </remarks>
         [RegularExpression(@"^(\*|[0-9,-/]+)(\s+(\*|[0-9,-/]+)){4,5}$", ErrorMessage = "Invalid CRON expression.")]
         [StringLength(100)]
-        public string CronSchedule { get; set; } = string.Empty;
+        public string? CronSchedule { get; set; }
     }
 }

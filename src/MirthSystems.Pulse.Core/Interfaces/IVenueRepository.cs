@@ -2,7 +2,7 @@
 {
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Models;
-
+    using MirthSystems.Pulse.Core.Models.Requests;
     using NetTopologySuite.Geometries;
 
     /// <summary>
@@ -16,31 +16,51 @@
     public interface IVenueRepository : IRepository<Venue>
     {
         /// <summary>
-        /// Gets a venue by ID with all its related data including address and operating schedules.
+        /// Gets a venue by ID with all its related data.
         /// </summary>
-        /// <param name="id">The primary key of the venue to retrieve.</param>
-        /// <returns>The venue with its related data if found; otherwise, null.</returns>
+        /// <param name="id">The primary key of the venue.</param>
+        /// <returns>The venue with its address and business hours if found; otherwise, null.</returns>
         /// <remarks>
-        /// <para>This method implements eager loading of related entities to reduce database round trips.</para>
-        /// <para>Related entities loaded include:</para>
-        /// <para>- Address: The venue's physical location</para>
-        /// <para>- BusinessHours: The venue's operating schedules for each day of the week</para>
+        /// <para>This method eager loads the following related entities:</para>
+        /// <para>- Address: Location information for the venue</para>
+        /// <para>- BusinessHours: Operating schedules for the venue</para>
+        /// <para>Only non-deleted venues are returned.</para>
         /// </remarks>
         Task<Venue?> GetVenueWithDetailsAsync(long id);
 
         /// <summary>
-        /// Gets a paged list of venues for efficient retrieval of large result sets.
+        /// Gets a paged list of venues with optional filtering.
         /// </summary>
         /// <param name="page">The page number (1-based).</param>
-        /// <param name="pageSize">The number of venues per page.</param>
-        /// <returns>A tuple containing the list of venues for the requested page and the total count of venues.</returns>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="location">Optional geographic point to filter by proximity.</param>
+        /// <param name="distanceInMeters">Optional search radius in meters when location is specified.</param>
+        /// <param name="searchTerm">Optional text to search in venue name and description.</param>
+        /// <param name="openOnDay">Optional day of week to filter venues that are open on that day.</param>
+        /// <param name="openAtTime">Optional time to filter venues that are open at that specific time (format: "HH:mm").</param>
+        /// <param name="hasActiveSpecials">Optional filter to include only venues with active specials.</param>
+        /// <param name="specialTypeId">Optional filter for venues with specials of a specific type.</param>
+        /// <returns>A paged list of venues matching the filter criteria.</returns>
         /// <remarks>
-        /// <para>This method implements server-side pagination to improve performance and resource utilization.</para>
-        /// <para>The venues are ordered by creation date (newest first).</para>
-        /// <para>Each venue includes its basic information and address for display purposes.</para>
-        /// <para>Soft-deleted venues are excluded from the results.</para>
+        /// <para>This method implements server-side pagination with flexible filtering options.</para>
+        /// <para>Filtering capabilities include:</para>
+        /// <para>- Text search in venue names and descriptions</para>
+        /// <para>- Location-based filtering (venues within a specific distance of a point)</para>
+        /// <para>- Operating hours filtering (venues open on specific days/times)</para>
+        /// <para>- Special availability filtering (venues with active specials)</para>
+        /// <para>Results include venue information with address details by default.</para>
+        /// <para>Results are ordered by name by default but can be ordered by distance when location is provided.</para>
         /// </remarks>
-        Task<PagedList<Venue>> GetPagedVenuesAsync(int page, int pageSize);
+        Task<PagedList<Venue>> GetPagedVenuesAsync(
+            int page,
+            int pageSize,
+            Point? location = null,
+            double? distanceInMeters = null,
+            string? searchTerm = null,
+            DayOfWeek? openOnDay = null,
+            string? openAtTime = null,
+            bool? hasActiveSpecials = null,
+            int? specialTypeId = null);
 
         /// <summary>
         /// Finds venues near a specific geographic location within a given distance.
@@ -56,5 +76,29 @@
         /// <para>Soft-deleted venues are excluded from the results.</para>
         /// </remarks>
         Task<List<Venue>> FindVenuesNearLocationAsync(Point location, double distanceInMeters);
+        
+        /// <summary>
+        /// Determines if a venue is open at a specific day and time.
+        /// </summary>
+        /// <param name="venueId">The ID of the venue to check.</param>
+        /// <param name="dayOfWeek">The day of week to check.</param>
+        /// <param name="time">The time to check in format "HH:mm".</param>
+        /// <returns>True if the venue is open at the specified day and time; otherwise, false.</returns>
+        /// <remarks>
+        /// <para>This method checks the operating schedule of a venue for the specified day.</para>
+        /// <para>It handles cases where venues close after midnight by checking if the time falls between opening and closing hours.</para>
+        /// </remarks>
+        Task<bool> IsVenueOpenAsync(long venueId, DayOfWeek dayOfWeek, string time);
+        
+        /// <summary>
+        /// Gets venues that have at least one active special at the current time.
+        /// </summary>
+        /// <param name="specialTypeId">Optional filter for specific type of special.</param>
+        /// <returns>A list of venue IDs with active specials.</returns>
+        /// <remarks>
+        /// <para>This method checks current and recurring specials to determine which are active.</para>
+        /// <para>It accounts for start/end dates, recurring patterns, and expiration dates.</para>
+        /// </remarks>
+        Task<List<long>> GetVenueIdsWithActiveSpecialsAsync(int? specialTypeId = null);
     }
 }

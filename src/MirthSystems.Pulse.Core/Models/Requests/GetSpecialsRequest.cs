@@ -46,7 +46,7 @@
         /// <para>If empty, the current date and time will be used.</para>
         /// </remarks>
         [RegularExpression(@"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$", ErrorMessage = "Invalid date-time format. Use ISO 8601 format (e.g., 2025-05-05T18:30:00Z).")]
-        public string SearchDateTime { get; set; } = string.Empty;
+        public string? SearchDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the text to search for in special descriptions and venue names.
@@ -58,7 +58,7 @@
         /// <para>- "jazz" (finds music venues with jazz performances)</para>
         /// </remarks>
         [StringLength(100, ErrorMessage = "Search term cannot exceed 100 characters.")]
-        public string SearchTerm { get; set; } = string.Empty;
+        public string? SearchTerm { get; set; }
 
         /// <summary>
         /// Gets or sets the venue ID to filter specials by.
@@ -69,7 +69,7 @@
         /// <para>When provided, only returns specials for the specified venue.</para>
         /// </remarks>
         [RegularExpression(@"^\d+$", ErrorMessage = "VenueId must be a positive integer")]
-        public string VenueId { get; set; } = string.Empty;
+        public string? VenueId { get; set; }
 
         /// <summary>
         /// Gets or sets the special type ID to filter by.

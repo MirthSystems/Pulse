@@ -1,8 +1,8 @@
-// Export user components
+// Export user UI components
 export * from './components';
 
-// Export user hooks
+// Export hooks
 export * from './hooks';
 
-// Export user Redux state management
-export * from './redux';
+// Export Redux slice
+export { userReducer } from './redux';

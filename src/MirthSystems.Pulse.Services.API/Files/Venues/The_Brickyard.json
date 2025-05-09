@@ -1,0 +1,59 @@
+﻿{
+  "name": "The Brickyard Restaurant & Ale House",
+  "description": "Williamsport, PA Gourmet Burger Restaurant and Bar featuring the best beer and burgers in town.",
+  "phoneNumber": "(570) 322-3339",
+  "website": "https://thebrickyard.net/",
+  "email": "info@thebrickyard.net",
+  "address": {
+    "streetAddress": "343 Pine St",
+    "secondaryAddress": "Suite #3",
+    "locality": "Williamsport",
+    "region": "PA",
+    "postcode": "17701",
+    "country": "USA"
+  },
+  "businessHours": [
+    {
+      "dayOfWeek": 0,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "23:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 1,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "00:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 2,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "00:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 3,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "00:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 4,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "00:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 5,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "02:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 6,
+      "timeOfOpen": "11:00",
+      "timeOfClose": "02:00",
+      "isClosed": false
+    }
+  ]
+}

@@ -18,16 +18,20 @@
     public interface IVenueService
     {
         /// <summary>
-        /// Retrieves a paginated list of venues.
+        /// Retrieves a paginated list of venues with optional filtering.
         /// </summary>
-        /// <param name="page">The page number (1-based).</param>
-        /// <param name="pageSize">The page size (items per page).</param>
+        /// <param name="request">The request containing pagination and filter criteria.</param>
         /// <returns>A paginated list of venue list items.</returns>
         /// <remarks>
-        /// <para>This method returns venues with minimal information suitable for listing.</para>
-        /// <para>Use GetVenueByIdAsync for detailed venue information.</para>
+        /// <para>This method supports sophisticated filtering including:</para>
+        /// <para>- Text search on name and description</para>
+        /// <para>- Geographic proximity to a location</para>
+        /// <para>- Filtering by operating schedule (open on specific days/times)</para>
+        /// <para>- Filtering by special availability</para>
+        /// <para>When no filters are specified, returns a basic paginated list of venues.</para>
+        /// <para>Use GetVenueByIdAsync for detailed information about a specific venue.</para>
         /// </remarks>
-        Task<PagedResult<VenueListItem>> GetVenuesAsync(int page = 1, int pageSize = 20);
+        Task<PagedResult<VenueListItem>> GetVenuesAsync(GetVenuesRequest request);
 
         /// <summary>
         /// Retrieves a venue by its ID.
@@ -55,11 +59,11 @@
         /// Retrieves specials for a venue by its ID.
         /// </summary>
         /// <param name="id">The venue ID.</param>
-        /// <param name="includeCurrentStatus">Whether to include current running status for each special.</param>
+        /// <param name="includeCurrentStatus">Whether to include the current active status of each special.</param>
         /// <returns>The venue specials information if found, otherwise null.</returns>
         /// <remarks>
-        /// <para>This method returns all specials associated with a venue.</para>
-        /// <para>When includeCurrentStatus is true, requires additional processing to determine current status.</para>
+        /// <para>This method returns all specials associated with the venue.</para>
+        /// <para>When includeCurrentStatus is true, each special includes whether it's currently active.</para>
         /// </remarks>
         Task<VenueSpecials?> GetVenueSpecialsAsync(string id, bool includeCurrentStatus = true);
 
@@ -68,7 +72,7 @@
         /// </summary>
         /// <param name="request">The venue creation request.</param>
         /// <param name="userId">The ID of the user creating the venue.</param>
-        /// <returns>The created venue details.</returns>
+        /// <returns>The newly created venue details.</returns>
         /// <remarks>
         /// <para>This method validates the request and persists a new venue.</para>
         /// <para>Includes geocoding the provided address.</para>
@@ -94,10 +98,10 @@
         /// </summary>
         /// <param name="id">The venue ID.</param>
         /// <param name="userId">The ID of the user deleting the venue.</param>
-        /// <returns>True if successfully deleted, otherwise false.</returns>
+        /// <returns>True if the venue was successfully deleted; otherwise, false.</returns>
         /// <remarks>
-        /// <para>This method performs a soft delete, marking the venue as deleted in the database.</para>
-        /// <para>The venue record remains in the database for audit purposes.</para>
+        /// <para>This method performs a soft delete, marking the venue as deleted but retaining the record.</para>
+        /// <para>Returns false if the venue doesn't exist.</para>
         /// </remarks>
         Task<bool> DeleteVenueAsync(string id, string userId);
     }

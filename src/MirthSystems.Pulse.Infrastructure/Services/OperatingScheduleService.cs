@@ -59,7 +59,7 @@
                     throw new KeyNotFoundException($"Venue with ID {request.VenueId} not found");
                 }
 
-                var schedule = request.MapToNewOperatingSchedule();
+                var schedule = request.MapToNewOperatingSchedule(venueId);
 
                 await _unitOfWork.OperatingSchedules.AddAsync(schedule);
                 await _unitOfWork.SaveChangesAsync();
@@ -116,73 +116,6 @@
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting operating schedule with ID {ScheduleId}", id);
-                return false;
-            }
-        }
-
-        public async Task<List<OperatingScheduleDetail>> GetVenueOperatingSchedulesAsync(string venueId)
-        {
-            try
-            {
-                if (!long.TryParse(venueId, out long parsedVenueId))
-                {
-                    _logger.LogWarning("Invalid venue ID format: {Id}", venueId);
-                    return new List<OperatingScheduleDetail>();
-                }
-                var venue = await _unitOfWork.Venues.GetByIdAsync(parsedVenueId);
-                if (venue == null)
-                {
-                    return new List<OperatingScheduleDetail>();
-                }
-
-                var schedules = await _unitOfWork.OperatingSchedules.GetSchedulesByVenueIdAsync(parsedVenueId);
-                return schedules.Select(s => s.MapToOperatingScheduleDetail(venue.Name ?? "Unknown Venue")).ToList();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving operating schedules for venue with ID {VenueId}", venueId);
-                return new List<OperatingScheduleDetail>();
-            }
-        }
-
-        public async Task<bool> CreateOperatingSchedulesForVenueAsync(string venueId, List<CreateOperatingScheduleRequest> requests, string userId)
-        {
-            try
-            {
-                if (!long.TryParse(venueId, out long parsedVenueId))
-                {
-                    throw new ArgumentException("Invalid venue ID format");
-                }
-                var venue = await _unitOfWork.Venues.GetByIdAsync(parsedVenueId);
-                if (venue == null)
-                {
-                    throw new KeyNotFoundException($"Venue with ID {venueId} not found");
-                }
-
-                var existingSchedules = await _unitOfWork.OperatingSchedules.GetSchedulesByVenueIdAsync(parsedVenueId);
-                foreach (var schedule in existingSchedules)
-                {
-                    await _unitOfWork.OperatingSchedules.DeleteAsync(schedule.Id);
-                }
-
-                foreach (var request in requests)
-                {
-                    if (!long.TryParse(request.VenueId, out long requestVenueId) || requestVenueId != parsedVenueId)
-                    {
-                        throw new ArgumentException("Invalid or mismatched venue ID in request");
-                    }
-
-                    var schedule = request.MapToNewOperatingSchedule();
-
-                    await _unitOfWork.OperatingSchedules.AddAsync(schedule);
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating operating schedules for venue with ID {VenueId}", venueId);
                 return false;
             }
         }

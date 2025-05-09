@@ -1,32 +1,32 @@
 ﻿namespace MirthSystems.Pulse.Infrastructure.Data.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
+    using NodaTime;
+    using NetTopologySuite.Geometries;
+
     using MirthSystems.Pulse.Core.Entities;
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models;
-
-    using NetTopologySuite.Geometries;
+    using MirthSystems.Pulse.Core.Models.Requests;
 
     /// <summary>
-    /// Repository for managing venue entities in the database.
+    /// Repository implementation for venue-related data access operations.
     /// </summary>
     /// <remarks>
-    /// <para>This repository extends the base repository with venue-specific query methods.</para>
-    /// <para>It handles venue-related data access operations including:</para>
-    /// <para>- Retrieving venues with related data</para>
-    /// <para>- Filtering venues by location</para>
-    /// <para>- Implementing soft delete behavior for venues</para>
+    /// <para>This class handles all database interactions related to venue entities.</para>
+    /// <para>Extends the base Repository class with venue-specific query methods.</para>
     /// </remarks>
     public class VenueRepository : Repository<Venue>, IVenueRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="VenueRepository"/> class.
         /// </summary>
-        /// <param name="context">The database context.</param>
-        /// <remarks>
-        /// Passes the database context to the base repository constructor.
-        /// </remarks>
-        public VenueRepository(ApplicationDbContext context) : base(context)
+        /// <param name="dbContext">The database context for entity operations.</param>
+        public VenueRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
         }
 
@@ -63,24 +63,120 @@
         }
 
         /// <summary>
-        /// Gets a paged list of venues.
+        /// Gets a paged list of venues with optional filtering.
         /// </summary>
         /// <param name="page">The page number (1-based).</param>
         /// <param name="pageSize">The number of items per page.</param>
-        /// <returns>A tuple containing the list of venues for the requested page and the total count of venues.</returns>
+        /// <param name="location">Optional geographic point to filter by proximity.</param>
+        /// <param name="distanceInMeters">Optional search radius in meters when location is specified.</param>
+        /// <param name="searchTerm">Optional text to search in venue name and description.</param>
+        /// <param name="openOnDay">Optional day of week to filter venues that are open on that day.</param>
+        /// <param name="openAtTime">Optional time to filter venues that are open at that specific time (format: "HH:mm").</param>
+        /// <param name="hasActiveSpecials">Optional filter to include only venues with active specials.</param>
+        /// <param name="specialTypeId">Optional filter for venues with specials of a specific type.</param>
+        /// <returns>A paged list of venues matching the filter criteria.</returns>
         /// <remarks>
-        /// <para>This method implements server-side paging for efficient data retrieval.</para>
-        /// <para>Venues are ordered by creation date (newest first) and include their address information.</para>
-        /// <para>Only non-deleted venues are included in the results.</para>
+        /// <para>This method implements server-side pagination with flexible filtering options.</para>
+        /// <para>Filtering capabilities include:</para>
+        /// <para>- Text search in venue names and descriptions</para>
+        /// <para>- Location-based filtering (venues within a specific distance of a point)</para>
+        /// <para>- Operating hours filtering (venues open on specific days/times)</para>
+        /// <para>- Special availability filtering (venues with active specials)</para>
+        /// <para>Results include venue information with address details by default.</para>
+        /// <para>Results are ordered by name by default but can be ordered by distance when location is provided.</para>
         /// </remarks>
-        public async Task<PagedList<Venue>> GetPagedVenuesAsync(int page, int pageSize)
+        public async Task<PagedList<Venue>> GetPagedVenuesAsync(
+            int page,
+            int pageSize,
+            Point? location = null,
+            double? distanceInMeters = null,
+            string? searchTerm = null,
+            DayOfWeek? openOnDay = null,
+            string? openAtTime = null,
+            bool? hasActiveSpecials = null,
+            int? specialTypeId = null)
         {
+            // Start with basic query for non-deleted venues
             var query = _context.Venues
-                .Include(v => v.Address)
                 .Where(v => !v.IsDeleted)
-                .OrderByDescending(v => v.CreatedAt);
+                .Include(v => v.Address)
+                .AsQueryable();
 
-            var totalCount = await query.CountAsync();
+            // Apply text search filter if provided
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                string search = searchTerm.ToLower();
+                query = query.Where(v => 
+                    v.Name.ToLower().Contains(search) || 
+                    (v.Description != null && v.Description.ToLower().Contains(search)));
+            }
+
+            // Apply location filter if provided
+            if (location != null && distanceInMeters.HasValue)
+            {
+                query = query.Where(v => v.Address != null && 
+                    v.Address.Location.Distance(location) <= distanceInMeters.Value);
+                    
+                // Order by distance when doing location-based search
+                query = query.OrderBy(v => v.Address.Location.Distance(location));
+            }
+            else
+            {
+                // Default ordering by name
+                query = query.OrderBy(v => v.Name);
+            }
+            
+            // Apply open day filter if provided
+            if (openOnDay.HasValue)
+            {
+                DayOfWeek day = openOnDay.Value;
+                
+                query = query.Where(v => 
+                    v.BusinessHours.Any(h => 
+                        h.DayOfWeek == day && !h.IsClosed
+                    )
+                );
+                
+                // If time is also specified, further filter venues open at that time
+                if (!string.IsNullOrEmpty(openAtTime) && 
+                    TimeOnly.TryParse(openAtTime, out TimeOnly requestTime))
+                {
+                    // Convert TimeOnly to LocalTime for comparison
+                    var requestLocalTime = new LocalTime(requestTime.Hour, requestTime.Minute);
+                    
+                    query = query.Where(v => 
+                        v.BusinessHours.Any(h => 
+                            h.DayOfWeek == day && !h.IsClosed &&
+                            (
+                                // Handle normal operating hours (open time before close time)
+                                (h.TimeOfOpen <= h.TimeOfClose && 
+                                    h.TimeOfOpen <= requestLocalTime && requestLocalTime <= h.TimeOfClose) ||
+                                // Handle operating hours spanning midnight (open time after close time)
+                                (h.TimeOfOpen > h.TimeOfClose && 
+                                    (h.TimeOfOpen <= requestLocalTime || requestLocalTime <= h.TimeOfClose))
+                            )
+                        )
+                    );
+                }
+            }
+            
+            // Apply active specials filter if requested
+            if (hasActiveSpecials == true)
+            {
+                // This requires a separate query as it involves complex time calculations
+                var venueIdsWithActiveSpecials = await GetVenueIdsWithActiveSpecialsAsync(specialTypeId);
+                query = query.Where(v => venueIdsWithActiveSpecials.Contains(v.Id));
+            }
+            // If only filtering by special type without checking active status
+            else if (specialTypeId.HasValue)
+            {
+                query = query.Where(v => 
+                    v.Specials.Any(s => 
+                        !s.IsDeleted && 
+                        (int)s.Type == specialTypeId.Value
+                    )
+                );
+            }
 
             return await PagedList<Venue>.CreateAsync(query, page, pageSize);
         }
@@ -92,18 +188,88 @@
         /// <param name="distanceInMeters">The search radius in meters.</param>
         /// <returns>A list of venues within the specified distance of the location.</returns>
         /// <remarks>
-        /// <para>This method performs a spatial query using PostGIS capabilities.</para>
+        /// <para>This method performs spatial queries using the database's geographic capabilities.</para>
+        /// <para>The search uses geodesic distance calculation (taking earth's curvature into account).</para>
         /// <para>Results are ordered by distance from the specified location (closest first).</para>
         /// <para>Each venue includes its address information.</para>
-        /// <para>Only non-deleted venues are included in the results.</para>
+        /// <para>Soft-deleted venues are excluded from the results.</para>
         /// </remarks>
         public async Task<List<Venue>> FindVenuesNearLocationAsync(Point location, double distanceInMeters)
         {
             return await _context.Venues
+                .Where(v => !v.IsDeleted)
                 .Include(v => v.Address)
-                .Where(v => !v.IsDeleted &&
-                           v.Address.Location.Distance(location) <= distanceInMeters)
+                .Where(v => v.Address != null && v.Address.Location.Distance(location) <= distanceInMeters)
                 .OrderBy(v => v.Address.Location.Distance(location))
+                .ToListAsync();
+        }
+        
+        /// <summary>
+        /// Determines if a venue is open at a specific day and time.
+        /// </summary>
+        /// <param name="venueId">The ID of the venue to check.</param>
+        /// <param name="dayOfWeek">The day of week to check.</param>
+        /// <param name="time">The time to check in format "HH:mm".</param>
+        /// <returns>True if the venue is open at the specified day and time; otherwise, false.</returns>
+        public async Task<bool> IsVenueOpenAsync(long venueId, DayOfWeek dayOfWeek, string time)
+        {
+            if (!TimeOnly.TryParse(time, out TimeOnly requestTime))
+            {
+                return false;
+            }
+            
+            // Convert TimeOnly to LocalTime for comparison
+            var requestLocalTime = new LocalTime(requestTime.Hour, requestTime.Minute);
+            
+            var schedule = await _context.OperatingSchedules
+                .FirstOrDefaultAsync(h => 
+                    h.VenueId == venueId && 
+                    h.DayOfWeek == dayOfWeek && 
+                    !h.IsClosed);
+                
+            if (schedule == null)
+            {
+                return false;
+            }
+            
+            // Handle normal operating hours (open time before close time)
+            if (schedule.TimeOfOpen <= schedule.TimeOfClose)
+            {
+                return schedule.TimeOfOpen <= requestLocalTime && requestLocalTime <= schedule.TimeOfClose;
+            }
+            
+            // Handle operating hours spanning midnight (open time after close time)
+            return schedule.TimeOfOpen <= requestLocalTime || requestLocalTime <= schedule.TimeOfClose;
+        }
+        
+        /// <summary>
+        /// Gets venues that have at least one active special at the current time.
+        /// </summary>
+        /// <param name="specialTypeId">Optional filter for specific type of special.</param>
+        /// <returns>A list of venue IDs with active specials.</returns>
+        public async Task<List<long>> GetVenueIdsWithActiveSpecialsAsync(int? specialTypeId = null)
+        {
+            var now = SystemClock.Instance.GetCurrentInstant();
+            var today = LocalDate.FromDateTime(now.ToDateTimeUtc());
+            var currentTime = LocalTime.FromTimeOnly(TimeOnly.Parse(now.ToDateTimeUtc().ToString("HH:mm:ss")));
+            
+            // Build the query for active specials
+            var query = _context.Specials
+                .Where(s => !s.IsDeleted)
+                .Where(s => s.StartDate <= today)
+                .Where(s => s.ExpirationDate == null || s.ExpirationDate >= today)
+                .Where(s => s.StartTime <= currentTime && (s.EndTime == null || s.EndTime >= currentTime));
+                
+            // Filter by special type if provided
+            if (specialTypeId.HasValue)
+            {
+                query = query.Where(s => (int)s.Type == specialTypeId.Value);
+            }
+            
+            // Get distinct venue IDs
+            return await query
+                .Select(s => s.VenueId)
+                .Distinct()
                 .ToListAsync();
         }
     }

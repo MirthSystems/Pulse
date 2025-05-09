@@ -111,6 +111,6 @@
         /// <para>- "0 16 * * 6,0" (weekends at 4 PM)</para>
         /// </remarks>
         [StringLength(100)]
-        public string CronSchedule { get; set; } = string.Empty;
+        public string? CronSchedule { get; set; }
     }
 }

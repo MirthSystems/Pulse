@@ -61,7 +61,6 @@
                 CreatedAt = SystemClock.Instance.GetCurrentInstant(),
                 CreatedByUserId = userId,
                 Address = request.Address.MapToNewAddress(geocodedPoint),
-                BusinessHours = request.BusinessHours.Select(bh => bh.MapToNewOperatingSchedule()).ToList()
             };
         }
 
@@ -107,13 +106,8 @@
             };
         }
 
-        public static OperatingSchedule MapToNewOperatingSchedule(this CreateOperatingScheduleRequest request)
+        public static OperatingSchedule MapToNewOperatingSchedule(this OperatingHours request, long venueId)
         {
-            if (!long.TryParse(request.VenueId, out long venueId))
-            {
-                throw new ArgumentException("Invalid venue ID format");
-            }
-
             return new OperatingSchedule
             {
                 VenueId = venueId,
@@ -225,7 +219,7 @@
             return existingSpecial;
         }
 
-        public static Address MapToNewAddress(this CreateAddressRequest request, Point geocodedPoint)
+        public static Address MapToNewAddress(this AddressRequest request, Point geocodedPoint)
         {
             return new Address
             {
@@ -239,7 +233,7 @@
             };
         }
 
-        public static Address MapAndUpdateExistingAddress(this UpdateAddressRequest request, Address existingAddress, Point geocodedPoint)
+        public static Address MapAndUpdateExistingAddress(this AddressRequest request, Address existingAddress, Point geocodedPoint)
         {
             existingAddress.StreetAddress = request.StreetAddress;
             existingAddress.SecondaryAddress = request.SecondaryAddress;

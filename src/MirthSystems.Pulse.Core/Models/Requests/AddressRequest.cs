@@ -10,7 +10,7 @@
     /// <para>It includes validation attributes to ensure the data meets business requirements.</para>
     /// <para>Used primarily within venue creation requests and as a standalone API request.</para>
     /// </remarks>
-    public class CreateAddressRequest
+    public class AddressRequest
     {
         /// <summary>
         /// Gets or sets the street address (primary address line).
@@ -37,7 +37,7 @@
         /// <para>- "Floor 15"</para>
         /// </remarks>
         [StringLength(50)]
-        public string SecondaryAddress { get; set; } = string.Empty;
+        public string? SecondaryAddress { get; set; }
 
         /// <summary>
         /// Gets or sets the city or locality.

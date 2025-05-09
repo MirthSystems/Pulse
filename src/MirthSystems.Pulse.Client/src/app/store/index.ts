@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { counterReducer } from '../../features/counter';
 import { userReducer } from '../../features/user';
+import { themeReducer } from '../../features/ui/redux';
 import { authMiddleware } from '../../features/api/redux/middleware';
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     user: userReducer,
+    theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware().concat(authMiddleware),

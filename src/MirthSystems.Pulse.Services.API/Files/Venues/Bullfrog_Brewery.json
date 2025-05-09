@@ -1,0 +1,59 @@
+﻿{
+  "name": "Bullfrog Brewery",
+  "description": "Independent Craft Brewery, Casual Dining, and Premier Live Music Events nestled in the vibrant heart of downtown Williamsport.",
+  "phoneNumber": "(570) 326-4700",
+  "website": "https://bullfrogbrewery.com/",
+  "email": "info@bullfrogbrewery.com",
+  "address": {
+    "streetAddress": "229 W 4th St",
+    "secondaryAddress": "",
+    "locality": "Williamsport",
+    "region": "PA",
+    "postcode": "17701",
+    "country": "USA"
+  },
+  "businessHours": [
+    {
+      "dayOfWeek": 0,
+      "timeOfOpen": "10:00",
+      "timeOfClose": "15:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 1,
+      "timeOfOpen": "11:30",
+      "timeOfClose": "22:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 2,
+      "timeOfOpen": "11:30",
+      "timeOfClose": "22:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 3,
+      "timeOfOpen": "11:30",
+      "timeOfClose": "22:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 4,
+      "timeOfOpen": "11:30",
+      "timeOfClose": "22:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 5,
+      "timeOfOpen": "11:30",
+      "timeOfClose": "00:00",
+      "isClosed": false
+    },
+    {
+      "dayOfWeek": 6,
+      "timeOfOpen": "11:30",
+      "timeOfClose": "00:00",
+      "isClosed": false
+    }
+  ]
+}

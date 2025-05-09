@@ -35,7 +35,7 @@
         /// <para>- "Upscale cocktail bar with rotating seasonal menu."</para>
         /// </remarks>
         [StringLength(500)]
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; }
 
         /// <summary>
         /// Gets or sets the venue's phone number.
@@ -47,7 +47,7 @@
         /// </remarks>
         [Phone]
         [StringLength(20)]
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Gets or sets the venue's website URL.
@@ -59,7 +59,7 @@
         /// </remarks>
         [Url]
         [StringLength(255)]
-        public string Website { get; set; } = string.Empty;
+        public string? Website { get; set; }
 
         /// <summary>
         /// Gets or sets the venue's email address.
@@ -71,7 +71,7 @@
         /// </remarks>
         [EmailAddress]
         [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         /// <summary>
         /// Gets or sets the URL to the venue's profile image.
@@ -83,7 +83,7 @@
         /// </remarks>
         [Url]
         [StringLength(255)]
-        public string ProfileImage { get; set; } = string.Empty;
+        public string? ProfileImage { get; set; }
 
         /// <summary>
         /// Gets or sets the updated address information for the venue.
@@ -94,6 +94,6 @@
         /// <para>If the address changes significantly, this may affect location-based searches and nearby venue results.</para>
         /// </remarks>
         [Required]
-        public UpdateAddressRequest Address { get; set; } = new UpdateAddressRequest();
+        public AddressRequest Address { get; set; } = new AddressRequest();
     }
 }
