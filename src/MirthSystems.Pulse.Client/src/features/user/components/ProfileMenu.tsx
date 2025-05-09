@@ -17,7 +17,8 @@ import {
   Dashboard as DashboardIcon,
   AdminPanelSettings as AdminIcon,
   Logout as LogoutIcon,
-  Login as LoginIcon
+  Login as LoginIcon,
+  Home as HomeIcon
 } from '@mui/icons-material';
 import { useAuth } from '../hooks';
 
@@ -95,7 +96,6 @@ export const ProfileMenu = () => {
             anchorEl={anchorEl}
             id="account-menu"
             open={open}
-            onClose={handleCloseMenu}
             PaperProps={{
               elevation: 0,
               sx: {
