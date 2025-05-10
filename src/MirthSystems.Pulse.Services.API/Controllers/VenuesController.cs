@@ -177,7 +177,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// <para>It handles address validation and geocoding through integrated mapping services.</para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = "System.Administrator")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(VenueDetail))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -223,7 +223,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// <para>Only fields included in the request are updated; omitted fields remain unchanged.</para>
         /// </remarks>
         [HttpPut("{id}")]
-        [Authorize(Roles = "System.Administrator")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueDetail))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -277,7 +277,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// <para>This allows for potential recovery and maintains historical data integrity.</para>
         /// </remarks>
         [HttpDelete("{id}")]
-        [Authorize(Roles = "System.Administrator")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
