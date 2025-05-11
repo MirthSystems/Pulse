@@ -1,59 +1,44 @@
-import 'src/global.css';
+import { useAuth0 } from "@auth0/auth0-react";
+import React from "react";
+import { PageLoader } from "./components/page-loader";
+import { AuthenticationGuard } from "./components/authentication-guard";
+import { Route, Routes } from "react-router-dom";
+import { AdminPage } from "./pages/admin-page";
+import { CallbackPage } from "./pages/callback-page";
+import { HomePage } from "./pages/home-page";
+import { NotFoundPage } from "./pages/not-found-page";
+import { ProfilePage } from "./pages/profile-page";
+import { ProtectedPage } from "./pages/protected-page";
+import { PublicPage } from "./pages/public-page";
 
-import { useEffect } from 'react';
+export const App: React.FC = () => {
+  const { isLoading } = useAuth0();
 
-import Fab from '@mui/material/Fab';
-
-import { usePathname } from 'src/routes/hooks';
-
-import { ThemeProvider } from 'src/theme/theme-provider';
-
-import { Iconify } from 'src/components/iconify';
-
-// ----------------------------------------------------------------------
-
-type AppProps = {
-  children: React.ReactNode;
-};
-
-export default function App({ children }: AppProps) {
-  useScrollToTop();
-
-  const githubButton = () => (
-    <Fab
-      size="medium"
-      aria-label="Github"
-      href="https://github.com/minimal-ui-kit/material-kit-react"
-      sx={{
-        zIndex: 9,
-        right: 20,
-        bottom: 20,
-        width: 48,
-        height: 48,
-        position: 'fixed',
-        bgcolor: 'grey.800',
-      }}
-    >
-      <Iconify width={24} icon="socials:github" sx={{ '--color': 'white' }} />
-    </Fab>
-  );
-
+  if (isLoading) {
+    return (
+      <div className="page-layout">
+        <PageLoader />
+      </div>
+    );
+  }
   return (
-    <ThemeProvider>
-      {children}
-      {githubButton()}
-    </ThemeProvider>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/profile"
+        element={<AuthenticationGuard component={ProfilePage} />}
+      />
+      <Route path="/public" element={<PublicPage />} />
+      <Route
+        path="/protected"
+        element={<AuthenticationGuard component={ProtectedPage} />}
+      />
+      <Route
+        path="/admin"
+        element={<AuthenticationGuard component={AdminPage} />}
+      />
+      <Route path="/callback" element={<CallbackPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function useScrollToTop() {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
+};

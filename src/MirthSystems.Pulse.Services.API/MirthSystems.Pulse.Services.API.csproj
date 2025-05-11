@@ -24,4 +24,8 @@
     <ProjectReference Include="..\MirthSystems.Pulse.ServiceDefaults\MirthSystems.Pulse.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Test\Services\" />
+  </ItemGroup>
+
 </Project>

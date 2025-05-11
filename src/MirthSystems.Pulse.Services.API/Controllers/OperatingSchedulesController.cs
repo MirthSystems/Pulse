@@ -69,7 +69,7 @@
         /// <response code="401">If the user is not authenticated.</response>
         /// <response code="403">If the user doesn't have the required role.</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "Content.Manager")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(OperatingScheduleDetail))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -110,7 +110,7 @@
         /// <response code="403">If the user doesn't have the required role.</response>
         /// <response code="404">If the operating schedule with the specified ID is not found.</response>
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Policy = "Content.Manager")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleDetail))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -160,7 +160,7 @@
         /// <response code="403">If the user doesn't have the required role.</response>
         /// <response code="404">If the operating schedule with the specified ID is not found.</response>
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Policy = "Content.Manager")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

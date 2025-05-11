@@ -1,8 +1,13 @@
 using System.Reflection;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 
 using MirthSystems.Pulse.Infrastructure.Extensions;
+using MirthSystems.Pulse.Services.API.Authorization;
+using MirthSystems.Pulse.Services.API.Extensions;
 
 using Serilog;
 
@@ -22,8 +27,64 @@ internal class Program
         builder.Services.AddServiceDefaults();
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
         builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
-        builder.Services.AddAuthentication().AddJwtBearer();
-        builder.Services.AddAuthorization();
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins(
+                    builder.Configuration.GetValue<string>("Authentication:ClientOriginUrl")!)
+                    .WithHeaders(new string[] {
+                        HeaderNames.ContentType,
+                        HeaderNames.Authorization,
+                    })
+                    .WithMethods("GET")
+                    .SetPreflightMaxAge(TimeSpan.FromSeconds(86400));
+            });
+        });
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                var audience =
+                      builder.Configuration.GetValue<string>("Authentication:Audience");
+
+                options.Authority =
+                      $"https://{builder.Configuration.GetValue<string>("Authentication:Domain")}/";
+                options.Audience = audience;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true
+                };
+            });
+
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("System.Administrator", policy =>
+            {
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:create"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:delete"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update_schedule"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:create"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:update"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:delete"));
+            });
+            options.AddPolicy("Content.Manager", policy =>
+            {
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update_schedule"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:create"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:update"));
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:delete"));
+            });
+            options.AddPolicy("Test.User", policy =>
+            {
+                policy.Requirements.Add(new RoleBasedAccessControlRequirement("test:read-message"));
+            });
+        });
+
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -72,17 +133,6 @@ internal class Program
             }
         });
 
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAllOrigins",
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
-        });
-
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -93,7 +143,12 @@ internal class Program
             app.UseSwaggerUI();
         }
 
-        app.UseCors("AllowAllOrigins");
+        app.UseErrorHandler();
+        app.UseSecureHeaders();
+        app.UseCors();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseHttpsRedirection();
 
