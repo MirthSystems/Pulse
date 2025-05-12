@@ -1,0 +1,265 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  TextField,
+  Button,
+  Slider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Alert,
+  InputAdornment,
+  IconButton,
+  Pagination,
+  Divider
+} from '@mui/material';
+import { Search as SearchIcon, MyLocation as MyLocationIcon } from '@mui/icons-material';
+
+import { RootState } from '@store/index';
+import { searchSpecials, clearSpecialsError } from '@features/specials/specialSlice';
+import { SpecialSearchParams } from '@models/special';
+import { SpecialTypes } from '@models/special';
+import SpecialsList from '@components/specials/SpecialsList';
+import VenueCard from '@components/venues/VenueCard';
+
+const SearchResultsPage = () => {
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchResults, loading, error, pagingInfo } = useSelector((state: RootState) => state.specials);
+
+  // Search parameters
+  const [address, setAddress] = useState<string>(searchParams.get('address') || '');
+  const [radius, setRadius] = useState<number>(Number(searchParams.get('radius')) || 5);
+  const [specialType, setSpecialType] = useState<number | string>(searchParams.get('type') || '');
+  const [searchTerm, setSearchTerm] = useState<string>(searchParams.get('term') || '');
+  const [activeOnly, setActiveOnly] = useState<boolean>(searchParams.get('active') !== 'false');
+  const [page, setPage] = useState<number>(Number(searchParams.get('page')) || 1);
+
+  useEffect(() => {
+    // If we have search params, perform search automatically
+    if (address) {
+      performSearch();
+    }
+  }, []);
+
+  const performSearch = () => {
+    if (!address) {
+      return;
+    }
+    
+    const params: SpecialSearchParams = {
+      address,
+      radius,
+      page,
+      pageSize: 6,
+      term: searchTerm || undefined,
+      type: typeof specialType === 'number' ? specialType : undefined,
+      active: activeOnly
+    };
+    
+    dispatch(searchSpecials(params) as any);
+
+    // Update URL parameters for shareable links
+    updateSearchParams();
+  };
+
+  const updateSearchParams = () => {
+    const newParams = new URLSearchParams();
+    newParams.set('address', address);
+    newParams.set('radius', radius.toString());
+    if (specialType) newParams.set('type', specialType.toString());
+    if (searchTerm) newParams.set('term', searchTerm);
+    newParams.set('active', activeOnly.toString());
+    newParams.set('page', page.toString());
+    setSearchParams(newParams);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1); // Reset to first page on new search
+    performSearch();
+  };
+
+  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    // After setting the page, trigger a new search
+    setTimeout(performSearch, 0);
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setAddress(`${position.coords.latitude}, ${position.coords.longitude}`);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    }
+  };
+
+  return (
+    <Box>
+      <Paper component="form" elevation={2} sx={{ p: 3, mb: 4 }} onSubmit={handleSearch}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={3}>
+            <TextField
+              fullWidth
+              required
+              label="Location"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Address, city, or ZIP"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleGetCurrentLocation} size="small">
+                      <MyLocationIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          
+          <Grid item xs={6} md={2}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Radius (miles)"
+              value={radius}
+              onChange={(e) => setRadius(Number(e.target.value))}
+              inputProps={{ min: 1, max: 50 }}
+            />
+          </Grid>
+          
+          <Grid item xs={6} md={2}>
+            <FormControl fullWidth>
+              <InputLabel>Special Type</InputLabel>
+              <Select
+                value={specialType}
+                label="Special Type"
+                onChange={(e) => setSpecialType(e.target.value)}
+              >
+                <MenuItem value="">All Types</MenuItem>
+                <MenuItem value={SpecialTypes.Food}>Food</MenuItem>
+                <MenuItem value={SpecialTypes.Drink}>Drink</MenuItem>
+                <MenuItem value={SpecialTypes.Entertainment}>Entertainment</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          
+          <Grid item xs={12} md={3}>
+            <TextField
+              fullWidth
+              label="Search Term"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Keywords"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={2}>
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={loading || !address}
+              sx={{ height: '56px' }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Search"}
+            </Button>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {loading ? (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress />
+        </Box>
+      ) : searchResults.items.length > 0 ? (
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            Found {searchResults.pagingInfo.totalCount} Results
+          </Typography>
+          
+          {searchResults.items.map((result) => (
+            <Paper key={result.venue.id} elevation={1} sx={{ mb: 4, overflow: 'hidden' }}>
+              <Grid container>
+                <Grid item xs={12} md={4} sx={{ 
+                  backgroundImage: `url(${result.venue.profileImage || '/img/default-venue.jpg'})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  minHeight: { xs: 150, md: 'auto' }
+                }} />
+                
+                <Grid item xs={12} md={8}>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="h5" component="h2">
+                      {result.venue.name}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {result.venue.locality}, {result.venue.region}
+                    </Typography>
+                    
+                    {result.venue.description && (
+                      <Typography variant="body2" sx={{ mb: 2 }}>
+                        {result.venue.description}
+                      </Typography>
+                    )}
+                    
+                    <Divider sx={{ mb: 2 }} />
+                    
+                    <Typography variant="subtitle1" gutterBottom>
+                      Current Specials:
+                    </Typography>
+                    
+                    <SpecialsList specials={result.specials.items} showVenueName={false} />
+                  </Box>
+                </Grid>
+              </Grid>
+            </Paper>
+          ))}
+          
+          <Box display="flex" justifyContent="center" my={4}>
+            <Pagination 
+              count={pagingInfo.totalPages} 
+              page={pagingInfo.currentPage} 
+              onChange={handlePageChange} 
+              color="primary"
+            />
+          </Box>
+        </Box>
+      ) : address && !loading ? (
+        <Typography variant="h6" textAlign="center" py={6}>
+          No specials found matching your criteria. Try adjusting your search.
+        </Typography>
+      ) : null}
+    </Box>
+  );
+};
+
+export default SearchResultsPage;

@@ -74,15 +74,12 @@ internal class Program
 
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowSPA", policy =>
+            options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins(
-                    builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
-                    new[] { "http://localhost:3000", "http://localhost:5173" }
-                )
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
+                policy.WithOrigins()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
             });
         });
 
@@ -124,7 +121,7 @@ internal class Program
         app.UseStaticFiles();
 
         app.UseRouting();
-        app.UseCors("AllowSPA");
+        app.UseCors();
 
         app.UseAuthentication();
         app.UseAuthorization();
