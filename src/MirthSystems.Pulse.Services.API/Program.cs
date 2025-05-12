@@ -6,8 +6,9 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 
 using MirthSystems.Pulse.Infrastructure.Extensions;
-using MirthSystems.Pulse.Services.API.Authorization;
-using MirthSystems.Pulse.Services.API.Extensions;
+using MirthSystems.Pulse.Services.API.Test.Interfaces;
+using MirthSystems.Pulse.Services.API.Test.Models;
+using MirthSystems.Pulse.Services.API.Test.Services;
 
 using Serilog;
 
@@ -27,6 +28,8 @@ internal class Program
         builder.Services.AddServiceDefaults();
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
         builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
+
+        builder.Services.AddScoped<IMessageService, MessageService>();
 
         builder.Services.AddCors(options =>
         {
@@ -59,31 +62,7 @@ internal class Program
                 };
             });
 
-        builder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy("System.Administrator", policy =>
-            {
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:create"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:delete"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update_schedule"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:create"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:update"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:delete"));
-            });
-            options.AddPolicy("Content.Manager", policy =>
-            {
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue:update_schedule"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:create"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:update"));
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("venue_special:delete"));
-            });
-            options.AddPolicy("Test.User", policy =>
-            {
-                policy.Requirements.Add(new RoleBasedAccessControlRequirement("test:read-message"));
-            });
-        });
+        builder.Services.AddAuthorization();
 
 
         builder.Services.AddControllers();
@@ -143,8 +122,6 @@ internal class Program
             app.UseSwaggerUI();
         }
 
-        app.UseErrorHandler();
-        app.UseSecureHeaders();
         app.UseCors();
 
         app.UseAuthentication();

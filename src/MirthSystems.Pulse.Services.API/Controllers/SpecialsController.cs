@@ -98,7 +98,7 @@
         /// <response code="401">If the user is not authenticated.</response>
         /// <response code="403">If the user doesn't have the required role.</response>
         [HttpPost]
-        [Authorize(Policy = "Content.Manager")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(SpecialDetail))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -139,7 +139,7 @@
         /// <response code="403">If the user doesn't have the required role.</response>
         /// <response code="404">If the special with the specified ID is not found.</response>
         [HttpPut("{id}")]
-        [Authorize(Policy = "Content.Manager")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialDetail))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -189,7 +189,7 @@
         /// <response code="403">If the user doesn't have the required role.</response>
         /// <response code="404">If the special with the specified ID is not found.</response>
         [HttpDelete("{id}")]
-        [Authorize(Policy = "Content.Manager")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

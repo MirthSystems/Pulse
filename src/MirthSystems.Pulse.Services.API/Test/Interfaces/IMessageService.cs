@@ -6,6 +6,5 @@
     {
         Message GetPublicMessage();
         Message GetProtectedMessage();
-        Message GetAdminMessage();
     }
 }

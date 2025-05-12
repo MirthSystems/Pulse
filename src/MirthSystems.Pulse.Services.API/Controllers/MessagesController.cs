@@ -31,12 +31,5 @@
         {
             return _messageService.GetProtectedMessage();
         }
-
-        [HttpGet("admin")]
-        [Authorize(Policy = "Test.User")]
-        public ActionResult<Message> GetAdminMessage()
-        {
-            return _messageService.GetAdminMessage();
-        }
     }
 }
