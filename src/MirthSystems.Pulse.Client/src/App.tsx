@@ -7,6 +7,7 @@ import LandingPage from '@components/pages/LandingPage';
 import SearchResultsPage from '@components/pages/SearchResultsPage';
 import BackofficePage from '@components/pages/BackofficePage';
 import VenueManagementPage from '@components/pages/VenueManagementPage';
+import VenueDetailsPage from '@components/pages/VenueDetailsPage';
 import VenueFormPage from '@components/pages/VenueFormPage';
 import SpecialFormPage from '@components/pages/SpecialFormPage';
 import NotFoundPage from '@components/pages/NotFoundPage';
@@ -29,6 +30,7 @@ const App = () => {
         {/* Public routes */}
         <Route index element={<LandingPage />} />
         <Route path="results" element={<SearchResultsPage />} />
+        <Route path="venue/:id" element={<VenueDetailsPage />} />
         
         {/* Protected routes - Backoffice */}
         <Route 
@@ -52,6 +54,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <VenueManagementPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="venues/:id/edit" 
+          element={
+            <ProtectedRoute>
+              <VenueFormPage />
             </ProtectedRoute>
           } 
         />

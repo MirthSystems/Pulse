@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Box,
@@ -31,6 +31,7 @@ import VenueCard from '@components/venues/VenueCard';
 
 const SearchResultsPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { searchResults, loading, error, pagingInfo } = useSelector((state: RootState) => state.specials);
 
@@ -51,7 +52,7 @@ const SearchResultsPage = () => {
 
   const performSearch = () => {
     if (!address) {
-      return;
+      return; // Require address for searching
     }
     
     const params: SpecialSearchParams = {
@@ -67,18 +68,14 @@ const SearchResultsPage = () => {
     dispatch(searchSpecials(params) as any);
 
     // Update URL parameters for shareable links
-    updateSearchParams();
-  };
-
-  const updateSearchParams = () => {
-    const newParams = new URLSearchParams();
-    newParams.set('address', address);
-    newParams.set('radius', radius.toString());
-    if (specialType) newParams.set('type', specialType.toString());
-    if (searchTerm) newParams.set('term', searchTerm);
-    newParams.set('active', activeOnly.toString());
-    newParams.set('page', page.toString());
-    setSearchParams(newParams);
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('address', address);
+    newSearchParams.set('radius', radius.toString());
+    if (specialType) newSearchParams.set('type', specialType.toString());
+    if (searchTerm) newSearchParams.set('term', searchTerm);
+    newSearchParams.set('active', activeOnly.toString());
+    newSearchParams.set('page', page.toString());
+    setSearchParams(newSearchParams);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -104,6 +101,10 @@ const SearchResultsPage = () => {
         }
       );
     }
+  };
+
+  const handleClearError = () => {
+    dispatch(clearSpecialsError());
   };
 
   return (
@@ -192,6 +193,14 @@ const SearchResultsPage = () => {
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
+          <Button 
+            color="inherit"
+            size="small"
+            onClick={handleClearError}
+            sx={{ ml: 2 }}
+          >
+            Dismiss
+          </Button>
         </Alert>
       )}
 
@@ -199,14 +208,28 @@ const SearchResultsPage = () => {
         <Box display="flex" justifyContent="center" my={4}>
           <CircularProgress />
         </Box>
-      ) : searchResults.items.length > 0 ? (
+      ) : searchResults.items && searchResults.items.length > 0 ? (
         <Box>
           <Typography variant="h5" gutterBottom>
-            Found {searchResults.pagingInfo.totalCount} Results
+            Found {searchResults.pagingInfo?.totalCount || 0} Results
           </Typography>
           
           {searchResults.items.map((result) => (
-            <Paper key={result.venue.id} elevation={1} sx={{ mb: 4, overflow: 'hidden' }}>
+            <Paper 
+              key={result.venue.id} 
+              elevation={1} 
+              sx={{ 
+                mb: 4, 
+                overflow: 'hidden', 
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 3
+                }
+              }}
+              onClick={() => navigate(`/venue/${result.venue.id}`)}
+            >
               <Grid container>
                 <Grid item xs={12} md={4} sx={{ 
                   backgroundImage: `url(${result.venue.profileImage || '/img/default-venue.jpg'})`,
@@ -244,14 +267,17 @@ const SearchResultsPage = () => {
             </Paper>
           ))}
           
-          <Box display="flex" justifyContent="center" my={4}>
-            <Pagination 
-              count={pagingInfo.totalPages} 
-              page={pagingInfo.currentPage} 
-              onChange={handlePageChange} 
-              color="primary"
-            />
-          </Box>
+          {searchResults.pagingInfo && searchResults.pagingInfo.totalPages > 1 && (
+            <Box display="flex" justifyContent="center" my={4}>
+              <Pagination 
+                count={searchResults.pagingInfo.totalPages} 
+                page={searchResults.pagingInfo.currentPage} 
+                onChange={handlePageChange} 
+                color="primary"
+                disabled={loading}
+              />
+            </Box>
+          )}
         </Box>
       ) : address && !loading ? (
         <Typography variant="h6" textAlign="center" py={6}>

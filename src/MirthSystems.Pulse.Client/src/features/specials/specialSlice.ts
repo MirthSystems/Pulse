@@ -1,33 +1,32 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AxiosInstance } from 'axios';
 import { SpecialService } from '@services/specialService';
 import { 
-  SpecialSearchParams,
   SpecialItem, 
-  SpecialItemExtended, 
-  CreateSpecialRequest, 
-  UpdateSpecialRequest,
+  SpecialItemExtended,
+  SpecialSearchParams, 
   SearchSpecialsResult
 } from '@models/special';
 import { PagedResult, ApiError } from '@models/common';
+import { AxiosError } from 'axios';
 
+// Define the state interface
 interface SpecialState {
-  specials: SpecialItem[];
-  currentSpecial: SpecialItemExtended | null;
+  items: SpecialItem[];
   searchResults: PagedResult<SearchSpecialsResult>;
-  loading: boolean;
-  error: string | null;
+  currentSpecial: SpecialItemExtended | null;
   pagingInfo: {
     currentPage: number;
     pageSize: number;
     totalCount: number;
     totalPages: number;
   };
+  loading: boolean;
+  error: string | null;
 }
 
+// Initial state
 const initialState: SpecialState = {
-  specials: [],
-  currentSpecial: null,
+  items: [],
   searchResults: {
     items: [],
     pagingInfo: {
@@ -35,20 +34,35 @@ const initialState: SpecialState = {
       pageSize: 20,
       totalCount: 0,
       totalPages: 0,
-      hasPreviousPage: false,
-      hasNextPage: false
     }
   },
-  loading: false,
-  error: null,
+  currentSpecial: null,
   pagingInfo: {
     currentPage: 1,
     pageSize: 20,
     totalCount: 0,
-    totalPages: 0
-  }
+    totalPages: 0,
+  },
+  loading: false,
+  error: null,
 };
 
+// Helper function to process API errors
+const processApiError = (error: any): ApiError => {
+  const errorMessage = error.message || 'An unexpected error occurred';
+  
+  // Extract status and error details if available
+  const statusCode = error.status || 500;
+  const errorDetails = error.errors || {};
+  
+  return {
+    status: statusCode,
+    message: errorMessage,
+    errors: errorDetails
+  };
+};
+
+// Async thunks
 export const searchSpecials = createAsyncThunk<
   PagedResult<SearchSpecialsResult>,
   SpecialSearchParams,
@@ -57,7 +71,9 @@ export const searchSpecials = createAsyncThunk<
   try {
     return await SpecialService.searchSpecials(params);
   } catch (error) {
-    return rejectWithValue(error as ApiError);
+    // Handle the error properly to ensure it's serializable
+    const apiError = processApiError(error);
+    return rejectWithValue(apiError);
   }
 });
 
@@ -69,44 +85,49 @@ export const getSpecialById = createAsyncThunk<
   try {
     return await SpecialService.getSpecialById(id);
   } catch (error) {
-    return rejectWithValue(error as ApiError);
+    const apiError = processApiError(error);
+    return rejectWithValue(apiError);
   }
 });
 
 export const createSpecial = createAsyncThunk(
   'specials/createSpecial',
-  async ({ specialData, apiClient }: { specialData: CreateSpecialRequest; apiClient: AxiosInstance }, { rejectWithValue }) => {
+  async ({ specialData, apiClient }: { specialData: any; apiClient: any }, { rejectWithValue }) => {
     try {
       return await SpecialService.createSpecial(specialData, apiClient);
     } catch (error) {
-      return rejectWithValue(error);
+      const apiError = processApiError(error);
+      return rejectWithValue(apiError);
     }
   }
 );
 
 export const updateSpecial = createAsyncThunk(
   'specials/updateSpecial',
-  async ({ id, specialData, apiClient }: { id: string; specialData: UpdateSpecialRequest; apiClient: AxiosInstance }, { rejectWithValue }) => {
+  async ({ id, specialData, apiClient }: { id: string; specialData: any; apiClient: any }, { rejectWithValue }) => {
     try {
       return await SpecialService.updateSpecial(id, specialData, apiClient);
     } catch (error) {
-      return rejectWithValue(error);
+      const apiError = processApiError(error);
+      return rejectWithValue(apiError);
     }
   }
 );
 
 export const deleteSpecial = createAsyncThunk(
   'specials/deleteSpecial',
-  async ({ id, apiClient }: { id: string; apiClient: AxiosInstance }, { rejectWithValue }) => {
+  async ({ id, apiClient }: { id: string; apiClient: any }, { rejectWithValue }) => {
     try {
       return await SpecialService.deleteSpecial(id, apiClient);
     } catch (error) {
-      return rejectWithValue(error);
+      const apiError = processApiError(error);
+      return rejectWithValue(apiError);
     }
   }
 );
 
-const specialsSlice = createSlice({
+// Create the slice
+const specialSlice = createSlice({
   name: 'specials',
   initialState,
   reducers: {
@@ -157,7 +178,7 @@ const specialsSlice = createSlice({
         state.loading = false;
         state.currentSpecial = action.payload;
       })
-      .addCase(createSpecial.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(createSpecial.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to create special';
       })
@@ -171,7 +192,7 @@ const specialsSlice = createSlice({
         state.loading = false;
         state.currentSpecial = action.payload;
       })
-      .addCase(updateSpecial.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(updateSpecial.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to update special';
       })
@@ -185,13 +206,13 @@ const specialsSlice = createSlice({
         state.loading = false;
         state.currentSpecial = null;
       })
-      .addCase(deleteSpecial.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(deleteSpecial.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to delete special';
       });
-  }
+  },
 });
 
-export const { clearCurrentSpecial, clearSpecialsError } = specialsSlice.actions;
+export const { clearCurrentSpecial, clearSpecialsError } = specialSlice.actions;
 
-export default specialsSlice.reducer;
+export const specialReducer = specialSlice.reducer;

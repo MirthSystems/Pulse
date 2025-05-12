@@ -55,7 +55,7 @@
                 var results = await _specialService.SearchSpecialsAsync(request);
                 if (results == null || results.Items.Count == 0)
                 {
-                    return NotFound("No specials found matching the criteria");
+                    return this.NotFound(results);
                 }
                 return Ok(results);
             }

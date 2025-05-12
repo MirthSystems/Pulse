@@ -36,6 +36,21 @@ const initialState: VenueState = {
   error: null,
 };
 
+// Helper function to process API errors
+const processApiError = (error: any): ApiError => {
+  const errorMessage = error.message || 'An unexpected error occurred';
+  
+  // Extract status and error details if available
+  const statusCode = error.status || 500;
+  const errorDetails = error.errors || {};
+  
+  return {
+    status: statusCode,
+    message: errorMessage,
+    errors: errorDetails
+  };
+};
+
 // Async thunks
 export const fetchVenues = createAsyncThunk<
   PagedResult<VenueItem>, 
@@ -45,7 +60,7 @@ export const fetchVenues = createAsyncThunk<
   try {
     return await VenueService.getVenues(params);
   } catch (error) {
-    return rejectWithValue(error as ApiError);
+    return rejectWithValue(processApiError(error));
   }
 });
 
@@ -57,7 +72,7 @@ export const fetchVenueById = createAsyncThunk<
   try {
     return await VenueService.getVenueById(id);
   } catch (error) {
-    return rejectWithValue(error as ApiError);
+    return rejectWithValue(processApiError(error));
   }
 });
 
@@ -69,7 +84,11 @@ export const fetchVenueBusinessHours = createAsyncThunk<
   try {
     return await VenueService.getVenueBusinessHours(id);
   } catch (error) {
-    return rejectWithValue(error as ApiError);
+    // Return empty array for 404s to prevent errors
+    if (error.status === 404) {
+      return [];
+    }
+    return rejectWithValue(processApiError(error));
   }
 });
 
@@ -81,7 +100,11 @@ export const fetchVenueSpecials = createAsyncThunk<
   try {
     return await VenueService.getVenueSpecials(id);
   } catch (error) {
-    return rejectWithValue(error as ApiError);
+    // Return empty array for 404s to prevent errors
+    if (error.status === 404) {
+      return [];
+    }
+    return rejectWithValue(processApiError(error));
   }
 });
 
@@ -91,7 +114,7 @@ export const createVenue = createAsyncThunk(
     try {
       return await VenueService.createVenue(venueData, apiClient);
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(processApiError(error));
     }
   }
 );
@@ -102,7 +125,7 @@ export const updateVenue = createAsyncThunk(
     try {
       return await VenueService.updateVenue(id, venueData, apiClient);
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(processApiError(error));
     }
   }
 );
@@ -113,7 +136,7 @@ export const deleteVenue = createAsyncThunk(
     try {
       return await VenueService.deleteVenue(id, apiClient);
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(processApiError(error));
     }
   }
 );
@@ -230,3 +253,4 @@ const venueSlice = createSlice({
 export const { clearCurrentVenue, clearVenueError } = venueSlice.actions;
 
 export default venueSlice.reducer;
+export const venueReducer = venueSlice.reducer;

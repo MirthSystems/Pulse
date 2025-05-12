@@ -145,3 +145,4 @@ const scheduleSlice = createSlice({
 export const { clearCurrentSchedule, clearScheduleError } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;
+export const scheduleReducer = scheduleSlice.reducer;

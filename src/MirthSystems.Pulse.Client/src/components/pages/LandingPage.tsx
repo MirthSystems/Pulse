@@ -14,9 +14,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  Card,
-  CardContent,
+  MenuItem
 } from '@mui/material';
 import { Search as SearchIcon, MyLocation as MyLocationIcon } from '@mui/icons-material';
 import { SpecialTypes } from '@models/special';
@@ -70,11 +68,11 @@ const LandingPage = () => {
         py: 4
       }}>
         <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Find Tonight's Best Specials
+          Discover Special Events & Promotions
         </Typography>
         
         <Typography variant="h5" color="text.secondary" sx={{ mb: 6, maxWidth: 700 }}>
-          Discover food, drink, and entertainment specials at venues near you
+          Find the best deals, happy hours, and events near you
         </Typography>
         
         <Paper 
@@ -84,77 +82,56 @@ const LandingPage = () => {
             width: '100%', 
             maxWidth: 800,
             borderRadius: 2,
-            background: theme => `linear-gradient(45deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`
+            backgroundColor: 'white',
           }}
           component="form"
           onSubmit={handleSearch}
         >
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid item xs={12} md={12}>
               <TextField
                 fullWidth
                 required
-                label="Your Location"
-                placeholder="Address, City, or ZIP"
+                label="Location"
+                placeholder="Enter address, city, or ZIP"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                variant="filled"
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={handleGetCurrentLocation} sx={{ color: 'white' }}>
+                      <IconButton onClick={handleGetCurrentLocation}>
                         <MyLocationIcon />
                       </IconButton>
                     </InputAdornment>
                   ),
-                  style: { color: 'white' }
-                }}
-                InputLabelProps={{ style: { color: 'rgba(255,255,255,0.8)' } }}
-                sx={{
-                  '& .MuiFilledInput-root': {
-                    bgcolor: 'rgba(255,255,255,0.15)',
-                    '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.25)',
-                    },
-                    '&.Mui-focused': {
-                      bgcolor: 'rgba(255,255,255,0.25)',
-                    }
-                  }
                 }}
               />
             </Grid>
             
             <Grid item xs={12} md={4}>
-              <Typography color="white" gutterBottom>
-                Search Radius: {radius} miles
-              </Typography>
-              <Slider
-                value={radius}
-                onChange={(_, value) => setRadius(value as number)}
-                min={1}
-                max={25}
-                valueLabelDisplay="auto"
-                sx={{ color: 'white' }}
+              <TextField
+                fullWidth
+                label="Keywords"
+                placeholder="e.g. happy hour, pizza"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             
             <Grid item xs={12} md={4}>
-              <FormControl variant="filled" fullWidth sx={{
-                '& .MuiFilledInput-root': {
-                  bgcolor: 'rgba(255,255,255,0.15)',
-                  '&:hover': {
-                    bgcolor: 'rgba(255,255,255,0.25)',
-                  },
-                  '&.Mui-focused': {
-                    bgcolor: 'rgba(255,255,255,0.25)',
-                  }
-                }
-              }}>
-                <InputLabel sx={{ color: 'rgba(255,255,255,0.8)' }}>Special Type</InputLabel>
+              <FormControl fullWidth>
+                <InputLabel>Special Type</InputLabel>
                 <Select
                   value={specialType}
+                  label="Special Type"
                   onChange={(e) => setSpecialType(e.target.value)}
-                  inputProps={{ style: { color: 'white' } }}
                 >
                   <MenuItem value="">Any Type</MenuItem>
                   <MenuItem value={SpecialTypes.Food}>Food</MenuItem>
@@ -165,55 +142,30 @@ const LandingPage = () => {
             </Grid>
             
             <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Keywords"
-                placeholder="e.g. happy hour, pizza"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                variant="filled"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: 'rgba(255,255,255,0.8)' }} />
-                    </InputAdornment>
-                  ),
-                  style: { color: 'white' }
-                }}
-                InputLabelProps={{ style: { color: 'rgba(255,255,255,0.8)' } }}
-                sx={{
-                  '& .MuiFilledInput-root': {
-                    bgcolor: 'rgba(255,255,255,0.15)',
-                    '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.25)',
-                    },
-                    '&.Mui-focused': {
-                      bgcolor: 'rgba(255,255,255,0.25)',
-                    }
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
               <Button 
+                fullWidth
                 type="submit"
                 variant="contained" 
+                color="primary"
                 size="large"
-                fullWidth
-                color="secondary"
                 sx={{ 
-                  py: 1.5,
-                  fontSize: '1.2rem',
-                  boxShadow: 4,
-                  '&:hover': {
-                    boxShadow: 6,
-                  }
+                  height: '56px',
                 }}
                 disabled={!address}
               >
-                Find Specials
+                Search Specials
               </Button>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Typography gutterBottom>Search Radius: {radius} miles</Typography>
+              <Slider
+                value={radius}
+                onChange={(_, value) => setRadius(value as number)}
+                min={1}
+                max={25}
+                valueLabelDisplay="auto"
+              />
             </Grid>
           </Grid>
         </Paper>
@@ -225,42 +177,36 @@ const LandingPage = () => {
           
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Discover New Places
-                  </Typography>
-                  <Typography>
-                    Find hidden gems and popular spots around you with our comprehensive venue database.
-                  </Typography>
-                </CardContent>
-              </Card>
+              <Paper sx={{ p: 3, height: '100%' }} elevation={2}>
+                <Typography variant="h6" gutterBottom>
+                  Discover New Places
+                </Typography>
+                <Typography>
+                  Find hidden gems and popular spots around you with our comprehensive venue database.
+                </Typography>
+              </Paper>
             </Grid>
             
             <Grid item xs={12} md={4}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Never Miss a Deal
-                  </Typography>
-                  <Typography>
-                    Stay updated on the latest promotions, happy hours, and special events in your area.
-                  </Typography>
-                </CardContent>
-              </Card>
+              <Paper sx={{ p: 3, height: '100%' }} elevation={2}>
+                <Typography variant="h6" gutterBottom>
+                  Never Miss a Deal
+                </Typography>
+                <Typography>
+                  Stay updated on the latest promotions, happy hours, and special events in your area.
+                </Typography>
+              </Paper>
             </Grid>
             
             <Grid item xs={12} md={4}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Plan Your Evening
-                  </Typography>
-                  <Typography>
-                    Find venues open now with current specials to make the most of your night out.
-                  </Typography>
-                </CardContent>
-              </Card>
+              <Paper sx={{ p: 3, height: '100%' }} elevation={2}>
+                <Typography variant="h6" gutterBottom>
+                  Plan Your Evening
+                </Typography>
+                <Typography>
+                  Find venues open now with current specials to make the most of your night out.
+                </Typography>
+              </Paper>
             </Grid>
           </Grid>
         </Box>
