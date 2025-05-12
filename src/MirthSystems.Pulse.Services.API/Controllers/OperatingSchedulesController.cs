@@ -24,169 +24,158 @@
     {
         private readonly IOperatingScheduleService _operatingScheduleService;
         private string? UserId => User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+        
         public OperatingSchedulesController(IOperatingScheduleService operatingScheduleService)
         {
             _operatingScheduleService = operatingScheduleService;
         }
-
+        
         /// <summary>
-        /// Retrieves a specific operating schedule by its ID.
+        /// Gets an operating schedule by ID.
         /// </summary>
-        /// <param name="id">The unique identifier of the operating schedule.</param>
-        /// <returns>Detailed information about the requested operating schedule.</returns>
-        /// <response code="200">Returns the operating schedule details.</response>
-        /// <response code="400">If the ID format is invalid.</response>
-        /// <response code="404">If the operating schedule with the specified ID is not found.</response>
+        /// <param name="id">The operating schedule ID.</param>
+        /// <returns>The operating schedule details.</returns>
         [HttpGet("{id}")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleItemExtended))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [OpenApiOperation("GetOperatingScheduleById", "Retrieves detailed information about a specific operating schedule")]
+        [OpenApiOperation("GetOperatingScheduleById", "Retrieves an operating schedule by its ID")]
         public async Task<ActionResult<OperatingScheduleItemExtended>> GetOperatingScheduleById(string id)
         {
-            if (!long.TryParse(id, out long scheduleId))
+            try
             {
-                return BadRequest("Invalid schedule ID format");
+                var operatingSchedule = await _operatingScheduleService.GetOperatingScheduleByIdAsync(id);
+                if (operatingSchedule == null)
+                {
+                    return NotFound($"Operating schedule with ID {id} not found");
+                }
+                
+                return Ok(operatingSchedule);
             }
-
-            var schedule = await _operatingScheduleService.GetOperatingScheduleByIdAsync(id);
-            if (schedule == null)
+            catch (Exception ex)
             {
-                return NotFound($"Operating schedule with ID {id} not found");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
-
-            return Ok(schedule);
         }
-
+        
         /// <summary>
-        /// Creates a new operating schedule for a venue.
+        /// Creates a new operating schedule.
         /// </summary>
-        /// <param name="request">The data for creating the operating schedule.</param>
-        /// <returns>The created operating schedule with its assigned ID.</returns>
-        /// <response code="201">Returns the newly created operating schedule.</response>
-        /// <response code="400">If the request data is invalid.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="403">If the user doesn't have the required role.</response>
+        /// <param name="request">The data for the new operating schedule.</param>
+        /// <returns>The created operating schedule.</returns>
         [HttpPost]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(OperatingScheduleItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [OpenApiOperation("CreateOperatingSchedule", "Creates a new operating schedule for a venue")]
+        [OpenApiOperation("CreateOperatingSchedule", "Creates a new operating schedule")]
         public async Task<ActionResult<OperatingScheduleItemExtended>> CreateOperatingSchedule([FromBody] CreateOperatingScheduleRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid request data");
-            }
-
-            if (UserId == null)
-            {
-                return Unauthorized("Unauthorized");
-            }
-
             try
             {
-                var schedule = await _operatingScheduleService.CreateOperatingScheduleAsync(request, UserId);
-                return CreatedAtAction(nameof(GetOperatingScheduleById), new { id = schedule.Id }, schedule);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                
+                if (UserId == null)
+                {
+                    return Unauthorized("User must be authenticated to create operating schedules");
+                }
+                
+                var operatingSchedule = await _operatingScheduleService.CreateOperatingScheduleAsync(request, UserId);
+                return CreatedAtAction(nameof(GetOperatingScheduleById), new { id = operatingSchedule.Id }, operatingSchedule);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
-
+        
         /// <summary>
         /// Updates an existing operating schedule.
         /// </summary>
-        /// <param name="id">The unique identifier of the operating schedule to update.</param>
-        /// <param name="request">The update data for the operating schedule.</param>
-        /// <returns>The updated operating schedule information.</returns>
-        /// <response code="200">Returns the updated operating schedule.</response>
-        /// <response code="400">If the ID format or request data is invalid.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="403">If the user doesn't have the required role.</response>
-        /// <response code="404">If the operating schedule with the specified ID is not found.</response>
+        /// <param name="id">The ID of the operating schedule to update.</param>
+        /// <param name="request">The update data.</param>
+        /// <returns>The updated operating schedule.</returns>
         [HttpPut("{id}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateOperatingSchedule", "Updates an existing operating schedule")]
         public async Task<ActionResult<OperatingScheduleItemExtended>> UpdateOperatingSchedule(string id, [FromBody] UpdateOperatingScheduleRequest request)
         {
-            if (!long.TryParse(id, out long scheduleId))
-            {
-                return BadRequest("Invalid schedule ID format");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid request data");
-            }
-
-            if (UserId == null)
-            {
-                return Unauthorized("Unauthorized");
-            }
-
             try
             {
-                var schedule = await _operatingScheduleService.UpdateOperatingScheduleAsync(id, request, UserId);
-                return Ok(schedule);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                
+                if (UserId == null)
+                {
+                    return Unauthorized("User must be authenticated to update operating schedules");
+                }
+                
+                var operatingSchedule = await _operatingScheduleService.UpdateOperatingScheduleAsync(id, request, UserId);
+                return Ok(operatingSchedule);
             }
-            catch (KeyNotFoundException)
-            {
-                return NotFound($"Operating schedule with ID {id} not found");
-            }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
-
+        
         /// <summary>
         /// Deletes an operating schedule.
         /// </summary>
-        /// <param name="id">The unique identifier of the operating schedule to delete.</param>
-        /// <returns>A boolean indicating whether the deletion was successful.</returns>
-        /// <response code="200">Returns true if deletion was successful.</response>
-        /// <response code="400">If the ID format is invalid.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="403">If the user doesn't have the required role.</response>
-        /// <response code="404">If the operating schedule with the specified ID is not found.</response>
+        /// <param name="id">The ID of the operating schedule to delete.</param>
+        /// <returns>A success indicator.</returns>
         [HttpDelete("{id}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("DeleteOperatingSchedule", "Deletes an operating schedule")]
         public async Task<ActionResult<bool>> DeleteOperatingSchedule(string id)
         {
-            if (!long.TryParse(id, out long scheduleId))
+            try
             {
-                return BadRequest("Invalid schedule ID format");
+                if (UserId == null)
+                {
+                    return Unauthorized("User must be authenticated to delete operating schedules");
+                }
+                
+                var result = await _operatingScheduleService.DeleteOperatingScheduleAsync(id, UserId);
+                if (!result)
+                {
+                    return NotFound($"Operating schedule with ID {id} not found");
+                }
+                
+                return Ok(true);
             }
-
-            if (UserId == null)
+            catch (Exception ex)
             {
-                return Unauthorized("Unauthorized");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
-
-            bool result = await _operatingScheduleService.DeleteOperatingScheduleAsync(id, UserId);
-            if (!result)
-            {
-                return NotFound($"Operating schedule with ID {id} not found");
-            }
-
-            return Ok(true);
         }
     }
 }

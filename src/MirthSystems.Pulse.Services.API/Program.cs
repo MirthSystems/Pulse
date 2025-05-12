@@ -1,16 +1,29 @@
 using System.Reflection;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 
+using MirthSystems.Pulse.Core.Interfaces;
+using MirthSystems.Pulse.Infrastructure.Data;
+using MirthSystems.Pulse.Infrastructure.Data.Repositories;
 using MirthSystems.Pulse.Infrastructure.Extensions;
+using MirthSystems.Pulse.Infrastructure.Services;
 using MirthSystems.Pulse.Services.API.Test.Interfaces;
 using MirthSystems.Pulse.Services.API.Test.Models;
 using MirthSystems.Pulse.Services.API.Test.Services;
 
+using NSwag;
+using NSwag.AspNetCore;
+using NSwag.Generation.Processors.Security;
+
 using Serilog;
+
+using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 internal class Program
 {
@@ -25,112 +38,98 @@ internal class Program
                 dispose: true
             );
 
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
+
         builder.Services.AddServiceDefaults();
         builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
-        builder.Services.AddAzureMaps(builder.Configuration.GetSection("AzureMaps")["SubscriptionKey"]);
+        builder.Services.AddAzureMaps(builder.Configuration.GetValue<string>("AzureMaps:SubscriptionKey"));
 
         builder.Services.AddScoped<IMessageService, MessageService>();
-
-        builder.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.WithOrigins(
-                    builder.Configuration.GetValue<string>("Authentication:ClientOriginUrl")!)
-                    .WithHeaders(new string[] {
-                        HeaderNames.ContentType,
-                        HeaderNames.Authorization,
-                    })
-                    .WithMethods("GET")
-                    .SetPreflightMaxAge(TimeSpan.FromSeconds(86400));
-            });
-        });
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                var audience =
-                      builder.Configuration.GetValue<string>("Authentication:Audience");
-
-                options.Authority =
-                      $"https://{builder.Configuration.GetValue<string>("Authentication:Domain")}/";
-                options.Audience = audience;
+                options.Authority = builder.Configuration["Auth0:Authority"];
+                options.Audience = builder.Configuration["Auth0:Audience"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    NameClaimType = ClaimTypes.NameIdentifier,
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true
                 };
             });
 
-        builder.Services.AddAuthorization();
-
-
-        builder.Services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
+        builder.Services.AddAuthorization(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Pulse API",
-                Description = "Learn how to protect your .NET applications with Auth0",
-                Contact = new OpenApiContact
-                {
-                    Name = ".NET Identity with Auth0",
-                    Url = new Uri("https://a0.to/dotnet-templates/webapi")
-                },
-                Version = "v1.0.0"
-            });
-
-            var securitySchema = new OpenApiSecurityScheme
-            {
-                Description = "Using the Authorization header with the Bearer scheme.",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            };
-
-            options.AddSecurityDefinition("Bearer", securitySchema);
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                { securitySchema, new[] { "Bearer" } }
-            });
-
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            if (File.Exists(xmlPath))
-            {
-                options.IncludeXmlComments(xmlPath);
-            }
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser()
+                .Build();
         });
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowSPA", policy =>
+            {
+                policy.WithOrigins(
+                    builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
+                    new[] { "http://localhost:3000", "http://localhost:5173" }
+                )
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+            });
+        });
+
+        builder.Services.AddOpenApiDocument(document =>
+        {
+            document.Title = "Pulse API";
+            document.Version = "v1";
+            document.DocumentName = "v1";
+            document.Description = "API for the Pulse nightlife discovery platform";
+
+            document.AddSecurity("JWT", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+            {
+                Type = OpenApiSecuritySchemeType.ApiKey,
+                Name = "Authorization",
+                In = OpenApiSecurityApiKeyLocation.Header,
+                Description = "Type into the textbox: Bearer {your JWT token}."
+            });
+
+            document.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+        });
+
+        builder.Services.AddHttpContextAccessor();
 
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseStaticFiles();
-            app.MapOpenApi();
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseDeveloperExceptionPage();
+            app.UseOpenApi();
+            app.UseSwaggerUi();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            app.UseHsts();
         }
 
-        app.UseCors();
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
+        app.UseRouting();
+        app.UseCors("AllowSPA");
 
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseHttpsRedirection();
-
         app.MapControllers();
-        app.MapFallbackToFile("index.html");
 
         app.Run();
     }

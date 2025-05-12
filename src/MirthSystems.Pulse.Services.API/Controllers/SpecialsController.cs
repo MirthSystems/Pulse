@@ -50,41 +50,42 @@
         [OpenApiOperation("SearchSpecials", "Searches for specials grouped by venue with optional filtering")]
         public async Task<ActionResult<PagedResult<SearchSpecialsResult>>> SearchSpecials([FromQuery] GetSpecialsRequest request)
         {
-            var results = await _specialService.SearchSpecialsAsync(request);
-            if (results == null || results.Items.Count == 0)
+            try
             {
-                return NotFound("No specials found matching the criteria");
+                var results = await _specialService.SearchSpecialsAsync(request);
+                if (results == null || results.Items.Count == 0)
+                {
+                    return NotFound("No specials found matching the criteria");
+                }
+                return Ok(results);
             }
-            return Ok(results);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
 
         /// <summary>
         /// Retrieves detailed information about a specific special.
         /// </summary>
-        /// <param name="id">The unique identifier of the special.</param>
-        /// <returns>Detailed information about the requested special.</returns>
-        /// <response code="200">Returns the special details.</response>
-        /// <response code="400">If the ID format is invalid.</response>
-        /// <response code="404">If the special with the specified ID is not found.</response>
+        /// <param name="id">The special ID.</param>
+        /// <returns>The special details.</returns>
         [HttpGet("{id}")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialItemExtended))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [OpenApiOperation("GetSpecialById", "Retrieves detailed information about a specific special promotion")]
+        [OpenApiOperation("GetSpecialById", "Retrieves detailed information about a specific special")]
         public async Task<ActionResult<SpecialItemExtended>> GetSpecialById(string id)
         {
-            if (!long.TryParse(id, out long specialId))
-            {
-                return BadRequest("Invalid special ID format");
-            }
-
             var special = await _specialService.GetSpecialByIdAsync(id);
             if (special == null)
             {
                 return NotFound($"Special with ID {id} not found");
             }
-
             return Ok(special);
         }
 
@@ -121,38 +122,35 @@
                 var special = await _specialService.CreateSpecialAsync(request, UserId);
                 return CreatedAtAction(nameof(GetSpecialById), new { id = special.Id }, special);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Updates an existing special promotion.
+        /// Updates an existing special.
         /// </summary>
-        /// <param name="id">The unique identifier of the special to update.</param>
+        /// <param name="id">The ID of the special to update.</param>
         /// <param name="request">The update data for the special.</param>
         /// <returns>The updated special information.</returns>
-        /// <response code="200">Returns the updated special.</response>
-        /// <response code="400">If the ID format or request data is invalid.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="403">If the user doesn't have the required role.</response>
-        /// <response code="404">If the special with the specified ID is not found.</response>
         [HttpPut("{id}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [OpenApiOperation("UpdateSpecial", "Updates an existing special promotion")]
+        [OpenApiOperation("UpdateSpecial", "Updates an existing special's information")]
         public async Task<ActionResult<SpecialItemExtended>> UpdateSpecial(string id, [FromBody] UpdateSpecialRequest request)
         {
-            if (!long.TryParse(id, out long specialId))
-            {
-                return BadRequest("Invalid special ID format");
-            }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -168,53 +166,51 @@
                 var special = await _specialService.UpdateSpecialAsync(id, request, UserId);
                 return Ok(special);
             }
-            catch (KeyNotFoundException)
+            catch (ArgumentException ex)
             {
-                return NotFound($"Special with ID {id} not found");
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Soft-deletes a special promotion.
+        /// Deletes a special.
         /// </summary>
-        /// <param name="id">The unique identifier of the special to delete.</param>
+        /// <param name="id">The ID of the special to delete.</param>
         /// <returns>A boolean indicating whether the deletion was successful.</returns>
-        /// <response code="200">Returns true if deletion was successful.</response>
-        /// <response code="400">If the ID format is invalid.</response>
-        /// <response code="401">If the user is not authenticated.</response>
-        /// <response code="403">If the user doesn't have the required role.</response>
-        /// <response code="404">If the special with the specified ID is not found.</response>
         [HttpDelete("{id}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [OpenApiOperation("DeleteSpecial", "Soft-deletes a special promotion")]
+        [OpenApiOperation("DeleteSpecial", "Deletes a special")]
         public async Task<ActionResult<bool>> DeleteSpecial(string id)
         {
-            if (!long.TryParse(id, out long specialId))
-            {
-                return BadRequest("Invalid special ID format");
-            }
-
             if (UserId == null)
             {
                 return Unauthorized("User must be authenticated to delete specials");
             }
 
-            bool result = await _specialService.DeleteSpecialAsync(id, UserId);
-            if (!result)
+            try
             {
-                return NotFound($"Special with ID {id} not found");
+                var result = await _specialService.DeleteSpecialAsync(id, UserId);
+                if (!result)
+                {
+                    return NotFound($"Special with ID {id} not found");
+                }
+                return Ok(true);
             }
-
-            return Ok(true);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
     }
 }

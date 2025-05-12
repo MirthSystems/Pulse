@@ -8,7 +8,6 @@ namespace MirthSystems.Pulse.Services.API.Controllers
     using MirthSystems.Pulse.Core.Models;
     using System.ComponentModel.DataAnnotations;
     using NSwag.Annotations;
-    using MirthSystems.Pulse.Infrastructure.Services;
     using System.Security.Claims;
 
     /// <summary>
@@ -53,18 +52,29 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("GetVenues", "Retrieves a paginated list of venues with optional filtering")]
         public async Task<ActionResult<PagedResult<VenueItem>>> GetVenues([FromQuery] GetVenuesRequest request)
         {
-            // Enforce safety limit on page size
-            if (request.PageSize > 10000)
+            try
             {
-                request.PageSize = 10000;
+                // Enforce safety limit on page size
+                if (request.PageSize > 10000)
+                {
+                    request.PageSize = 10000;
+                }
+                
+                var venues = await _venueService.GetVenuesAsync(request);
+                if (venues == null || venues.Items.Count == 0)
+                {
+                    return NotFound("No venues found matching the criteria");
+                }
+                return Ok(venues);
             }
-            
-            var venues = await _venueService.GetVenuesAsync(request);
-            if (venues == null || venues.Items.Count == 0)
+            catch (ArgumentException ex)
             {
-                return NotFound("No venues found matching the criteria");
+                return BadRequest(ex.Message);
             }
-            return Ok(venues);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -80,18 +90,25 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("GetVenueById", "Retrieves detailed information about a specific venue")]
         public async Task<ActionResult<VenueItemExtended>> GetVenueById(string id)
         {
-            if (!long.TryParse(id, out long venueId))
+            try
             {
-                return BadRequest("Invalid venue ID format");
-            }
+                if (!long.TryParse(id, out long venueId))
+                {
+                    return BadRequest("Invalid venue ID format");
+                }
 
-            var venue = await _venueService.GetVenueByIdAsync(id);
-            if (venue == null)
+                var venue = await _venueService.GetVenueByIdAsync(id);
+                if (venue == null)
+                {
+                    return NotFound($"Venue with ID {id} not found");
+                }
+
+                return Ok(venue);
+            }
+            catch (Exception ex)
             {
-                return NotFound($"Venue with ID {id} not found");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
-
-            return Ok(venue);
         }
 
         /// <summary>
@@ -115,18 +132,25 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("GetVenueBusinessHours", "Retrieves the business hours for a specific venue")]
         public async Task<ActionResult<List<OperatingScheduleItem>>> GetVenueBusinessHours(string id)
         {
-            if (!long.TryParse(id, out long venueId))
+            try
             {
-                return BadRequest("Invalid venue ID format");
-            }
+                if (!long.TryParse(id, out long venueId))
+                {
+                    return BadRequest("Invalid venue ID format");
+                }
 
-            var businessHours = await _venueService.GetVenueBusinessHoursAsync(id);
-            if (businessHours == null)
+                var businessHours = await _venueService.GetVenueBusinessHoursAsync(id);
+                if (businessHours == null)
+                {
+                    return NotFound($"Business hours for venue with ID {id} not found");
+                }
+
+                return Ok(businessHours);
+            }
+            catch (Exception ex)
             {
-                return NotFound($"Business hours for venue with ID {id} not found");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
-
-            return Ok(businessHours);
         }
 
         /// <summary>
@@ -150,18 +174,25 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("GetVenueSpecials", "Retrieves all special promotions offered by a specific venue")]
         public async Task<ActionResult<List<SpecialItem>>> GetVenueSpecials(string id)
         {
-            if (!long.TryParse(id, out long venueId))
+            try
             {
-                return BadRequest("Invalid venue ID format");
-            }
+                if (!long.TryParse(id, out long venueId))
+                {
+                    return BadRequest("Invalid venue ID format");
+                }
 
-            var specials = await _venueService.GetVenueSpecialsAsync(id);
-            if (specials == null || specials.Count == 0)
+                var specials = await _venueService.GetVenueSpecialsAsync(id);
+                if (specials == null || specials.Count == 0)
+                {
+                    return NotFound($"Specials for venue with ID {id} not found");
+                }
+
+                return Ok(specials);
+            }
+            catch (Exception ex)
             {
-                return NotFound($"Specials for venue with ID {id} not found");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
-
-            return Ok(specials);
         }
 
         /// <summary>
@@ -186,24 +217,28 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("CreateVenue", "Creates a new venue")]
         public async Task<ActionResult<VenueItemExtended>> CreateVenue([FromBody] CreateVenueRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid request data");
-            }
-
-            if (UserId == null)
-            {
-                return Unauthorized("Unauthorized");
-            }
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                if (UserId == null)
+                {
+                    return Unauthorized("User must be authenticated to create venues");
+                }
+
                 var venue = await _venueService.CreateVenueAsync(request, UserId);
                 return CreatedAtAction(nameof(GetVenueById), new { id = venue.Id }, venue);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
         }
 
@@ -233,23 +268,23 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("UpdateVenue", "Updates an existing venue's information")]
         public async Task<ActionResult<VenueItemExtended>> UpdateVenue([FromRoute] string id, [FromBody] UpdateVenueRequest request)
         {
-            if (!long.TryParse(id, out long venueId))
-            {
-                return BadRequest("Invalid venue ID format");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid request data");
-            }
-
-            if (UserId == null)
-            {
-                return Unauthorized("Unauthorized");
-            }
-
             try
             {
+                if (!long.TryParse(id, out long venueId))
+                {
+                    return BadRequest("Invalid venue ID format");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest("Invalid request data");
+                }
+
+                if (UserId == null)
+                {
+                    return Unauthorized("User must be authenticated to update venues");
+                }
+
                 var venue = await _venueService.UpdateVenueAsync(id, request, UserId);
                 return Ok(venue);
             }
@@ -259,7 +294,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
         }
 
@@ -287,23 +322,30 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [OpenApiOperation("DeleteVenue", "Soft-deletes a venue")]
         public async Task<ActionResult<bool>> DeleteVenue(string id)
         {
-            if (!long.TryParse(id, out long venueId))
+            try
             {
-                return BadRequest("Invalid venue ID format");
-            }
+                if (!long.TryParse(id, out long venueId))
+                {
+                    return BadRequest("Invalid venue ID format");
+                }
 
-            if (UserId == null)
+                if (UserId == null)
+                {
+                    return Unauthorized("User must be authenticated to delete venues");
+                }
+
+                bool result = await _venueService.DeleteVenueAsync(id, UserId);
+                if (!result)
+                {
+                    return NotFound($"Venue with ID {id} not found");
+                }
+
+                return Ok(true);
+            }
+            catch (Exception ex)
             {
-                return Unauthorized("Unauthorized");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
-
-            bool result = await _venueService.DeleteVenueAsync(id, UserId);
-            if (!result)
-            {
-                return NotFound($"Venue with ID {id} not found");
-            }
-
-            return Ok(true);
         }
     }
 }
