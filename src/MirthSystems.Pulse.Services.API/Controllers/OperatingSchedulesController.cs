@@ -43,7 +43,7 @@
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetOperatingScheduleById", "Retrieves detailed information about a specific operating schedule")]
-        public async Task<IActionResult> GetOperatingScheduleById(string id)
+        public async Task<ActionResult<OperatingScheduleDetail>> GetOperatingScheduleById(string id)
         {
             if (!long.TryParse(id, out long scheduleId))
             {
@@ -75,7 +75,7 @@
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [OpenApiOperation("CreateOperatingSchedule", "Creates a new operating schedule for a venue")]
-        public async Task<IActionResult> CreateOperatingSchedule([FromBody] CreateOperatingScheduleRequest request)
+        public async Task<ActionResult<OperatingScheduleDetail>> CreateOperatingSchedule([FromBody] CreateOperatingScheduleRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -117,7 +117,7 @@
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateOperatingSchedule", "Updates an existing operating schedule")]
-        public async Task<IActionResult> UpdateOperatingSchedule(string id, [FromBody] UpdateOperatingScheduleRequest request)
+        public async Task<ActionResult<OperatingScheduleDetail>> UpdateOperatingSchedule(string id, [FromBody] UpdateOperatingScheduleRequest request)
         {
             if (!long.TryParse(id, out long scheduleId))
             {
@@ -167,7 +167,7 @@
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("DeleteOperatingSchedule", "Deletes an operating schedule")]
-        public async Task<IActionResult> DeleteOperatingSchedule(string id)
+        public async Task<ActionResult<bool>> DeleteOperatingSchedule(string id)
         {
             if (!long.TryParse(id, out long scheduleId))
             {

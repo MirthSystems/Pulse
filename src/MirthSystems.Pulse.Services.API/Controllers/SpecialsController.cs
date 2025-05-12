@@ -48,7 +48,7 @@
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [OpenApiOperation("GetSpecials", "Retrieves a paginated list of specials with optional filtering")]
-        public async Task<IActionResult> GetSpecials([FromQuery] GetSpecialsRequest request)
+        public async Task<ActionResult<PagedResult<SpecialListItem>>> GetSpecials([FromQuery] GetSpecialsRequest request)
         {
             var specials = await _specialService.GetSpecialsAsync(request);
             if (specials == null || specials.Items.Count == 0)
@@ -72,7 +72,7 @@
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetSpecialById", "Retrieves detailed information about a specific special promotion")]
-        public async Task<IActionResult> GetSpecialById(string id)
+        public async Task<ActionResult<SpecialDetail>> GetSpecialById(string id)
         {
             if (!long.TryParse(id, out long specialId))
             {
@@ -104,7 +104,7 @@
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [OpenApiOperation("CreateSpecial", "Creates a new special promotion")]
-        public async Task<IActionResult> CreateSpecial([FromBody] CreateSpecialRequest request)
+        public async Task<ActionResult<SpecialDetail>> CreateSpecial([FromBody] CreateSpecialRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -146,7 +146,7 @@
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateSpecial", "Updates an existing special promotion")]
-        public async Task<IActionResult> UpdateSpecial(string id, [FromBody] UpdateSpecialRequest request)
+        public async Task<ActionResult<SpecialDetail>> UpdateSpecial(string id, [FromBody] UpdateSpecialRequest request)
         {
             if (!long.TryParse(id, out long specialId))
             {
@@ -196,7 +196,7 @@
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("DeleteSpecial", "Soft-deletes a special promotion")]
-        public async Task<IActionResult> DeleteSpecial(string id)
+        public async Task<ActionResult<bool>> DeleteSpecial(string id)
         {
             if (!long.TryParse(id, out long specialId))
             {

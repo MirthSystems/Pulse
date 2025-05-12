@@ -50,7 +50,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenues", "Retrieves a paginated list of venues with optional filtering")]
-        public async Task<IActionResult> GetVenues([FromQuery] GetVenuesRequest request)
+        public async Task<ActionResult<PagedResult<VenueListItem>>> GetVenues([FromQuery] GetVenuesRequest request)
         {
             // Enforce safety limit on page size
             if (request.PageSize > 10000)
@@ -77,7 +77,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueById", "Retrieves detailed information about a specific venue")]
-        public async Task<IActionResult> GetVenueById(string id)
+        public async Task<ActionResult<VenueDetail>> GetVenueById(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -112,7 +112,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueBusinessHours", "Retrieves the business hours for a specific venue")]
-        public async Task<IActionResult> GetVenueBusinessHours(string id)
+        public async Task<ActionResult<BusinessHours>> GetVenueBusinessHours(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -147,7 +147,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueSpecials", "Retrieves all special promotions offered by a specific venue")]
-        public async Task<IActionResult> GetVenueSpecials(string id)
+        public async Task<ActionResult<VenueSpecials>> GetVenueSpecials(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -183,7 +183,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [OpenApiOperation("CreateVenue", "Creates a new venue")]
-        public async Task<IActionResult> CreateVenue([FromBody] CreateVenueRequest request)
+        public async Task<ActionResult<VenueDetail>> CreateVenue([FromBody] CreateVenueRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -230,7 +230,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateVenue", "Updates an existing venue's information")]
-        public async Task<IActionResult> UpdateVenue([FromQuery] string id, [FromBody] UpdateVenueRequest request)
+        public async Task<ActionResult<VenueDetail>> UpdateVenue([FromQuery] string id, [FromBody] UpdateVenueRequest request)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -284,7 +284,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("DeleteVenue", "Soft-deletes a venue")]
-        public async Task<IActionResult> DeleteVenue(string id)
+        public async Task<ActionResult<bool>> DeleteVenue(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
