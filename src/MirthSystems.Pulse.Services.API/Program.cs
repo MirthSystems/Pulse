@@ -76,7 +76,7 @@ internal class Program
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins()
+                policy.WithOrigins("http://localhost:3000")
                       .AllowAnyMethod()
                       .AllowAnyHeader()
                       .AllowCredentials();

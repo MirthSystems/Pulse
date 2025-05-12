@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import UserMenu from './UserMenu';
@@ -26,17 +26,6 @@ const Header = () => {
         >
           PULSE
         </Typography>
-
-        {isAuthenticated && isBackoffice && (
-          <Button 
-            color="inherit" 
-            component={RouterLink} 
-            to="/"
-            sx={{ mr: 2 }}
-          >
-            Main Site
-          </Button>
-        )}
 
         <Box sx={{ ml: 2 }}>
           <UserMenu isBackoffice={isBackoffice} />
