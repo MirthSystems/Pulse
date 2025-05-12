@@ -105,6 +105,6 @@
         /// </remarks>
         [Required]
         [MinLength(1, ErrorMessage = "At least one operating schedule must be provided.")]
-        public ICollection<OperatingHours> BusinessHours { get; set; } = new List<OperatingHours>();
+        public ICollection<OperatingHours> HoursOfOperation { get; set; } = new List<OperatingHours>();
     }
 }

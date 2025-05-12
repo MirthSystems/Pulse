@@ -21,7 +21,7 @@
             _logger = logger;
         }
 
-        public async Task<OperatingScheduleDetail?> GetOperatingScheduleByIdAsync(string id)
+        public async Task<OperatingScheduleItemExtended?> GetOperatingScheduleByIdAsync(string id)
         {
             try
             {
@@ -45,7 +45,7 @@
             }
         }
 
-        public async Task<OperatingScheduleDetail> CreateOperatingScheduleAsync(CreateOperatingScheduleRequest request, string userId)
+        public async Task<OperatingScheduleItemExtended> CreateOperatingScheduleAsync(CreateOperatingScheduleRequest request, string userId)
         {
             try
             {
@@ -59,7 +59,14 @@
                     throw new KeyNotFoundException($"Venue with ID {request.VenueId} not found");
                 }
 
-                var schedule = request.MapToNewOperatingSchedule(venueId);
+                var schedule = new OperatingSchedule
+                {
+                    VenueId = venueId,
+                    DayOfWeek = request.DayOfWeek,
+                    TimeOfOpen = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen)),
+                    TimeOfClose = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose)),
+                    IsClosed = request.IsClosed
+                };
 
                 await _unitOfWork.OperatingSchedules.AddAsync(schedule);
                 await _unitOfWork.SaveChangesAsync();
@@ -73,7 +80,7 @@
             }
         }
 
-        public async Task<OperatingScheduleDetail> UpdateOperatingScheduleAsync(string id, UpdateOperatingScheduleRequest request, string userId)
+        public async Task<OperatingScheduleItemExtended> UpdateOperatingScheduleAsync(string id, UpdateOperatingScheduleRequest request, string userId)
         {
             try
             {

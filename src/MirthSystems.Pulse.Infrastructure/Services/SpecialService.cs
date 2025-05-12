@@ -16,6 +16,7 @@
     using Azure.Maps.Search.Models;
     using Microsoft.IdentityModel.Tokens;
     using MirthSystems.Pulse.Core.Extensions;
+    using MirthSystems.Pulse.Core.Utilities;
 
     public class SpecialService : ISpecialService
     {
@@ -33,7 +34,7 @@
             _logger = logger;
         }
 
-        public async Task<PagedResult<SpecialListItem>> GetSpecialsAsync(GetSpecialsRequest request)
+        public async Task<PagedResult<SpecialItem>> GetSpecialsAsync(GetSpecialsRequest request)
         {
             try
             {
@@ -109,7 +110,7 @@
                     totalCount = (int)(specials.TotalCount * filterRatio);
                 }
 
-                return new PagedResult<SpecialListItem>
+                return new PagedResult<SpecialItem>
                 {
                     Items = filteredItems,
                     PagingInfo = PagingInfo.Create(
@@ -125,7 +126,103 @@
             }
         }
 
-        public async Task<SpecialDetail?> GetSpecialByIdAsync(string id)
+        public async Task<PagedResult<SearchSpecialsResult>> SearchSpecialsAsync(GetSpecialsRequest request)
+        {
+            try
+            {
+                // Convert address to search point
+                Point? searchLocation = null;
+                double? radiusInMeters = null;
+
+                if (!string.IsNullOrEmpty(request.Address))
+                {
+                    var geocodeResponse = await _mapsApiService.SearchClient.GetGeocodingAsync(request.Address);
+                    if (geocodeResponse.Value.Features.Count > 0)
+                    {
+                        var result = geocodeResponse.Value.Features[0];
+                        searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude) { SRID = 4326 };
+                        radiusInMeters = request.Radius * 1609.34; // Convert miles to meters
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Could not geocode address: {request.Address}");
+                    }
+                }
+                else
+                {
+                    return new PagedResult<SearchSpecialsResult>
+                    {
+                        Items = new List<SearchSpecialsResult>(),
+                        PagingInfo = PagingInfo.Create(request.Page, request.PageSize, 0)
+                    };
+                }
+
+                // Parse search datetime
+                Instant searchDateTimeInstant;
+                if (!string.IsNullOrEmpty(request.SearchDateTime))
+                {
+                    if (DateTimeOffset.TryParse(request.SearchDateTime, out var parsedDateTime))
+                    {
+                        searchDateTimeInstant = Instant.FromDateTimeOffset(parsedDateTime);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Invalid search date time format: {request.SearchDateTime}");
+                    }
+                }
+                else
+                {
+                    searchDateTimeInstant = SystemClock.Instance.GetCurrentInstant();
+                }
+
+                // Get venues with their running specials directly from repository
+                var venuesWithSpecials = await _unitOfWork.Venues.GetVenuesWithRunningSpecialsAsync(
+                    searchLocation,
+                    radiusInMeters.Value,
+                    searchDateTimeInstant,
+                    request.SearchTerm,
+                    request.SpecialTypeId.HasValue ? (Core.Enums.SpecialTypes)request.SpecialTypeId.Value : null,
+                    request.Page,
+                    request.PageSize);
+
+                // Map the results to the expected return format
+                var searchResults = new List<SearchSpecialsResult>();
+                
+                foreach (var venueWithSpecials in venuesWithSpecials)
+                {
+                    Venue venue = venueWithSpecials.Venue;
+                    List<Special> specials = venueWithSpecials.Specials;
+
+                    // Map specials to SpecialItem objects
+                    var specialItems = specials.Select(s => 
+                        s.MapToSpecialListItem(true) // true because we know these specials are currently active
+                    ).ToList();
+
+                    searchResults.Add(new SearchSpecialsResult
+                    {
+                        Venue = venue.MapToVenueDetail(),
+                        Specials = new SpecialMenu { Items = specialItems }
+                    });
+                }
+
+                // Return the paged results
+                return new PagedResult<SearchSpecialsResult>
+                {
+                    Items = searchResults,
+                    PagingInfo = PagingInfo.Create(
+                        request.Page,
+                        request.PageSize,
+                        venuesWithSpecials.TotalCount)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching specials");
+                throw;
+            }
+        }
+
+        public async Task<SpecialItemExtended?> GetSpecialByIdAsync(string id)
         {
             try
             {
@@ -149,7 +246,7 @@
             }
         }
 
-        public async Task<SpecialDetail> CreateSpecialAsync(CreateSpecialRequest request, string userId)
+        public async Task<SpecialItemExtended> CreateSpecialAsync(CreateSpecialRequest request, string userId)
         {
             try
             {
@@ -183,7 +280,7 @@
             }
         }
 
-        public async Task<SpecialDetail> UpdateSpecialAsync(string id, UpdateSpecialRequest request, string userId)
+        public async Task<SpecialItemExtended> UpdateSpecialAsync(string id, UpdateSpecialRequest request, string userId)
         {
             try
             {
@@ -251,23 +348,22 @@
 
         public async Task<bool> IsSpecialCurrentlyRunningAsync(string specialId, DateTimeOffset? referenceTime = null)
         {
-            try
+            if (!long.TryParse(specialId, out long id))
             {
-                if (!long.TryParse(specialId, out long parsedSpecialId))
-                {
-                    _logger.LogWarning("Invalid special ID format: {Id}", specialId);
-                    return false;
-                }
-                Instant instant = referenceTime.HasValue
-                    ? Instant.FromDateTimeOffset(referenceTime.Value)
-                    : SystemClock.Instance.GetCurrentInstant();
-                return await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(parsedSpecialId, instant);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error checking if special with ID {SpecialId} is currently running", specialId);
                 return false;
             }
+
+            var special = await _unitOfWork.Specials.GetByIdAsync(id);
+            if (special == null)
+            {
+                return false;
+            }
+
+            Instant instant = referenceTime.HasValue 
+                ? Instant.FromDateTimeOffset(referenceTime.Value) 
+                : DateTimeUtility.GetCurrentInstant();
+                
+            return SpecialActivityUtility.IsSpecialActive(special, instant);
         }
     }
 }

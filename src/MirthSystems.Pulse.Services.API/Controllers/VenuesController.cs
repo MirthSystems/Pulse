@@ -6,10 +6,10 @@ namespace MirthSystems.Pulse.Services.API.Controllers
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models.Requests;
     using MirthSystems.Pulse.Core.Models;
-    using MirthSystems.Pulse.Services.API.Controllers.Base;
     using System.ComponentModel.DataAnnotations;
     using NSwag.Annotations;
     using MirthSystems.Pulse.Infrastructure.Services;
+    using System.Security.Claims;
 
     /// <summary>
     /// API controller for venue-related endpoints.
@@ -22,9 +22,10 @@ namespace MirthSystems.Pulse.Services.API.Controllers
     /// <para>- Creating, updating, and deleting venues</para>
     /// </remarks>
     [Route("api/venues")]
-    public class VenuesController : ApiController
+    public class VenuesController : ControllerBase
     {
         private readonly IVenueService _venueService;
+        private string? UserId => User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         public VenuesController(IVenueService venueService)
         {
@@ -46,11 +47,11 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// </remarks>
         [HttpGet]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<VenueListItem>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<VenueItem>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenues", "Retrieves a paginated list of venues with optional filtering")]
-        public async Task<ActionResult<PagedResult<VenueListItem>>> GetVenues([FromQuery] GetVenuesRequest request)
+        public async Task<ActionResult<PagedResult<VenueItem>>> GetVenues([FromQuery] GetVenuesRequest request)
         {
             // Enforce safety limit on page size
             if (request.PageSize > 10000)
@@ -73,11 +74,11 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// <returns>The venue details.</returns>
         [HttpGet("{id}")]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueDetail))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueById", "Retrieves detailed information about a specific venue")]
-        public async Task<ActionResult<VenueDetail>> GetVenueById(string id)
+        public async Task<ActionResult<VenueItemExtended>> GetVenueById(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -108,11 +109,11 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// </remarks>
         [HttpGet("{id}/business-hours")]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BusinessHours))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<OperatingScheduleItem>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueBusinessHours", "Retrieves the business hours for a specific venue")]
-        public async Task<ActionResult<BusinessHours>> GetVenueBusinessHours(string id)
+        public async Task<ActionResult<List<OperatingScheduleItem>>> GetVenueBusinessHours(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -143,11 +144,11 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// </remarks>
         [HttpGet("{id}/specials")]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueSpecials))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SpecialItem>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueSpecials", "Retrieves all special promotions offered by a specific venue")]
-        public async Task<ActionResult<VenueSpecials>> GetVenueSpecials(string id)
+        public async Task<ActionResult<List<SpecialItem>>> GetVenueSpecials(string id)
         {
             if (!long.TryParse(id, out long venueId))
             {
@@ -155,7 +156,7 @@ namespace MirthSystems.Pulse.Services.API.Controllers
             }
 
             var specials = await _venueService.GetVenueSpecialsAsync(id);
-            if (specials == null)
+            if (specials == null || specials.Count == 0)
             {
                 return NotFound($"Specials for venue with ID {id} not found");
             }
@@ -178,12 +179,12 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// </remarks>
         [HttpPost]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(VenueDetail))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(VenueItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [OpenApiOperation("CreateVenue", "Creates a new venue")]
-        public async Task<ActionResult<VenueDetail>> CreateVenue([FromBody] CreateVenueRequest request)
+        public async Task<ActionResult<VenueItemExtended>> CreateVenue([FromBody] CreateVenueRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -224,13 +225,13 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         /// </remarks>
         [HttpPut("{id}")]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueDetail))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateVenue", "Updates an existing venue's information")]
-        public async Task<ActionResult<VenueDetail>> UpdateVenue([FromQuery] string id, [FromBody] UpdateVenueRequest request)
+        public async Task<ActionResult<VenueItemExtended>> UpdateVenue([FromRoute] string id, [FromBody] UpdateVenueRequest request)
         {
             if (!long.TryParse(id, out long venueId))
             {

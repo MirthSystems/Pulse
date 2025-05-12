@@ -1,9 +1,11 @@
 ﻿namespace MirthSystems.Pulse.Core.Interfaces
 {
     using MirthSystems.Pulse.Core.Entities;
+    using MirthSystems.Pulse.Core.Enums;
     using MirthSystems.Pulse.Core.Models;
     using MirthSystems.Pulse.Core.Models.Requests;
     using NetTopologySuite.Geometries;
+    using NodaTime;
 
     /// <summary>
     /// Repository interface for venue entities, extending the base repository with venue-specific operations.
@@ -100,5 +102,25 @@
         /// <para>It accounts for start/end dates, recurring patterns, and expiration dates.</para>
         /// </remarks>
         Task<List<long>> GetVenueIdsWithActiveSpecialsAsync(int? specialTypeId = null);
+
+        /// <summary>
+        /// Gets venues with their running specials for a specific search area and time.
+        /// </summary>
+        /// <param name="searchPoint">The center point of the search area.</param>
+        /// <param name="distanceInMeters">The radius to search around the point in meters.</param>
+        /// <param name="searchAt">The instant in time to check for running specials.</param>
+        /// <param name="searchTerm">Optional text to filter venues and specials.</param>
+        /// <param name="specialType">Optional type to filter specials.</param>
+        /// <param name="page">The page number for pagination.</param>
+        /// <param name="pageSize">The page size for pagination.</param>
+        /// <returns>Paged list of venues with their matching specials.</returns>
+        Task<PagedList<(Venue Venue, List<Special> Specials)>> GetVenuesWithRunningSpecialsAsync(
+            Point searchPoint,
+            double distanceInMeters,
+            Instant searchAt,
+            string? searchTerm = null,
+            SpecialTypes? specialType = null,
+            int page = 1,
+            int pageSize = 20);
     }
 }

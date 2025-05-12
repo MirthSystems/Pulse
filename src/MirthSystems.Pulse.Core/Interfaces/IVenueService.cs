@@ -31,7 +31,7 @@
         /// <para>When no filters are specified, returns a basic paginated list of venues.</para>
         /// <para>Use GetVenueByIdAsync for detailed information about a specific venue.</para>
         /// </remarks>
-        Task<PagedResult<VenueListItem>> GetVenuesAsync(GetVenuesRequest request);
+        Task<PagedResult<VenueItem>> GetVenuesAsync(GetVenuesRequest request);
 
         /// <summary>
         /// Retrieves a venue by its ID.
@@ -42,7 +42,7 @@
         /// <para>This method returns comprehensive information about a venue.</para>
         /// <para>Includes address, business hours, and other venue properties.</para>
         /// </remarks>
-        Task<VenueDetail?> GetVenueByIdAsync(string id);
+        Task<VenueItemExtended?> GetVenueByIdAsync(string id);
 
         /// <summary>
         /// Retrieves business hours for a venue by its ID.
@@ -53,19 +53,19 @@
         /// <para>This method returns the operating schedule for a venue.</para>
         /// <para>Includes hours for each day of the week.</para>
         /// </remarks>
-        Task<BusinessHours?> GetVenueBusinessHoursAsync(string id);
+        Task<List<OperatingScheduleItem>?> GetVenueBusinessHoursAsync(string id);
 
         /// <summary>
         /// Retrieves specials for a venue by its ID.
         /// </summary>
         /// <param name="id">The venue ID.</param>
         /// <param name="includeCurrentStatus">Whether to include the current active status of each special.</param>
-        /// <returns>The venue specials information if found, otherwise null.</returns>
+        /// <returns>The list of specials for the venue if found, otherwise null.</returns>
         /// <remarks>
         /// <para>This method returns all specials associated with the venue.</para>
         /// <para>When includeCurrentStatus is true, each special includes whether it's currently active.</para>
         /// </remarks>
-        Task<VenueSpecials?> GetVenueSpecialsAsync(string id, bool includeCurrentStatus = true);
+        Task<List<SpecialItem>?> GetVenueSpecialsAsync(string id, bool includeCurrentStatus = true);
 
         /// <summary>
         /// Creates a new venue.
@@ -77,7 +77,7 @@
         /// <para>This method validates the request and persists a new venue.</para>
         /// <para>Includes geocoding the provided address.</para>
         /// </remarks>
-        Task<VenueDetail> CreateVenueAsync(CreateVenueRequest request, string userId);
+        Task<VenueItemExtended> CreateVenueAsync(CreateVenueRequest request, string userId);
 
         /// <summary>
         /// Updates an existing venue.
@@ -91,7 +91,7 @@
         /// <para>Includes re-geocoding the address if changed.</para>
         /// <para>Throws KeyNotFoundException if the venue doesn't exist.</para>
         /// </remarks>
-        Task<VenueDetail> UpdateVenueAsync(string id, UpdateVenueRequest request, string userId);
+        Task<VenueItemExtended> UpdateVenueAsync(string id, UpdateVenueRequest request, string userId);
 
         /// <summary>
         /// Deletes a venue (soft delete).

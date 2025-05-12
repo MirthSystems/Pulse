@@ -35,7 +35,14 @@
         /// <para>- Text search terms</para>
         /// <para>- Venue ID filtering</para>
         /// </remarks>
-        Task<PagedResult<SpecialListItem>> GetSpecialsAsync(GetSpecialsRequest request);
+        Task<PagedResult<SpecialItem>> GetSpecialsAsync(GetSpecialsRequest request);
+
+        /// <summary>
+        /// Searches for specials and groups them by venue based on the provided criteria.
+        /// </summary>
+        /// <param name="request">The request parameters including pagination and filter criteria.</param>
+        /// <returns>A paginated list of venues with their specials.</returns>
+        Task<PagedResult<SearchSpecialsResult>> SearchSpecialsAsync(GetSpecialsRequest request);
 
         /// <summary>
         /// Retrieves a special by its ID.
@@ -46,7 +53,7 @@
         /// <para>This method returns comprehensive information about a special.</para>
         /// <para>Includes venue information and current running status.</para>
         /// </remarks>
-        Task<SpecialDetail?> GetSpecialByIdAsync(string id);
+        Task<SpecialItemExtended?> GetSpecialByIdAsync(string id);
 
         /// <summary>
         /// Creates a new special.
@@ -58,7 +65,7 @@
         /// <para>This method validates the request and persists a new special.</para>
         /// <para>Supports one-time and recurring specials with various scheduling options.</para>
         /// </remarks>
-        Task<SpecialDetail> CreateSpecialAsync(CreateSpecialRequest request, string userId);
+        Task<SpecialItemExtended> CreateSpecialAsync(CreateSpecialRequest request, string userId);
 
         /// <summary>
         /// Updates an existing special.
@@ -71,7 +78,7 @@
         /// <para>This method validates the request and updates an existing special.</para>
         /// <para>Throws KeyNotFoundException if the special doesn't exist.</para>
         /// </remarks>
-        Task<SpecialDetail> UpdateSpecialAsync(string id, UpdateSpecialRequest request, string userId);
+        Task<SpecialItemExtended> UpdateSpecialAsync(string id, UpdateSpecialRequest request, string userId);
 
         /// <summary>
         /// Deletes a special (soft delete).

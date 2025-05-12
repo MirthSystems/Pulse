@@ -26,7 +26,7 @@
             _logger = logger;
         }
 
-        public async Task<PagedResult<VenueListItem>> GetVenuesAsync(GetVenuesRequest request)
+        public async Task<PagedResult<VenueItem>> GetVenuesAsync(GetVenuesRequest request)
         {
             try
             {
@@ -79,7 +79,7 @@
                     request.SpecialTypeId);
 
                 // Map to response model
-                return new PagedResult<VenueListItem>
+                return new PagedResult<VenueItem>
                 {
                     Items = venues.Select(v => v.MapToVenueListItem()).ToList(),
                     PagingInfo = PagingInfo.Create(
@@ -95,7 +95,7 @@
             }
         }
 
-        public async Task<VenueDetail?> GetVenueByIdAsync(string id)
+        public async Task<VenueItemExtended?> GetVenueByIdAsync(string id)
         {
             try
             {
@@ -118,7 +118,7 @@
             }
         }
 
-        public async Task<BusinessHours?> GetVenueBusinessHoursAsync(string id)
+        public async Task<List<OperatingScheduleItem>?> GetVenueBusinessHoursAsync(string id)
         {
             try
             {
@@ -137,12 +137,7 @@
                 {
                     return null;
                 }
-                return new BusinessHours
-                {
-                    VenueId = venue.Id.ToString(),
-                    VenueName = venue.Name ?? string.Empty,
-                    ScheduleItems = schedules.Select(s => s.MapToOperatingScheduleListItem()).ToList()
-                };
+                return schedules.Select(s => s.MapToOperatingScheduleListItem()).ToList();
             }
             catch (Exception ex)
             {
@@ -151,7 +146,7 @@
             }
         }
 
-        public async Task<VenueSpecials?> GetVenueSpecialsAsync(string id, bool includeCurrentStatus = true)
+        public async Task<List<SpecialItem>?> GetVenueSpecialsAsync(string id, bool includeCurrentStatus = true)
         {
             try
             {
@@ -160,13 +155,21 @@
                     _logger.LogWarning("Invalid venue ID format: {Id}", id);
                     return null;
                 }
+                
                 var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
                 if (venue == null)
                 {
                     return null;
                 }
+                
                 var specials = await _unitOfWork.Specials.GetSpecialsByVenueIdAsync(venueId);
-                var specialListItems = new List<SpecialListItem>();
+                if (specials == null || !specials.Any())
+                {
+                    return null;
+                }
+                
+                var specialListItems = new List<SpecialItem>();
+                
                 if (includeCurrentStatus)
                 {
                     var now = SystemClock.Instance.GetCurrentInstant();
@@ -180,27 +183,25 @@
                 {
                     specialListItems = specials.Select(s => s.MapToSpecialListItem(false)).ToList();
                 }
-                return new VenueSpecials
-                {
-                    VenueId = venue.Id.ToString(),
-                    VenueName = venue.Name ?? string.Empty,
-                    Specials = specialListItems
-                };
+                
+                return specialListItems;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving specials for venue with ID {VenueId}", id);
                 return null;
             }
-        }
+        }   
 
-        public async Task<VenueDetail> CreateVenueAsync(CreateVenueRequest request, string userId)
-        {
+        public async Task<VenueItemExtended> CreateVenueAsync(CreateVenueRequest request, string userId)
+        {     
             try
             {
                 var fullAddress = $"{request.Address.StreetAddress}, {request.Address.Locality}, {request.Address.Region} {request.Address.Postcode}, {request.Address.Country}";
                 var geocodeResponse = await _mapsApiService.SearchClient.GetGeocodingAsync(fullAddress);
+                
                 Point geocodedPoint;
+                
                 if (geocodeResponse.Value.Features.Count > 0)
                 {
                     var result = geocodeResponse.Value.Features[0];
@@ -210,22 +211,23 @@
                 {
                     throw new InvalidOperationException("Unable to geocode address");
                 }
-
+                
                 var venue = request.MapToNewVenue(userId, geocodedPoint);
 
-                if (request.BusinessHours != null)
+                if (request.HoursOfOperation != null)
                 {
-                    venue.BusinessHours = request.BusinessHours.Select(oh => oh.MapToNewOperatingSchedule(venue.Id)).ToList();
+                    venue.BusinessHours = request.HoursOfOperation.Select(oh => oh.MapToNewOperatingSchedule(venue.Id)).ToList();
                 }
-
+                
                 await _unitOfWork.Venues.AddAsync(venue);
                 await _unitOfWork.SaveChangesAsync();
-
+                
                 var createdVenue = await _unitOfWork.Venues.GetVenueWithDetailsAsync(venue.Id);
                 if (createdVenue == null)
                 {
                     throw new InvalidOperationException("Failed to retrieve created venue");
                 }
+                
                 return createdVenue.MapToVenueDetail();
             }
             catch (Exception ex)
@@ -235,7 +237,7 @@
             }
         }
 
-        public async Task<VenueDetail> UpdateVenueAsync(string id, UpdateVenueRequest request, string userId)
+        public async Task<VenueItemExtended> UpdateVenueAsync(string id, UpdateVenueRequest request, string userId)
         {
             try
             {
@@ -243,14 +245,16 @@
                 {
                     throw new ArgumentException("Invalid venue ID format");
                 }
+                
                 var venue = await _unitOfWork.Venues.GetVenueWithDetailsAsync(venueId);
                 if (venue == null)
                 {
                     throw new KeyNotFoundException($"Venue with ID {id} not found");
                 }
-
+                
                 var fullAddress = $"{request.Address.StreetAddress}, {request.Address.Locality}, {request.Address.Region} {request.Address.Postcode}, {request.Address.Country}";
                 var geocodeResponse = await _mapsApiService.SearchClient.GetGeocodingAsync(fullAddress);
+                
                 Point geocodedPoint;
                 if (geocodeResponse.Value.Features.Count > 0)
                 {
@@ -261,17 +265,18 @@
                 {
                     throw new InvalidOperationException("Unable to geocode address");
                 }
-
+                
                 request.MapAndUpdateExistingVenue(venue, userId, geocodedPoint);
 
                 _unitOfWork.Venues.Update(venue);
                 await _unitOfWork.SaveChangesAsync();
-
+                
                 var updatedVenue = await _unitOfWork.Venues.GetVenueWithDetailsAsync(venueId);
                 if (updatedVenue == null)
                 {
                     throw new InvalidOperationException("Failed to retrieve updated venue");
                 }
+                
                 return updatedVenue.MapToVenueDetail();
             }
             catch (Exception ex)
@@ -290,18 +295,20 @@
                     _logger.LogWarning("Invalid venue ID format: {Id}", id);
                     return false;
                 }
+                
                 var venue = await _unitOfWork.Venues.GetByIdAsync(venueId);
                 if (venue == null)
                 {
                     return false;
                 }
-
+                
                 venue.IsDeleted = true;
                 venue.DeletedAt = SystemClock.Instance.GetCurrentInstant();
                 venue.DeletedByUserId = userId;
-
+                
                 _unitOfWork.Venues.Update(venue);
                 await _unitOfWork.SaveChangesAsync();
+                
                 return true;
             }
             catch (Exception ex)

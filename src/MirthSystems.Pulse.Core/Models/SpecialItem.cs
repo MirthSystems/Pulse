@@ -1,31 +1,38 @@
-﻿namespace MirthSystems.Pulse.Core.Models.Requests
+﻿namespace MirthSystems.Pulse.Core.Models
 {
-    using MirthSystems.Pulse.Core.Enums;
-
     using System.ComponentModel.DataAnnotations;
 
+    using MirthSystems.Pulse.Core.Enums;
+
     /// <summary>
-    /// Request model for updating an existing special promotion.
+    /// Represents a summary view of a special promotion for display in lists and search results.
     /// </summary>
     /// <remarks>
-    /// <para>This model defines the fields that can be modified when updating a special entity.</para>
-    /// <para>It includes validation attributes to ensure the data meets business requirements.</para>
-    /// <para>The structure mirrors CreateSpecialRequest but omits the VenueId since that can't be changed.</para>
+    /// <para>This model provides essential information about a special for preview purposes.</para>
+    /// <para>It includes only the most important fields needed for special listings.</para>
+    /// <para>Used for venue special listings, search results, and promotional displays.</para>
     /// </remarks>
-    public class UpdateSpecialRequest
+    public class SpecialItem
     {
         /// <summary>
-        /// Gets or sets the description of the special.
+        /// Gets or sets the unique identifier of the special.
         /// </summary>
         /// <remarks>
-        /// <para>Examples include:</para>
-        /// <para>- "Half-Price Wings Happy Hour"</para>
-        /// <para>- "Live Jazz Night"</para>
-        /// <para>- "Buy One Get One Free Draft Beer"</para>
+        /// <para>Format example: "123456"</para>
+        /// <para>This is a string representation of the special's database ID.</para>
+        /// </remarks>
+        [RegularExpression(@"^\d+$", ErrorMessage = "Id must be a positive integer")]
+        public string? Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets information about the venue offering this special.
+        /// </summary>
+        /// <remarks>
+        /// <para>This contains the venue's basic details like ID, name, and location.</para>
+        /// <para>Used for displaying venue context alongside special preview.</para>
         /// </remarks>
         [Required]
-        [StringLength(200, MinimumLength = 5)]
-        public string Content { get; set; } = string.Empty;
+        public string VenueId { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the category of the special.
@@ -36,9 +43,30 @@
         /// <para>- Drink: Drink specials like happy hour or discount cocktails</para>
         /// <para>- Entertainment: Entertainment specials like live music or events</para>
         /// </remarks>
-        [Required]
-        [EnumDataType(typeof(SpecialTypes))]
         public SpecialTypes Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the special type.
+        /// </summary>
+        /// <remarks>
+        /// <para>The string representation of the Type enum value.</para>
+        /// <para>Examples: "Food", "Drink", "Entertainment"</para>
+        /// </remarks>
+        [Required]
+        public string TypeName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the description of the special.
+        /// </summary>
+        /// <remarks>
+        /// <para>Examples include:</para>
+        /// <para>- "Half-Price Wings Happy Hour"</para>
+        /// <para>- "Live Jazz Night"</para>
+        /// <para>- "Buy One Get One Free Draft Beer"</para>
+        /// </remarks>
+        [Required]
+        [StringLength(500)]
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the start date of the special.
@@ -71,23 +99,18 @@
         /// <para>Format: HH:mm (24-hour)</para>
         /// <para>Examples: "19:00" (7 PM), "23:00" (11 PM)</para>
         /// <para>May be empty for specials without a specific end time.</para>
-        /// <para>If this time is earlier than StartTime, it's interpreted as crossing midnight into the next day.</para>
         /// </remarks>
         [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Time must be in format HH:mm")]
         public string? EndTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the expiration date of the special.
+        /// Gets or sets a value indicating whether the special is currently running.
         /// </summary>
         /// <remarks>
-        /// <para>Format: YYYY-MM-DD</para>
-        /// <para>Examples: "2023-12-31", "2024-03-15"</para>
-        /// <para>For one-time specials, this is typically the same as the start date.</para>
-        /// <para>For recurring specials, this is the last date the special will be offered.</para>
-        /// <para>May be empty for ongoing specials with no defined end date.</para>
+        /// <para>True if the special is active at the current time or the time of the query.</para>
+        /// <para>False if the special is not currently active (upcoming or ended).</para>
         /// </remarks>
-        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Date must be in format YYYY-MM-DD")]
-        public string? ExpirationDate { get; set; }
+        public bool IsCurrentlyRunning { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the special recurs over time.
@@ -95,22 +118,7 @@
         /// <remarks>
         /// <para>True if the special repeats on a schedule (e.g., weekly happy hour).</para>
         /// <para>False if the special is a one-time event (e.g., New Year's Eve party).</para>
-        /// <para>When true, the CronSchedule property should be provided.</para>
         /// </remarks>
-        [Required]
         public bool IsRecurring { get; set; }
-
-        /// <summary>
-        /// Gets or sets the CRON expression defining the recurrence pattern of the special.
-        /// </summary>
-        /// <remarks>
-        /// <para>Only applicable when IsRecurring is true.</para>
-        /// <para>Examples:</para>
-        /// <para>- "0 17 * * 1-5" (weekdays at 5 PM)</para>
-        /// <para>- "0 20 * * 3" (Wednesdays at 8 PM)</para>
-        /// <para>- "0 16 * * 6,0" (weekends at 4 PM)</para>
-        /// </remarks>
-        [StringLength(100)]
-        public string? CronSchedule { get; set; }
     }
 }

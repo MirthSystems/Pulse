@@ -4,13 +4,12 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
-    using MirthSystems.Pulse.Services.API.Controllers.Base;
     using MirthSystems.Pulse.Services.API.Test.Interfaces;
 
     using MirthSystems.Pulse.Services.API.Test.Models;
 
     [Route("api/messages")]
-    public class MessagesController : ApiController
+    public class MessagesController : ControllerBase
     {
         private readonly IMessageService _messageService;
 

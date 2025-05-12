@@ -12,6 +12,9 @@
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models;
     using MirthSystems.Pulse.Core.Models.Requests;
+    using MirthSystems.Pulse.Core.Enums;
+    using MirthSystems.Pulse.Core.Utilities;
+    using Cronos;
 
     /// <summary>
     /// Repository implementation for venue-related data access operations.
@@ -271,6 +274,116 @@
                 .Select(s => s.VenueId)
                 .Distinct()
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets venues with their running specials for a specific search area and time.
+        /// </summary>
+        /// <param name="searchPoint">The center point of the search area.</param>
+        /// <param name="distanceInMeters">The radius to search around the point in meters.</param>
+        /// <param name="searchAt">The instant in time to check for running specials.</param>
+        /// <param name="searchTerm">Optional text to filter venues and specials.</param>
+        /// <param name="specialType">Optional type to filter specials.</param>
+        /// <param name="page">The page number for pagination.</param>
+        /// <param name="pageSize">The page size for pagination.</param>
+        /// <returns>Paged list of venues with their matching specials.</returns>
+        public async Task<PagedList<(Venue Venue, List<Special> Specials)>> GetVenuesWithRunningSpecialsAsync(
+            Point searchPoint,
+            double distanceInMeters,
+            Instant searchAt,
+            string? searchTerm = null,
+            SpecialTypes? specialType = null,
+            int page = 1,
+            int pageSize = 20)
+        {
+            // Build base query for non-deleted venues within search area
+            var venueQuery = _context.Venues
+                .Where(v => !v.IsDeleted)
+                .Include(v => v.Address)
+                .Where(v => v.Address != null && 
+                           v.Address.Location.Distance(searchPoint) <= distanceInMeters);
+
+            // Apply text search if provided
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                string search = searchTerm.ToLower();
+                venueQuery = venueQuery.Where(v => 
+                    v.Name.ToLower().Contains(search) || 
+                    (v.Description != null && v.Description.ToLower().Contains(search)));
+            }
+
+            var venues = await venueQuery.ToListAsync();
+            if (!venues.Any())
+            {
+                return await PagedList<(Venue Venue, List<Special> Specials)>.CreateAsync(
+                    new List<(Venue, List<Special>)>().AsQueryable(), page, pageSize);
+            }
+            
+            // Get searchDate for special date filtering
+            var searchDate = LocalDate.FromDateTime(searchAt.ToDateTimeUtc().Date);
+            
+            // Now find all specials for these venues that match the criteria
+            var venueIds = venues.Select(v => v.Id).ToList();
+            
+            // Get specials for these venues
+            var specialsQuery = _context.Specials
+                .Where(s => !s.IsDeleted && venueIds.Contains(s.VenueId))
+                .Where(s => s.StartDate <= searchDate &&
+                           (s.ExpirationDate == null || s.ExpirationDate >= searchDate));
+            
+            // Filter by special type if provided
+            if (specialType.HasValue)
+            {
+                specialsQuery = specialsQuery.Where(s => s.Type == specialType);
+            }
+            
+            // Apply text search to specials content if provided
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                string search = searchTerm.ToLower();
+                specialsQuery = specialsQuery.Where(s => s.Content.ToLower().Contains(search));
+            }
+            
+            var allSpecials = await specialsQuery.ToListAsync();
+            if (!allSpecials.Any())
+            {
+                return await PagedList<(Venue Venue, List<Special> Specials)>.CreateAsync(
+                    new List<(Venue, List<Special>)>().AsQueryable(), page, pageSize);
+            }
+            
+            // Group specials by venue
+            var venuesWithSpecials = new List<(Venue Venue, List<Special> Specials)>();
+            
+            foreach (var venue in venues)
+            {
+                var venueSpecials = allSpecials
+                    .Where(s => s.VenueId == venue.Id)
+                    .ToList();
+                
+                // Only include venues that have matching specials
+                if (venueSpecials.Count > 0)
+                {
+                    // Further filter specials that are active at the search time
+                    var activeSpecials = new List<Special>();
+                    
+                    foreach (var special in venueSpecials)
+                    {
+                        bool isActive = SpecialActivityUtility.IsSpecialActive(special, searchAt);
+                        if (isActive)
+                        {
+                            activeSpecials.Add(special);
+                        }
+                    }
+                    
+                    // Only include venue if it has active specials
+                    if (activeSpecials.Count > 0)
+                    {
+                        venuesWithSpecials.Add((venue, activeSpecials));
+                    }
+                }
+            }
+            
+            return await PagedList<(Venue Venue, List<Special> Specials)>.CreateAsync(venuesWithSpecials.AsQueryable(), page, pageSize);
         }
     }
 }

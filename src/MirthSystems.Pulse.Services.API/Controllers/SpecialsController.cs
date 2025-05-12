@@ -6,8 +6,8 @@
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models.Requests;
     using MirthSystems.Pulse.Core.Models;
-    using MirthSystems.Pulse.Services.API.Controllers.Base;
     using NSwag.Annotations;
+    using System.Security.Claims;
 
     /// <summary>
     /// API controller for managing venue specials and promotions.
@@ -19,9 +19,10 @@
     /// <para>- Creating, updating, and deleting specials (for authenticated users with appropriate roles)</para>
     /// </remarks>
     [Route("api/specials")]
-    public class SpecialsController : ApiController
+    public class SpecialsController : ControllerBase
     {
         private readonly ISpecialService _specialService;
+        private string? UserId => User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         public SpecialsController(ISpecialService specialService)
         {
@@ -29,33 +30,32 @@
         }
 
         /// <summary>
-        /// Retrieves specials with comprehensive filtering options.
+        /// Searches for specials and groups them by venue with optional filtering.
         /// </summary>
-        /// <param name="request">The request containing filtering criteria and pagination options.</param>
-        /// <returns>A paginated list of specials matching the filter criteria.</returns>
+        /// <param name="request">The request containing pagination and filter criteria.</param>
+        /// <returns>A paginated list of venues with their specials.</returns>
         /// <remarks>
-        /// <para>This endpoint supports the following filtering capabilities:</para>
-        /// <para>- Text search: Filter by description</para>
-        /// <para>- Location-based: Find specials near a specific address</para>
+        /// <para>This endpoint supports sophisticated filtering capabilities:</para>
+        /// <para>- Location-based: Find venues with specials near a specific address</para>
+        /// <para>- Text search: Filter by special description or venue name</para>
+        /// <para>- Time-based: Find venues with specials active at a specific date and time</para>
         /// <para>- Type-based: Filter by special type (Food, Drink, Entertainment)</para>
-        /// <para>- Timing: Filter by currently active specials</para>
-        /// <para>- Venue: Filter specials by specific venue</para>
         /// <para>All filters are optional and can be combined for refined searching.</para>
         /// </remarks>
         [HttpGet]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<SpecialListItem>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<SearchSpecialsResult>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [OpenApiOperation("GetSpecials", "Retrieves a paginated list of specials with optional filtering")]
-        public async Task<ActionResult<PagedResult<SpecialListItem>>> GetSpecials([FromQuery] GetSpecialsRequest request)
+        [OpenApiOperation("SearchSpecials", "Searches for specials grouped by venue with optional filtering")]
+        public async Task<ActionResult<PagedResult<SearchSpecialsResult>>> SearchSpecials([FromQuery] GetSpecialsRequest request)
         {
-            var specials = await _specialService.GetSpecialsAsync(request);
-            if (specials == null || specials.Items.Count == 0)
+            var results = await _specialService.SearchSpecialsAsync(request);
+            if (results == null || results.Items.Count == 0)
             {
-                return NotFound("No specials found");
+                return NotFound("No specials found matching the criteria");
             }
-            return Ok(specials);
+            return Ok(results);
         }
 
         /// <summary>
@@ -68,11 +68,11 @@
         /// <response code="404">If the special with the specified ID is not found.</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialDetail))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetSpecialById", "Retrieves detailed information about a specific special promotion")]
-        public async Task<ActionResult<SpecialDetail>> GetSpecialById(string id)
+        public async Task<ActionResult<SpecialItemExtended>> GetSpecialById(string id)
         {
             if (!long.TryParse(id, out long specialId))
             {
@@ -99,12 +99,12 @@
         /// <response code="403">If the user doesn't have the required role.</response>
         [HttpPost]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(SpecialDetail))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(SpecialItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [OpenApiOperation("CreateSpecial", "Creates a new special promotion")]
-        public async Task<ActionResult<SpecialDetail>> CreateSpecial([FromBody] CreateSpecialRequest request)
+        public async Task<ActionResult<SpecialItemExtended>> CreateSpecial([FromBody] CreateSpecialRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -140,13 +140,13 @@
         /// <response code="404">If the special with the specified ID is not found.</response>
         [HttpPut("{id}")]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialDetail))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SpecialItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateSpecial", "Updates an existing special promotion")]
-        public async Task<ActionResult<SpecialDetail>> UpdateSpecial(string id, [FromBody] UpdateSpecialRequest request)
+        public async Task<ActionResult<SpecialItemExtended>> UpdateSpecial(string id, [FromBody] UpdateSpecialRequest request)
         {
             if (!long.TryParse(id, out long specialId))
             {

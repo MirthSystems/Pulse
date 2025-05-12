@@ -6,8 +6,8 @@
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models.Requests;
     using MirthSystems.Pulse.Core.Models;
-    using MirthSystems.Pulse.Services.API.Controllers.Base;
     using NSwag.Annotations;
+    using System.Security.Claims;
 
     /// <summary>
     /// API controller for managing venue operating schedules.
@@ -20,9 +20,10 @@
     /// <para>- Deleting schedules (for authenticated users with appropriate roles)</para>
     /// </remarks>
     [Route("api/operating-schedules")]
-    public class OperatingSchedulesController : ApiController
+    public class OperatingSchedulesController : ControllerBase
     {
         private readonly IOperatingScheduleService _operatingScheduleService;
+        private string? UserId => User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         public OperatingSchedulesController(IOperatingScheduleService operatingScheduleService)
         {
@@ -39,11 +40,11 @@
         /// <response code="404">If the operating schedule with the specified ID is not found.</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleDetail))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetOperatingScheduleById", "Retrieves detailed information about a specific operating schedule")]
-        public async Task<ActionResult<OperatingScheduleDetail>> GetOperatingScheduleById(string id)
+        public async Task<ActionResult<OperatingScheduleItemExtended>> GetOperatingScheduleById(string id)
         {
             if (!long.TryParse(id, out long scheduleId))
             {
@@ -70,12 +71,12 @@
         /// <response code="403">If the user doesn't have the required role.</response>
         [HttpPost]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(OperatingScheduleDetail))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(OperatingScheduleItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [OpenApiOperation("CreateOperatingSchedule", "Creates a new operating schedule for a venue")]
-        public async Task<ActionResult<OperatingScheduleDetail>> CreateOperatingSchedule([FromBody] CreateOperatingScheduleRequest request)
+        public async Task<ActionResult<OperatingScheduleItemExtended>> CreateOperatingSchedule([FromBody] CreateOperatingScheduleRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -111,13 +112,13 @@
         /// <response code="404">If the operating schedule with the specified ID is not found.</response>
         [HttpPut("{id}")]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleDetail))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperatingScheduleItemExtended))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("UpdateOperatingSchedule", "Updates an existing operating schedule")]
-        public async Task<ActionResult<OperatingScheduleDetail>> UpdateOperatingSchedule(string id, [FromBody] UpdateOperatingScheduleRequest request)
+        public async Task<ActionResult<OperatingScheduleItemExtended>> UpdateOperatingSchedule(string id, [FromBody] UpdateOperatingScheduleRequest request)
         {
             if (!long.TryParse(id, out long scheduleId))
             {

@@ -49,7 +49,7 @@ namespace MirthSystems.Pulse.Core.Models.Requests
         /// <para>Must be used in conjunction with RadiusInMiles.</para>
         /// </remarks>
         /// <example>Chicago, IL</example>
-        [StringLength(200)]
+        [StringLength(250, ErrorMessage = "Address cannot exceed 250 characters.")]
         public string? Address { get; set; }
 
         /// <summary>

@@ -5,12 +5,13 @@
     using MirthSystems.Pulse.Core.Models;
     using NodaTime;
     using NetTopologySuite.Geometries;
+    using MirthSystems.Pulse.Core.Utilities;
 
     public static class MappingExtensions
     {
-        public static VenueListItem MapToVenueListItem(this Venue venue)
+        public static VenueItem MapToVenueListItem(this Venue venue)
         {
-            return new VenueListItem
+            return new VenueItem
             {
                 Id = venue.Id.ToString(),
                 Name = venue.Name ?? string.Empty,
@@ -23,29 +24,31 @@
             };
         }
 
-        public static VenueDetail MapToVenueDetail(this Venue venue)
+        public static VenueItemExtended MapToVenueDetail(this Venue venue)
         {
-            return new VenueDetail
+            var detail = new VenueItemExtended
             {
                 Id = venue.Id.ToString(),
                 Name = venue.Name ?? string.Empty,
                 Description = venue.Description ?? string.Empty,
+                Locality = venue.Address?.Locality ?? string.Empty,
+                Region = venue.Address?.Region ?? string.Empty,
+                ProfileImage = venue.ProfileImage ?? string.Empty,
+                Latitude = venue.Address?.Location?.Y,
+                Longitude = venue.Address?.Location?.X,
                 PhoneNumber = venue.PhoneNumber ?? string.Empty,
                 Website = venue.Website ?? string.Empty,
                 Email = venue.Email ?? string.Empty,
-                ProfileImage = venue.ProfileImage ?? string.Empty,
                 StreetAddress = venue.Address?.StreetAddress ?? string.Empty,
                 SecondaryAddress = venue.Address?.SecondaryAddress ?? string.Empty,
-                Locality = venue.Address?.Locality ?? string.Empty,
-                Region = venue.Address?.Region ?? string.Empty,
                 Postcode = venue.Address?.Postcode ?? string.Empty,
                 Country = venue.Address?.Country ?? string.Empty,
-                Latitude = venue.Address?.Location?.Y,
-                Longitude = venue.Address?.Location?.X,
-                BusinessHours = venue.BusinessHours?.Select(s => s.MapToOperatingScheduleListItem()).ToList() ?? new List<OperatingScheduleListItem>(),
+                BusinessHours = venue.BusinessHours?.Select(s => s.MapToOperatingScheduleListItem()).ToList() ?? new List<OperatingScheduleItem>(),
                 CreatedAt = venue.CreatedAt.ToDateTimeOffset(),
                 UpdatedAt = venue.UpdatedAt?.ToDateTimeOffset()
             };
+
+            return detail;
         }
 
         public static Venue MapToNewVenue(this CreateVenueRequest request, string userId, Point geocodedPoint)
@@ -58,7 +61,7 @@
                 Website = request.Website,
                 Email = request.Email,
                 ProfileImage = request.ProfileImage,
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
+                CreatedAt = DateTimeUtility.GetCurrentInstant(),
                 CreatedByUserId = userId,
                 Address = request.Address.MapToNewAddress(geocodedPoint),
             };
@@ -72,15 +75,15 @@
             existingVenue.Website = request.Website;
             existingVenue.Email = request.Email;
             existingVenue.ProfileImage = request.ProfileImage;
-            existingVenue.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
+            existingVenue.UpdatedAt = DateTimeUtility.GetCurrentInstant();
             existingVenue.UpdatedByUserId = userId;
             request.Address.MapAndUpdateExistingAddress(existingVenue.Address, geocodedPoint);
             return existingVenue;
         }
 
-        public static OperatingScheduleListItem MapToOperatingScheduleListItem(this OperatingSchedule schedule)
+        public static OperatingScheduleItem MapToOperatingScheduleListItem(this OperatingSchedule schedule)
         {
-            return new OperatingScheduleListItem
+            return new OperatingScheduleItem
             {
                 Id = schedule.Id.ToString(),
                 DayOfWeek = schedule.DayOfWeek,
@@ -91,79 +94,93 @@
             };
         }
 
-        public static OperatingScheduleDetail MapToOperatingScheduleDetail(this OperatingSchedule schedule, string venueName)
+        public static OperatingScheduleItemExtended MapToOperatingScheduleDetail(this OperatingSchedule schedule, string venueName)
         {
-            return new OperatingScheduleDetail
+            var detail = new OperatingScheduleItemExtended
             {
                 Id = schedule.Id.ToString(),
+                DayOfWeek = schedule.DayOfWeek,
+                DayName = schedule.DayOfWeek.ToString(),
+                OpenTime = schedule.TimeOfOpen.ToString("HH:mm", null),
+                CloseTime = schedule.TimeOfClose.ToString("HH:mm", null),
+                IsClosed = schedule.IsClosed,
                 VenueId = schedule.VenueId.ToString(),
-                VenueName = venueName,
-                DayOfWeek = schedule.DayOfWeek,
-                DayName = schedule.DayOfWeek.ToString(),
-                OpenTime = schedule.TimeOfOpen.ToString("HH:mm", null),
-                CloseTime = schedule.TimeOfClose.ToString("HH:mm", null),
-                IsClosed = schedule.IsClosed
+                VenueName = venueName
             };
+
+            return detail;
         }
 
-        public static OperatingSchedule MapToNewOperatingSchedule(this OperatingHours request, long venueId)
+        public static OperatingSchedule MapToNewOperatingSchedule(this OperatingScheduleItem item, long venueId)
         {
             return new OperatingSchedule
             {
                 VenueId = venueId,
-                DayOfWeek = request.DayOfWeek,
-                TimeOfOpen = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen)),
-                TimeOfClose = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose)),
-                IsClosed = request.IsClosed
+                DayOfWeek = item.DayOfWeek,
+                TimeOfOpen = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(item.OpenTime)),
+                TimeOfClose = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(item.CloseTime)),
+                IsClosed = item.IsClosed
+            };
+        }
+
+        public static OperatingSchedule MapToNewOperatingSchedule(this OperatingHours hours, long venueId)
+        {
+            return new OperatingSchedule
+            {
+                VenueId = venueId,
+                DayOfWeek = hours.DayOfWeek,
+                TimeOfOpen = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(hours.TimeOfOpen)),
+                TimeOfClose = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(hours.TimeOfClose)),
+                IsClosed = hours.IsClosed
             };
         }
 
         public static OperatingSchedule MapAndUpdateExistingOperatingSchedule(this UpdateOperatingScheduleRequest request, OperatingSchedule existingSchedule)
         {
-            existingSchedule.TimeOfOpen = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen));
-            existingSchedule.TimeOfClose = LocalTime.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose));
+            existingSchedule.TimeOfOpen = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(request.TimeOfOpen));
+            existingSchedule.TimeOfClose = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(request.TimeOfClose));
             existingSchedule.IsClosed = request.IsClosed;
             return existingSchedule;
         }
 
-        public static SpecialListItem MapToSpecialListItem(this Special special, bool isCurrentlyRunning)
+        public static SpecialItem MapToSpecialListItem(this Special special, bool isCurrentlyRunning)
         {
-            return new SpecialListItem
+            return new SpecialItem
             {
                 Id = special.Id.ToString(),
                 VenueId = special.VenueId.ToString(),
-                VenueName = special.Venue?.Name ?? string.Empty,
                 Content = special.Content ?? string.Empty,
                 Type = special.Type,
                 TypeName = special.Type.ToString(),
                 StartDate = special.StartDate.ToString("yyyy-MM-dd", null),
                 StartTime = special.StartTime.ToString("HH:mm", null),
-                EndTime = special.EndTime?.ToString("HH:mm", null) ?? string.Empty,
+                EndTime = special.EndTime?.ToString("HH:mm", null),
                 IsCurrentlyRunning = isCurrentlyRunning,
                 IsRecurring = special.IsRecurring
             };
         }
 
-        public static SpecialDetail MapToSpecialDetail(this Special special, bool isCurrentlyRunning)
+        public static SpecialItemExtended MapToSpecialDetail(this Special special, bool isCurrentlyRunning)
         {
-            return new SpecialDetail
+            var detail = new SpecialItemExtended
             {
                 Id = special.Id.ToString(),
-                VenueId = special.VenueId.ToString(),
-                VenueName = special.Venue?.Name ?? string.Empty,
+                Venue = special.Venue?.MapToVenueListItem() ?? new VenueItem(),
                 Content = special.Content ?? string.Empty,
                 Type = special.Type,
                 TypeName = special.Type.ToString(),
                 StartDate = special.StartDate.ToString("yyyy-MM-dd", null),
                 StartTime = special.StartTime.ToString("HH:mm", null),
-                EndTime = special.EndTime?.ToString("HH:mm", null) ?? string.Empty,
-                ExpirationDate = special.ExpirationDate?.ToString("yyyy-MM-dd", null) ?? string.Empty,
-                IsRecurring = special.IsRecurring,
-                CronSchedule = special.CronSchedule ?? string.Empty,
+                EndTime = special.EndTime?.ToString("HH:mm", null),
                 IsCurrentlyRunning = isCurrentlyRunning,
+                IsRecurring = special.IsRecurring,
+                ExpirationDate = special.ExpirationDate?.ToString("yyyy-MM-dd", null),
+                CronSchedule = special.CronSchedule,
                 CreatedAt = special.CreatedAt.ToDateTimeOffset(),
                 UpdatedAt = special.UpdatedAt?.ToDateTimeOffset()
             };
+
+            return detail;
         }
 
         public static Special MapToNewSpecial(this CreateSpecialRequest request, string userId)
@@ -175,24 +192,23 @@
 
             LocalDate? expirationDate = string.IsNullOrEmpty(request.ExpirationDate)
                 ? null
-                : LocalDate.FromDateOnly(DateOnly.Parse(request.ExpirationDate));
-
+                : DateTimeUtility.FromDateOnly(DateOnly.Parse(request.ExpirationDate));
             LocalTime? endTime = string.IsNullOrEmpty(request.EndTime)
                 ? null
-                : LocalTime.FromTimeOnly(TimeOnly.Parse(request.EndTime));
+                : DateTimeUtility.FromTimeOnly(TimeOnly.Parse(request.EndTime));
 
             return new Special
             {
                 VenueId = venueId,
                 Content = request.Content,
                 Type = request.Type,
-                StartDate = LocalDate.FromDateOnly(DateOnly.Parse(request.StartDate)),
-                StartTime = LocalTime.FromTimeOnly(TimeOnly.Parse(request.StartTime)),
+                StartDate = DateTimeUtility.FromDateOnly(DateOnly.Parse(request.StartDate)),
+                StartTime = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(request.StartTime)),
                 EndTime = endTime,
                 ExpirationDate = expirationDate,
                 IsRecurring = request.IsRecurring,
                 CronSchedule = request.CronSchedule,
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
+                CreatedAt = DateTimeUtility.GetCurrentInstant(),
                 CreatedByUserId = userId
             };
         }
@@ -201,21 +217,19 @@
         {
             LocalDate? expirationDate = string.IsNullOrEmpty(request.ExpirationDate)
                 ? null
-                : LocalDate.FromDateOnly(DateOnly.Parse(request.ExpirationDate));
-
+                : DateTimeUtility.FromDateOnly(DateOnly.Parse(request.ExpirationDate));
             LocalTime? endTime = string.IsNullOrEmpty(request.EndTime)
                 ? null
-                : LocalTime.FromTimeOnly(TimeOnly.Parse(request.EndTime));
+                : DateTimeUtility.FromTimeOnly(TimeOnly.Parse(request.EndTime));
 
             existingSpecial.Content = request.Content;
             existingSpecial.Type = request.Type;
-            existingSpecial.StartDate = LocalDate.FromDateOnly(DateOnly.Parse(request.StartDate));
-            existingSpecial.StartTime = LocalTime.FromTimeOnly(TimeOnly.Parse(request.StartTime));
+            existingSpecial.StartDate = DateTimeUtility.FromDateOnly(DateOnly.Parse(request.StartDate));
+            existingSpecial.StartTime = DateTimeUtility.FromTimeOnly(TimeOnly.Parse(request.StartTime));
             existingSpecial.EndTime = endTime;
             existingSpecial.ExpirationDate = expirationDate;
             existingSpecial.IsRecurring = request.IsRecurring;
             existingSpecial.CronSchedule = request.CronSchedule;
-
             return existingSpecial;
         }
 
@@ -243,6 +257,12 @@
             existingAddress.Country = request.Country;
             existingAddress.Location = geocodedPoint;
             return existingAddress;
+        }
+
+        // Extension method to convert NodaTime Instant to DateTimeOffset
+        public static DateTimeOffset ToDateTimeOffset(this Instant instant)
+        {
+            return instant.ToDateTimeOffset();
         }
     }
 }

@@ -7,6 +7,7 @@
     using MirthSystems.Pulse.Core.Enums;
     using MirthSystems.Pulse.Core.Interfaces;
     using MirthSystems.Pulse.Core.Models;
+    using MirthSystems.Pulse.Core.Utilities;
 
     using NetTopologySuite.Geometries;
 
@@ -80,6 +81,11 @@
         /// <returns>A tuple containing the list of specials for the requested page and the total count of specials matching the filters.</returns>
         /// <remarks>
         /// <para>This method implements server-side paging with multiple filtering options.</para>
+        /// <para>Filtering capabilities include:</para>
+        /// <para>- Location-based filtering (specials at venues within a specific distance of a point)</para>
+        /// <para>- Text search in special descriptions and venue names</para>
+        /// <para>- Type filtering (food, drink, entertainment)</para>
+        /// <para>- Expiration filtering to exclude expired specials</para>
         /// <para>Specials are ordered by creation date (newest first) and venue name.</para>
         /// <para>Only non-deleted specials from non-deleted venues are included in the results.</para>
         /// <para>Text search is case-insensitive and matches partial content in special descriptions or venue names.</para>
@@ -175,118 +181,7 @@
                 return false;
             }
 
-            var localDateTime = referenceTime.InUtc().ToDateTimeUtc();
-            var localDate = LocalDate.FromDateTime(localDateTime.Date);
-            var localTime = LocalTime.FromTicksSinceMidnight(localDateTime.TimeOfDay.Ticks);
-
-            if (special.ExpirationDate.HasValue && special.ExpirationDate.Value < localDate)
-            {
-                return false;
-            }
-
-            if (special.StartDate > localDate)
-            {
-                return false;
-            }
-
-            if (!special.IsRecurring && special.StartDate == localDate)
-            {
-                if (special.EndTime.HasValue)
-                {
-                    return localTime >= special.StartTime && localTime <= special.EndTime.Value;
-                }
-                else
-                {
-                    return localTime >= special.StartTime;
-                }
-            }
-
-            if (special.IsRecurring && !string.IsNullOrEmpty(special.CronSchedule))
-            {
-                try
-                {
-                    var cronExpression = CronExpression.Parse(special.CronSchedule, CronFormat.Standard);
-
-                    // Get the start date from special (local date)
-                    var startDateTime = new DateTime(
-                        special.StartDate.Year,
-                        special.StartDate.Month,
-                        special.StartDate.Day,
-                        0, 0, 0,
-                        DateTimeKind.Utc);
-
-                    // Set up the date range for today (to check if the special occurs today)
-                    var todayStart = new DateTime(
-                        localDateTime.Year,
-                        localDateTime.Month,
-                        localDateTime.Day,
-                        0, 0, 0,
-                        DateTimeKind.Utc);
-
-                    var todayEnd = todayStart.AddDays(1);
-
-                    // Get all occurrences for today
-                    var todayOccurrences = cronExpression.GetOccurrences(startDateTime, todayEnd)
-                        .Where(o => o.Date == todayStart.Date)
-                        .ToList();
-
-                    // If no occurrences today, the special isn't running
-                    if (todayOccurrences.Count == 0)
-                    {
-                        return false;
-                    }
-
-                    // check if current time is within the special's hours
-                    var startTimeOnCurrentDay = new DateTime(
-                        localDateTime.Year,
-                        localDateTime.Month,
-                        localDateTime.Day,
-                        special.StartTime.Hour,
-                        special.StartTime.Minute,
-                        special.StartTime.Second,
-                        DateTimeKind.Utc);
-
-                    if (special.EndTime.HasValue)
-                    {
-                        var endTimeOnCurrentDay = new DateTime(
-                            localDateTime.Year,
-                            localDateTime.Month,
-                            localDateTime.Day,
-                            special.EndTime.Value.Hour,
-                            special.EndTime.Value.Minute,
-                            special.EndTime.Value.Second,
-                            DateTimeKind.Utc);
-
-                        // Handle the case where end time is after midnight
-                        if (endTimeOnCurrentDay < startTimeOnCurrentDay)
-                        {
-                            endTimeOnCurrentDay = endTimeOnCurrentDay.AddDays(1);
-                        }
-
-                        // Check if current time is between start and end times
-                        return localDateTime >= startTimeOnCurrentDay && localDateTime <= endTimeOnCurrentDay;
-                    }
-                    else
-                    {
-                        // No end time specified, just check if after start time
-                        return localDateTime >= startTimeOnCurrentDay;
-                    }
-                }
-                catch (Exception)
-                {
-                    // Invalid CRON expression, default to basic time range checking
-                    if (special.EndTime.HasValue)
-                    {
-                        return localTime >= special.StartTime && localTime <= special.EndTime.Value;
-                    }
-                    else
-                    {
-                        return localTime >= special.StartTime;
-                    }
-                }
-            }
-
-            return false;
+            return SpecialActivityUtility.IsSpecialActive(special, referenceTime);
         }
     }
 }

@@ -25,7 +25,7 @@
         /// <para>This method returns comprehensive information about an operating schedule.</para>
         /// <para>Includes venue information and day/time details.</para>
         /// </remarks>
-        Task<OperatingScheduleDetail?> GetOperatingScheduleByIdAsync(string id);
+        Task<OperatingScheduleItemExtended?> GetOperatingScheduleByIdAsync(string id);
 
         /// <summary>
         /// Creates a new operating schedule.
@@ -37,7 +37,7 @@
         /// <para>This method validates the request and persists a new operating schedule.</para>
         /// <para>Supports setting open/close times and closed days.</para>
         /// </remarks>
-        Task<OperatingScheduleDetail> CreateOperatingScheduleAsync(CreateOperatingScheduleRequest request, string userId);
+        Task<OperatingScheduleItemExtended> CreateOperatingScheduleAsync(CreateOperatingScheduleRequest request, string userId);
 
         /// <summary>
         /// Updates an existing operating schedule.
@@ -50,7 +50,7 @@
         /// <para>This method validates the request and updates an existing operating schedule.</para>
         /// <para>Throws KeyNotFoundException if the operating schedule doesn't exist.</para>
         /// </remarks>
-        Task<OperatingScheduleDetail> UpdateOperatingScheduleAsync(string id, UpdateOperatingScheduleRequest request, string userId);
+        Task<OperatingScheduleItemExtended> UpdateOperatingScheduleAsync(string id, UpdateOperatingScheduleRequest request, string userId);
 
         /// <summary>
         /// Deletes an operating schedule.
