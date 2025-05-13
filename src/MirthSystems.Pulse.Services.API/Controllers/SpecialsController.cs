@@ -12,11 +12,13 @@
     public class SpecialsController : ControllerBase
     {
         private readonly ISpecialService _specialService;
+        private readonly IVenueService _venueService;
         private string? UserId => User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        public SpecialsController(ISpecialService specialService)
+        public SpecialsController(ISpecialService specialService, IVenueService venueService)
         {
             _specialService = specialService;
+            _venueService = venueService;
         }
 
         [HttpGet]
@@ -212,7 +214,7 @@
                 return BadRequest("Invalid venue ID format");
             }
 
-            var specials = await _specialService.GetVenueSpecialsAsync(venueId);
+            var specials = await _venueService.GetVenueSpecialsAsync(venueId);
 
             if (specials == null)
             {
