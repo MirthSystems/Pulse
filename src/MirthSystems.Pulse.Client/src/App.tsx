@@ -3,14 +3,14 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { CircularProgress, Box } from '@mui/material';
 
 import MainLayout from '@components/layout/MainLayout';
-import LandingPage from '@components/pages/LandingPage';
-import SearchResultsPage from '@components/pages/SearchResultsPage';
-import BackofficePage from '@components/pages/BackofficePage';
-import VenueManagementPage from '@components/pages/VenueManagementPage';
-import VenueDetailsPage from '@components/pages/VenueDetailsPage';
-import VenueFormPage from '@components/pages/VenueFormPage';
-import SpecialFormPage from '@components/pages/SpecialFormPage';
-import NotFoundPage from '@components/pages/NotFoundPage';
+import LandingPage from '@/pages/LandingPage';
+import SearchResultsPage from '@/pages/SearchResultsPage';
+import BackofficePage from '@/pages/BackofficePage';
+import VenueManagementPage from '@/pages/VenueManagementPage';
+import VenueDetailsPage from '@/pages/VenueDetailsPage';
+import VenueFormPage from '@/pages/VenueFormPage';
+import SpecialFormPage from '@/pages/SpecialFormPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 import ProtectedRoute from '@components/auth/ProtectedRoute';
 
 const App = () => {

@@ -185,6 +185,37 @@
         }
 
         /// <summary>
+        /// Gets venues that have at least one active special at the current time.
+        /// </summary>
+        /// <param name="specialTypeId">Optional filter for specific type of special.</param>
+        /// <returns>A list of venue IDs with active specials.</returns>
+        public async Task<List<long>> GetVenueIdsWithActiveSpecialsAsync(int? specialTypeId = null)
+        {
+            var now = SystemClock.Instance.GetCurrentInstant();
+            var today = LocalDate.FromDateTime(now.ToDateTimeUtc());
+            var currentTime = LocalTime.FromTimeOnly(TimeOnly.Parse(now.ToDateTimeUtc().ToString("HH:mm:ss")));
+
+            // Build the query for active specials
+            var query = _context.Specials
+                .Where(s => !s.IsDeleted)
+                .Where(s => s.StartDate <= today)
+                .Where(s => s.ExpirationDate == null || s.ExpirationDate >= today)
+                .Where(s => s.StartTime <= currentTime && (s.EndTime == null || s.EndTime >= currentTime));
+
+            // Filter by special type if provided
+            if (specialTypeId.HasValue)
+            {
+                query = query.Where(s => (int)s.Type == specialTypeId.Value);
+            }
+
+            // Get distinct venue IDs
+            return await query
+                .Select(s => s.VenueId)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Finds venues near a specific geographic location within a given distance.
         /// </summary>
         /// <param name="location">The geographic point to search around.</param>
@@ -244,37 +275,6 @@
             // Handle operating hours spanning midnight (open time after close time)
             return schedule.TimeOfOpen <= requestLocalTime || requestLocalTime <= schedule.TimeOfClose;
         }
-        
-        /// <summary>
-        /// Gets venues that have at least one active special at the current time.
-        /// </summary>
-        /// <param name="specialTypeId">Optional filter for specific type of special.</param>
-        /// <returns>A list of venue IDs with active specials.</returns>
-        public async Task<List<long>> GetVenueIdsWithActiveSpecialsAsync(int? specialTypeId = null)
-        {
-            var now = SystemClock.Instance.GetCurrentInstant();
-            var today = LocalDate.FromDateTime(now.ToDateTimeUtc());
-            var currentTime = LocalTime.FromTimeOnly(TimeOnly.Parse(now.ToDateTimeUtc().ToString("HH:mm:ss")));
-            
-            // Build the query for active specials
-            var query = _context.Specials
-                .Where(s => !s.IsDeleted)
-                .Where(s => s.StartDate <= today)
-                .Where(s => s.ExpirationDate == null || s.ExpirationDate >= today)
-                .Where(s => s.StartTime <= currentTime && (s.EndTime == null || s.EndTime >= currentTime));
-                
-            // Filter by special type if provided
-            if (specialTypeId.HasValue)
-            {
-                query = query.Where(s => (int)s.Type == specialTypeId.Value);
-            }
-            
-            // Get distinct venue IDs
-            return await query
-                .Select(s => s.VenueId)
-                .Distinct()
-                .ToListAsync();
-        }
 
         /// <summary>
         /// Gets venues with their running specials for a specific search area and time.
@@ -282,108 +282,72 @@
         /// <param name="searchPoint">The center point of the search area.</param>
         /// <param name="distanceInMeters">The radius to search around the point in meters.</param>
         /// <param name="searchAt">The instant in time to check for running specials.</param>
-        /// <param name="searchTerm">Optional text to filter venues and specials.</param>
+        /// <param name="searchTerm">Optional text to filter specials.</param>
         /// <param name="specialType">Optional type to filter specials.</param>
-        /// <param name="page">The page number for pagination.</param>
-        /// <param name="pageSize">The page size for pagination.</param>
-        /// <returns>Paged list of venues with their matching specials.</returns>
-        public async Task<PagedList<(Venue Venue, List<Special> Specials)>> GetVenuesWithRunningSpecialsAsync(
+        /// <returns>list of venues with their matching specials.</returns>
+        public async Task<List<(Venue Venue, List<Special> Specials)>> GetVenuesWithRunningSpecialsAsync(
             Point searchPoint,
             double distanceInMeters,
             Instant searchAt,
             string? searchTerm = null,
-            SpecialTypes? specialType = null,
-            int page = 1,
-            int pageSize = 20)
+            SpecialTypes? specialType = null)
         {
-            // Build base query for non-deleted venues within search area
             var venueQuery = _context.Venues
                 .Where(v => !v.IsDeleted)
                 .Include(v => v.Address)
-                .Where(v => v.Address != null && 
+                .Where(v => v.Address != null &&
                            v.Address.Location.Distance(searchPoint) <= distanceInMeters);
-
-            // Apply text search if provided
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                string search = searchTerm.ToLower();
-                venueQuery = venueQuery.Where(v => 
-                    v.Name.ToLower().Contains(search) || 
-                    (v.Description != null && v.Description.ToLower().Contains(search)));
-            }
 
             var venues = await venueQuery.ToListAsync();
             if (!venues.Any())
             {
-                return await PagedList<(Venue Venue, List<Special> Specials)>.CreateAsync(
-                    new List<(Venue, List<Special>)>().AsQueryable(), page, pageSize);
+                return new List<(Venue, List<Special>)>();
             }
-            
-            // Get searchDate for special date filtering
+
             var searchDate = LocalDate.FromDateTime(searchAt.ToDateTimeUtc().Date);
-            
-            // Now find all specials for these venues that match the criteria
             var venueIds = venues.Select(v => v.Id).ToList();
-            
-            // Get specials for these venues
+
             var specialsQuery = _context.Specials
                 .Where(s => !s.IsDeleted && venueIds.Contains(s.VenueId))
                 .Where(s => s.StartDate <= searchDate &&
                            (s.ExpirationDate == null || s.ExpirationDate >= searchDate));
-            
-            // Filter by special type if provided
+
             if (specialType.HasValue)
             {
                 specialsQuery = specialsQuery.Where(s => s.Type == specialType);
             }
-            
-            // Apply text search to specials content if provided
+
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 string search = searchTerm.ToLower();
                 specialsQuery = specialsQuery.Where(s => s.Content.ToLower().Contains(search));
             }
-            
+
             var allSpecials = await specialsQuery.ToListAsync();
             if (!allSpecials.Any())
             {
-                return await PagedList<(Venue Venue, List<Special> Specials)>.CreateAsync(
-                    new List<(Venue, List<Special>)>().AsQueryable(), page, pageSize);
+                return new List<(Venue, List<Special>)>();
             }
-            
-            // Group specials by venue
+
+            var activeSpecials = allSpecials
+                .Where(s => SpecialActivityUtility.IsSpecialActive(s, searchAt))
+                .ToList();
+
             var venuesWithSpecials = new List<(Venue Venue, List<Special> Specials)>();
-            
+
             foreach (var venue in venues)
             {
-                var venueSpecials = allSpecials
+                var venueActiveSpecials = activeSpecials
                     .Where(s => s.VenueId == venue.Id)
                     .ToList();
-                
-                // Only include venues that have matching specials
-                if (venueSpecials.Count > 0)
+
+                if (venueActiveSpecials.Any())
                 {
-                    // Further filter specials that are active at the search time
-                    var activeSpecials = new List<Special>();
-                    
-                    foreach (var special in venueSpecials)
-                    {
-                        bool isActive = SpecialActivityUtility.IsSpecialActive(special, searchAt);
-                        if (isActive)
-                        {
-                            activeSpecials.Add(special);
-                        }
-                    }
-                    
-                    // Only include venue if it has active specials
-                    if (activeSpecials.Count > 0)
-                    {
-                        venuesWithSpecials.Add((venue, activeSpecials));
-                    }
+                    venuesWithSpecials.Add((venue, venueActiveSpecials));
                 }
             }
-            
-            return await PagedList<(Venue Venue, List<Special> Specials)>.CreateAsync(venuesWithSpecials.AsQueryable(), page, pageSize);
+
+            return venuesWithSpecials.OrderBy(vs => vs.Venue.Name).ToList();
         }
     }
 }

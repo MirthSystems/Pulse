@@ -1,47 +1,43 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent,
-  TextField,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Pagination,
-  CircularProgress,
+import { useAuth0 } from '@auth0/auth0-react';
+import {
+  Add as AddIcon,
+  MyLocation as MyLocationIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
+import {
   Alert,
+  Box,
+  Button,
+  CircularProgress,
   Container,
+  FormControl,
+  Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
+  Pagination,
   Paper,
-  Divider,
+  Select,
+  TextField,
+  Typography
 } from '@mui/material';
-import { 
-  Search as SearchIcon, 
-  MyLocation as MyLocationIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
 import { DateTime } from 'luxon';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
-import { RootState } from '@store/index';
-import { fetchVenues, clearVenueError } from '@features/venues/venueSlice';
-import { VenueItem } from '@models/venue';
-import { VenueSearchParams } from '@models/venue';
+import { clearVenueError, fetchVenues } from '@/store/venueSlice';
 import VenueCard from '@components/venues/VenueCard';
+import { VenueSearchParams } from '@models/venue';
+import { RootState } from '@store/index';
 
 const VenuesPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useAuth0();
   const { venues, loading, error, pagingInfo } = useSelector((state: RootState) => state.venues);
-  
+
   const [searchParams, setSearchParams] = useState<VenueSearchParams>({
     page: 1,
     pageSize: 12,
@@ -69,12 +65,12 @@ const VenuesPage = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchParams({...searchParams, page: 1}); // Reset to first page
+    setSearchParams({ ...searchParams, page: 1 }); // Reset to first page
     loadVenues();
   };
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
-    setSearchParams({...searchParams, page: value});
+    setSearchParams({ ...searchParams, page: value });
   };
 
   const handleCurrentLocation = () => {
@@ -82,7 +78,7 @@ const VenuesPage = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setSearchParams({
-            ...searchParams, 
+            ...searchParams,
             address: `${position.coords.latitude}, ${position.coords.longitude}`
           });
         },
@@ -104,9 +100,9 @@ const VenuesPage = () => {
           Venues
         </Typography>
         {isAuthenticated && (
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             startIcon={<AddIcon />}
             onClick={() => navigate('/venues/new')}
           >
@@ -118,12 +114,12 @@ const VenuesPage = () => {
       <Paper component="form" elevation={3} sx={{ p: 3, mb: 4 }} onSubmit={handleSearch}>
         <Grid container spacing={2} alignItems="flex-end">
           <Grid item xs={12} md={3}>
-            <TextField 
+            <TextField
               fullWidth
-              label="Search Venues" 
+              label="Search Venues"
               placeholder="Name or description"
               value={searchParams.searchText || ''}
-              onChange={(e) => setSearchParams({...searchParams, searchText: e.target.value})}
+              onChange={(e) => setSearchParams({ ...searchParams, searchText: e.target.value })}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -135,12 +131,12 @@ const VenuesPage = () => {
           </Grid>
 
           <Grid item xs={12} md={3}>
-            <TextField 
+            <TextField
               fullWidth
-              label="Location" 
+              label="Location"
               placeholder="Address, city, or ZIP"
               value={searchParams.address || ''}
-              onChange={(e) => setSearchParams({...searchParams, address: e.target.value})}
+              onChange={(e) => setSearchParams({ ...searchParams, address: e.target.value })}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -159,7 +155,7 @@ const VenuesPage = () => {
               <Select
                 value={searchParams.sort || 0}
                 label="Sort By"
-                onChange={(e) => setSearchParams({...searchParams, sort: Number(e.target.value)})}
+                onChange={(e) => setSearchParams({ ...searchParams, sort: Number(e.target.value) })}
               >
                 <MenuItem value={0}>Name (A-Z)</MenuItem>
                 <MenuItem value={1}>Name (Z-A)</MenuItem>
@@ -179,13 +175,13 @@ const VenuesPage = () => {
                   if (e.target.value === 'now') {
                     const now = DateTime.local();
                     setSearchParams({
-                      ...searchParams, 
+                      ...searchParams,
                       openDay: now.weekday % 7, // Convert to 0-based weekday (0=Sunday)
                       openTime: now.toFormat('HH:mm')
                     });
                   } else {
                     setSearchParams({
-                      ...searchParams, 
+                      ...searchParams,
                       openDay: undefined,
                       openTime: undefined
                     });
@@ -199,10 +195,10 @@ const VenuesPage = () => {
           </Grid>
 
           <Grid item xs={12} md={2}>
-            <Button 
+            <Button
               fullWidth
               type="submit"
-              variant="contained" 
+              variant="contained"
               color="primary"
               disabled={loading}
               sx={{ height: '56px' }}
@@ -228,19 +224,19 @@ const VenuesPage = () => {
           <Grid container spacing={3} sx={{ mb: 4 }}>
             {venues.map((venue) => (
               <Grid item key={venue.id} xs={12} sm={6} md={4}>
-                <VenueCard 
-                  venue={venue} 
-                  onClick={() => navigate(`/venues/${venue.id}`)} 
+                <VenueCard
+                  venue={venue}
+                  onClick={() => navigate(`/venues/${venue.id}`)}
                 />
               </Grid>
             ))}
           </Grid>
 
           <Box display="flex" justifyContent="center" my={4}>
-            <Pagination 
-              count={pagingInfo.totalPages} 
-              page={pagingInfo.currentPage} 
-              onChange={handlePageChange} 
+            <Pagination
+              count={pagingInfo.totalPages}
+              page={pagingInfo.currentPage}
+              onChange={handlePageChange}
               color="primary"
               disabled={loading}
             />

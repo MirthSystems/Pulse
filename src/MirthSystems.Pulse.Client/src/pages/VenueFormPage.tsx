@@ -1,32 +1,29 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { useAuth0 } from '@auth0/auth0-react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  TextField, 
-  Button, 
-  Grid, 
-  Container,
-  Alert,
-  CircularProgress,
-  Divider,
-  FormControlLabel,
-  Switch,
-  Stack
-} from '@mui/material';
-import { 
-  Save as SaveIcon, 
-  ArrowBack as ArrowBackIcon
+import {
+  ArrowBack as ArrowBackIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Divider,
+  Grid,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { RootState } from '@store/index';
-import { fetchVenueById, createVenue, updateVenue, clearVenueError } from '@features/venues/venueSlice';
-import { AddressRequest, CreateVenueRequest, UpdateVenueRequest, OperatingHours } from '@models/venue';
-import { useApiClient } from '@services/apiClient';
 import BusinessHoursEditor from '@components/venues/BusinessHoursEditor';
+import { AddressRequest, CreateVenueRequest, OperatingHours, UpdateVenueRequest } from '@models/venue';
+import { useApiClient } from '@services/apiClient';
+import { RootState } from '@store/index';
+import { clearVenueError, createVenue, fetchVenueById, updateVenue } from '@store/venueSlice';
 
 const VenueFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +31,7 @@ const VenueFormPage = () => {
   const dispatch = useDispatch();
   const apiClient = useApiClient();
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
-  
+
   const { currentVenue, loading, error } = useSelector((state: RootState) => state.venues);
 
   // Form state
@@ -44,7 +41,7 @@ const VenueFormPage = () => {
   const [website, setWebsite] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [profileImage, setProfileImage] = useState<string>('');
-  
+
   // Address fields
   const [streetAddress, setStreetAddress] = useState<string>('');
   const [secondaryAddress, setSecondaryAddress] = useState<string>('');
@@ -52,7 +49,7 @@ const VenueFormPage = () => {
   const [region, setRegion] = useState<string>('');
   const [postcode, setPostcode] = useState<string>('');
   const [country, setCountry] = useState<string>('United States');
-  
+
   // Business hours
   const [businessHours, setBusinessHours] = useState<OperatingHours[]>([
     { dayOfWeek: 0, timeOfOpen: "11:00", timeOfClose: "22:00", isClosed: false }, // Sunday
@@ -63,11 +60,11 @@ const VenueFormPage = () => {
     { dayOfWeek: 5, timeOfOpen: "11:00", timeOfClose: "00:00", isClosed: false }, // Friday
     { dayOfWeek: 6, timeOfOpen: "11:00", timeOfClose: "00:00", isClosed: false }, // Saturday
   ]);
-  
+
   // Form submission and error states
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-  
+
   // Fetch venue data if in edit mode
   useEffect(() => {
     if (id) {
@@ -77,7 +74,7 @@ const VenueFormPage = () => {
       dispatch(clearVenueError());
     }
   }, [id, dispatch]);
-  
+
   // Populate form with venue data in edit mode
   useEffect(() => {
     if (currentVenue && id) {
@@ -87,14 +84,14 @@ const VenueFormPage = () => {
       setWebsite(currentVenue.website || '');
       setEmail(currentVenue.email || '');
       setProfileImage(currentVenue.profileImage || '');
-      
+
       setStreetAddress(currentVenue.streetAddress);
       setSecondaryAddress(currentVenue.secondaryAddress || '');
       setLocality(currentVenue.locality);
       setRegion(currentVenue.region);
       setPostcode(currentVenue.postcode);
       setCountry(currentVenue.country);
-      
+
       if (currentVenue.businessHours?.length) {
         // Convert business hours from API to form model
         const hours: OperatingHours[] = currentVenue.businessHours.map(bh => ({
@@ -103,60 +100,60 @@ const VenueFormPage = () => {
           timeOfClose: bh.closeTime,
           isClosed: bh.isClosed
         })).sort((a, b) => a.dayOfWeek - b.dayOfWeek);
-        
+
         setBusinessHours(hours);
       }
     }
   }, [currentVenue, id]);
-  
+
   // Validate form data
   const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
-    
+
     // Validate venue fields
     if (!name.trim()) errors.name = "Venue name is required";
     else if (name.trim().length < 2) errors.name = "Venue name must be at least 2 characters";
     else if (name.trim().length > 100) errors.name = "Venue name cannot exceed 100 characters";
-    
-    if (description && description.length > 500) 
+
+    if (description && description.length > 500)
       errors.description = "Description cannot exceed 500 characters";
-    
-    if (website && !/^https?:\/\/.+\..+$/.test(website)) 
+
+    if (website && !/^https?:\/\/.+\..+$/.test(website))
       errors.website = "Website must be a valid URL (include http:// or https://)";
-    
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) 
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       errors.email = "Email must be a valid email address";
-    
-    if (profileImage && !/^https?:\/\/.+/.test(profileImage)) 
+
+    if (profileImage && !/^https?:\/\/.+/.test(profileImage))
       errors.profileImage = "Profile image must be a valid URL (include http:// or https://)";
-    
+
     // Validate address fields
     if (!streetAddress.trim()) errors.streetAddress = "Street address is required";
     if (!locality.trim()) errors.locality = "City is required";
     if (!region.trim()) errors.region = "State/province is required";
     if (!postcode.trim()) errors.postcode = "Postal code is required";
     if (!country.trim()) errors.country = "Country is required";
-    
+
     // Check business hours
     const missingHours = businessHours.some(hour => {
       return !hour.isClosed && (!hour.timeOfOpen || !hour.timeOfClose);
     });
-    
+
     if (missingHours) {
       errors.businessHours = "Please provide both opening and closing times for all open days";
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const addressData: AddressRequest = {
         streetAddress,
@@ -166,7 +163,7 @@ const VenueFormPage = () => {
         postcode,
         country
       };
-      
+
       if (id) {
         // Edit mode
         const updateData: UpdateVenueRequest = {
@@ -178,7 +175,7 @@ const VenueFormPage = () => {
           profileImage: profileImage || undefined,
           address: addressData
         };
-        
+
         await dispatch(updateVenue({ id, venueData: updateData, apiClient }) as any);
       } else {
         // Create mode
@@ -192,14 +189,14 @@ const VenueFormPage = () => {
           address: addressData,
           hoursOfOperation: businessHours
         };
-        
+
         const result = await dispatch(createVenue({ venueData: createData, apiClient }) as any);
         if (result.payload?.id) {
           navigate(`/venues/${result.payload.id}`);
           return;
         }
       }
-      
+
       if (id) {
         navigate(`/venues/${id}`);
       }
@@ -209,13 +206,13 @@ const VenueFormPage = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleUpdateBusinessHours = (dayIndex: number, field: keyof OperatingHours, value: any) => {
     const updatedHours = [...businessHours];
     updatedHours[dayIndex] = { ...updatedHours[dayIndex], [field]: value };
     setBusinessHours(updatedHours);
   };
-  
+
   // Check if user is authorized
   if (!authLoading && !isAuthenticated) {
     return (
@@ -223,9 +220,9 @@ const VenueFormPage = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           You must be logged in to manage venues.
         </Alert>
-        <Button 
-          variant="contained" 
-          onClick={() => navigate('/venues')} 
+        <Button
+          variant="contained"
+          onClick={() => navigate('/venues')}
           sx={{ mt: 2 }}
         >
           Back to Venues
@@ -233,7 +230,7 @@ const VenueFormPage = () => {
       </Container>
     );
   }
-  
+
   if (loading && id) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -257,7 +254,7 @@ const VenueFormPage = () => {
             Back
           </Button>
         </Box>
-        
+
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
@@ -351,7 +348,7 @@ const VenueFormPage = () => {
                 placeholder="https://example.com/your-image.jpg"
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Typography variant="h6" gutterBottom>Address Information</Typography>
@@ -441,7 +438,7 @@ const VenueFormPage = () => {
                 margin="normal"
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Typography variant="h6" gutterBottom>Business Hours</Typography>
@@ -451,9 +448,9 @@ const VenueFormPage = () => {
                 </Alert>
               )}
             </Grid>
-            
+
             <Grid item xs={12}>
-              <BusinessHoursEditor 
+              <BusinessHoursEditor
                 businessHours={businessHours}
                 onChange={handleUpdateBusinessHours}
                 disabled={isSubmitting}

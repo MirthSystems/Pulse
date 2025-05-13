@@ -22,15 +22,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import SpecialsList from '@components/specials/SpecialsList';
-import { clearSpecialsError } from '@features/specials/specialSlice';
-import { SpecialSearchParams, SpecialTypes } from '@models/special';
+import { clearSpecialsError } from '@store/specialSlice';
+import { SpecialSearchParams, SpecialTypes, PagedResult, SearchSpecialsResult } from '@models/special';
 import { RootState } from '@store/index';
+import { SpecialService } from '@services/specialService';
 
 const SearchResultsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { searchResults, loading, error } = useSelector((state: RootState) => state.specials);
+  
+  // Add missing state variables
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<PagedResult<SearchSpecialsResult> | null>(null);
 
   // Search parameters
   const [address, setAddress] = useState<string>(searchParams.get('address') || '');
@@ -68,25 +73,15 @@ const SearchResultsPage = () => {
         active: activeOnly
       };
 
-      const response = await apiClient.get('/api/specials', {
-        params: {
-          address: params.address,
-          radius: params.radius || 5,
-          isCurrentlyRunning: params.active === undefined ? true : params.active,
-          searchTerm: params.term,
-          specialTypeId: params.type,
-          page: params.page || 1,
-          pageSize: params.pageSize
-        }
-      });
-
-      setResults(response.data);
+      // Use the service method instead of direct API call
+      const response = await SpecialService.searchSpecials(params);
+      setResults(response);
     } catch (error: any) {
       console.error('Error fetching search results:', error);
 
-      if (error.response?.status === 404) {
+      if (error.status === 404) {
         setError('No results found for your search criteria. Try adjusting your filters.');
-      } else if (error.response?.status === 400) {
+      } else if (error.status === 400) {
         setError('Invalid search parameters. Please check your inputs and try again.');
       } else {
         setError('Failed to load results. Please try again later.');
@@ -133,6 +128,7 @@ const SearchResultsPage = () => {
 
   const handleClearError = () => {
     dispatch(clearSpecialsError());
+    setError(null);
   };
 
   return (
@@ -236,13 +232,13 @@ const SearchResultsPage = () => {
         <Box display="flex" justifyContent="center" my={4}>
           <CircularProgress />
         </Box>
-      ) : searchResults?.items?.length > 0 ? (
+      ) : results?.items?.length > 0 ? (
         <Box>
           <Typography variant="h5" gutterBottom>
-            Found {searchResults?.pagingInfo?.totalCount || 0} Results
+            Found {results?.pagingInfo?.totalCount || 0} Results
           </Typography>
 
-          {searchResults.items.map((result) => (
+          {results.items.map((result) => (
             <Paper
               key={result.venue?.id || `venue-${Math.random()}`}
               elevation={1}
@@ -295,11 +291,11 @@ const SearchResultsPage = () => {
             </Paper>
           ))}
 
-          {searchResults.pagingInfo && searchResults.pagingInfo.totalPages > 1 && (
+          {results.pagingInfo && results.pagingInfo.totalPages > 1 && (
             <Box display="flex" justifyContent="center" my={4}>
               <Pagination
-                count={searchResults.pagingInfo.totalPages}
-                page={searchResults.pagingInfo.currentPage}
+                count={results.pagingInfo.totalPages}
+                page={results.pagingInfo.currentPage}
                 onChange={handlePageChange}
                 color="primary"
                 disabled={loading}

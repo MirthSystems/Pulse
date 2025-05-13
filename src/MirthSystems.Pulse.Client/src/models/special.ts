@@ -67,11 +67,11 @@ export interface SpecialSearchParams {
   pageSize: number;
   address: string;
   radius: number;
-  dateTime?: string;
-  term?: string;
+  dateTime?: string; // Will map to searchDateTime in the API
+  term?: string; // Will map to searchTerm in the API
   venueId?: string;
-  type?: number;
-  active?: boolean;
+  type?: number; // Will map to specialTypeId in the API
+  active?: boolean; // Will map to isCurrentlyRunning in the API
 }
 
 export interface SpecialMenu {

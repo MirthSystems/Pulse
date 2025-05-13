@@ -34,95 +34,6 @@
             _logger = logger;
         }
 
-        public async Task<PagedResult<SpecialItem>> GetSpecialsAsync(GetSpecialsRequest request)
-        {
-            try
-            {
-                Point? searchLocation = null;
-                double? radiusInMeters = null;
-
-                if (!string.IsNullOrEmpty(request.Address))
-                {
-                    var geocodeResponse = await _mapsApiService.SearchClient.GetGeocodingAsync(request.Address);
-                    if (geocodeResponse.Value.Features.Count > 0)
-                    {
-                        var result = geocodeResponse.Value.Features[0];
-                        searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude) { SRID = 4326 };
-                        radiusInMeters = request.Radius * 1609.34;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Could not geocode address: {request.Address}");
-                    }
-                }
-
-                Instant searchDateTimeInstant;
-                if (!string.IsNullOrEmpty(request.SearchDateTime))
-                {
-                    if (DateTimeOffset.TryParse(request.SearchDateTime, out var parsedDateTime))
-                    {
-                        searchDateTimeInstant = Instant.FromDateTimeOffset(parsedDateTime);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Invalid search date time format: {request.SearchDateTime}");
-                    }
-                }
-                else
-                {
-                    searchDateTimeInstant = SystemClock.Instance.GetCurrentInstant();
-                }
-
-                var specials = await _unitOfWork.Specials.GetPagedSpecialsAsync(
-                    request.Page,
-                    request.PageSize,
-                    searchLocation,
-                    radiusInMeters,
-                    request.SearchTerm,
-                    request.SpecialTypeId.HasValue ? (Core.Enums.SpecialTypes)request.SpecialTypeId.Value : null,
-                    !request.IsCurrentlyRunning.HasValue || !request.IsCurrentlyRunning.Value);
-
-                var specialListItems = await Task.WhenAll(specials.Select(async s =>
-                {
-                    var isCurrentlyRunning = await _unitOfWork.Specials.IsSpecialCurrentlyActiveAsync(s.Id, searchDateTimeInstant);
-                    return s.MapToSpecialListItem(isCurrentlyRunning);
-                }));
-
-                var filteredItems = specialListItems.ToList();
-
-                if (request.IsCurrentlyRunning.HasValue && request.IsCurrentlyRunning.Value)
-                {
-                    filteredItems = filteredItems.Where(s => s.IsCurrentlyRunning).ToList();
-                }
-
-                if (!string.IsNullOrEmpty(request.VenueId) && long.TryParse(request.VenueId, out long venueId))
-                {
-                    filteredItems = filteredItems.Where(s => s.VenueId == venueId.ToString()).ToList();
-                }
-                
-                int totalCount = 0;
-                if (filteredItems.Count != specialListItems.Length)
-                {
-                    double filterRatio = (double)filteredItems.Count / specialListItems.Length;
-                    totalCount = (int)(specials.TotalCount * filterRatio);
-                }
-
-                return new PagedResult<SpecialItem>
-                {
-                    Items = filteredItems,
-                    PagingInfo = PagingInfo.Create(
-                        request.Page,
-                        request.PageSize,
-                        totalCount)
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving specials");
-                throw;
-            }
-        }
-
         public async Task<PagedResult<SearchSpecialsResult>> SearchSpecialsAsync(GetSpecialsRequest request)
         {
             try
@@ -137,7 +48,7 @@
                     {
                         var result = geocodeResponse.Value.Features[0];
                         searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude) { SRID = 4326 };
-                        radiusInMeters = request.Radius * 1609.34; // Convert miles to meters
+                        radiusInMeters = request.Radius * 1609.34;
                     }
                     else
                     {
@@ -175,35 +86,33 @@
                     radiusInMeters.Value,
                     searchDateTimeInstant,
                     request.SearchTerm,
-                    request.SpecialTypeId.HasValue ? (Core.Enums.SpecialTypes)request.SpecialTypeId.Value : null,
-                    request.Page,
-                    request.PageSize);
+                    request.SpecialTypeId.HasValue ? (Core.Enums.SpecialTypes)request.SpecialTypeId.Value : null);
 
-                var searchResults = new List<SearchSpecialsResult>();
-                
-                foreach (var venueWithSpecials in venuesWithSpecials)
+                var allResults = venuesWithSpecials.Select(venueWithSpecials =>
                 {
-                    Venue venue = venueWithSpecials.Venue;
-                    List<Special> specials = venueWithSpecials.Specials;
-
-                    var specialItems = specials.Select(s => 
-                        s.MapToSpecialListItem(true)
-                    ).ToList();
-
-                    searchResults.Add(new SearchSpecialsResult
+                    var venue = venueWithSpecials.Venue;
+                    var specials = venueWithSpecials.Specials;
+                    var specialItems = specials.Select(s => s.MapToSpecialListItem(true)).ToList();
+                    return new SearchSpecialsResult
                     {
                         Venue = venue.MapToVenueDetail(),
                         Specials = new SpecialMenu { Items = specialItems }
-                    });
-                }
+                    };
+                }).ToList();
+
+                var totalCount = allResults.Count;
+                var pagedItems = allResults
+                    .Skip((request.Page - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToList();
 
                 return new PagedResult<SearchSpecialsResult>
                 {
-                    Items = searchResults,
+                    Items = pagedItems,
                     PagingInfo = PagingInfo.Create(
                         request.Page,
                         request.PageSize,
-                        venuesWithSpecials.TotalCount)
+                        totalCount)
                 };
             }
             catch (Exception ex)

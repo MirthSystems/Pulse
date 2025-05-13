@@ -111,16 +111,12 @@
         /// <param name="searchAt">The instant in time to check for running specials.</param>
         /// <param name="searchTerm">Optional text to filter venues and specials.</param>
         /// <param name="specialType">Optional type to filter specials.</param>
-        /// <param name="page">The page number for pagination.</param>
-        /// <param name="pageSize">The page size for pagination.</param>
-        /// <returns>Paged list of venues with their matching specials.</returns>
-        Task<PagedList<(Venue Venue, List<Special> Specials)>> GetVenuesWithRunningSpecialsAsync(
+        /// <returns>list of venues with their matching specials.</returns>
+        Task<List<(Venue Venue, List<Special> Specials)>> GetVenuesWithRunningSpecialsAsync(
             Point searchPoint,
             double distanceInMeters,
             Instant searchAt,
             string? searchTerm = null,
-            SpecialTypes? specialType = null,
-            int page = 1,
-            int pageSize = 20);
+            SpecialTypes? specialType = null);
     }
 }

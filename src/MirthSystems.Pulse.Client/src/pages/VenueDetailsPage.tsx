@@ -1,7 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
   Edit as EditIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
@@ -17,11 +15,6 @@ import {
   Chip,
   CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Grid,
   Link,
   List,
@@ -33,17 +26,14 @@ import {
   Tabs,
   Typography
 } from '@mui/material';
-import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { fetchVenueBusinessHours, fetchVenueById, fetchVenueSpecials } from '@/store/venueSlice';
 import SpecialsList from '@components/specials/SpecialsList';
 import BusinessHoursDisplay from '@components/venues/BusinessHoursDisplay';
 import VenueMap from '@components/venues/VenueMap';
-import { clearSpecialsError } from '@features/specials/specialSlice';
-import { deleteVenue, fetchVenueBusinessHours, fetchVenueById, fetchVenueSpecials } from '@features/venues/venueSlice';
-import { useApiClient } from '@services/apiClient';
 import { RootState } from '@store/index';
 
 interface TabPanelProps {
@@ -72,18 +62,15 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const VenueDetailPage = () => {
+const VenueDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const apiClient = useApiClient();
   const { isAuthenticated } = useAuth0();
 
   const { currentVenue, venueBusinessHours, venueSpecials, loading, error } = useSelector((state: RootState) => state.venues);
 
   const [tabValue, setTabValue] = useState(0);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteInProgress, setDeleteInProgress] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -91,42 +78,16 @@ const VenueDetailPage = () => {
       dispatch(fetchVenueBusinessHours(id) as any);
       dispatch(fetchVenueSpecials(id) as any);
     }
-
-    return () => {
-      // Cleanup
-      dispatch(clearSpecialsError());
-    };
   }, [id, dispatch]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handleEditVenue = () => {
-    navigate(`/venues/${id}/edit`);
-  };
-
-  const handleDeleteVenue = async () => {
-    if (!id) return;
-
-    setDeleteInProgress(true);
-    try {
-      await dispatch(deleteVenue({ id, apiClient }) as any);
-      setDeleteDialogOpen(false);
-      navigate('/venues');
-    } catch (error) {
-      console.error('Failed to delete venue:', error);
-    } finally {
-      setDeleteInProgress(false);
+  const handleManageVenue = () => {
+    if (isAuthenticated) {
+      navigate(`/venues/${id}`);
     }
-  };
-
-  const handleAddSpecial = () => {
-    navigate(`/specials/new?venueId=${id}`);
-  };
-
-  const handleBack = () => {
-    navigate('/backoffice');
   };
 
   if (loading && !currentVenue) {
@@ -145,10 +106,10 @@ const VenueDetailPage = () => {
         </Alert>
         <Button
           variant="outlined"
-          onClick={handleBack}
+          onClick={() => navigate('/')}
           sx={{ mt: 2 }}
         >
-          Back to Venues
+          Back to Home
         </Button>
       </Container>
     );
@@ -162,10 +123,10 @@ const VenueDetailPage = () => {
         </Alert>
         <Button
           variant="outlined"
-          onClick={handleBack}
+          onClick={() => navigate('/')}
           sx={{ mt: 2 }}
         >
-          Back to Venues
+          Back to Home
         </Button>
       </Container>
     );
@@ -250,20 +211,11 @@ const VenueDetailPage = () => {
             {isAuthenticated && (
               <Box sx={{ mt: 2 }}>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   startIcon={<EditIcon />}
-                  onClick={handleEditVenue}
-                  sx={{ mr: 2 }}
+                  onClick={handleManageVenue}
                 >
-                  Edit Venue
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
-                  Delete Venue
+                  Manage This Venue
                 </Button>
               </Box>
             )}
@@ -358,21 +310,10 @@ const VenueDetailPage = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ mb: 2 }}>
             <Typography variant="h6">
               {venueSpecials.length > 0 ? 'Current Specials' : 'No Current Specials'}
             </Typography>
-
-            {isAuthenticated && (
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={handleAddSpecial}
-              >
-                Add Special
-              </Button>
-            )}
           </Box>
 
           {venueSpecials.length > 0 ? (
@@ -382,47 +323,10 @@ const VenueDetailPage = () => {
               <Typography color="text.secondary">
                 This venue doesn't have any active specials right now.
               </Typography>
-
-              {isAuthenticated && (
-                <Button
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  onClick={handleAddSpecial}
-                  sx={{ mt: 2 }}
-                >
-                  Create First Special
-                </Button>
-              )}
             </Box>
           )}
         </TabPanel>
       </Box>
-
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete the venue "{currentVenue.name}"?
-            This action cannot be undone, and all associated specials will also be deleted.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleteInProgress}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDeleteVenue}
-            color="error"
-            disabled={deleteInProgress}
-            startIcon={deleteInProgress ? <CircularProgress size={20} /> : null}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 };
@@ -431,9 +335,11 @@ const VenueDetailPage = () => {
 function isVenueOpenNow(businessHours: any[]): boolean {
   if (!businessHours || businessHours.length === 0) return false;
 
-  const now = DateTime.local();
-  const dayOfWeek = now.weekday % 7; // Convert to 0-based (0=Sunday)
-  const currentTime = now.toFormat("HH:mm");
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0-based (0=Sunday)
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTime = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
 
   const todayHours = businessHours.find(schedule =>
     schedule.dayOfWeek === dayOfWeek
@@ -449,4 +355,4 @@ function isVenueOpenNow(businessHours: any[]): boolean {
   return currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
 }
 
-export default VenueDetailPage;
+export default VenueDetailsPage;

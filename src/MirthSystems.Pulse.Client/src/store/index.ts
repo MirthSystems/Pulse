@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { venueReducer } from '@features/venues/venueSlice';
-import { specialReducer } from '@features/specials/specialSlice';
-import { scheduleReducer } from '@features/schedules/scheduleSlice';
+import { venueReducer } from '@store/venueSlice';
+import { specialReducer } from '@store/specialSlice';
+import { scheduleReducer } from '@store/scheduleSlice';
 
 export const store = configureStore({
   reducer: {

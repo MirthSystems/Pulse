@@ -16,14 +16,14 @@ export class SpecialService {
         pageSize: params.pageSize,
         address: params.address,
         radius: params.radius,
-        term: params.term,
-        type: params.type,
-        active: params.active !== undefined ? params.active.toString() : 'true',
+        searchTerm: params.term,
+        specialTypeId: params.type,
+        isCurrentlyRunning: params.active !== undefined ? params.active.toString() : 'true',
         venueId: params.venueId,
-        date: params.searchDateTime
+        searchDateTime: params.dateTime
       });
 
-      const response = await publicApiClient.get(`/specials/search${queryString}`);
+      const response = await publicApiClient.get(`/specials${queryString}`);
       return response.data;
     } catch (error) {
       console.error('Error in searchSpecials:', error);
@@ -61,9 +61,10 @@ export class SpecialService {
     }
   }
 
-  static async deleteSpecial(id: string, apiClient: AxiosInstance): Promise<void> {
+  static async deleteSpecial(id: string, apiClient: AxiosInstance): Promise<boolean> {
     try {
       await apiClient.delete(`/specials/${id}`);
+      return true;
     } catch (error) {
       console.error('Error deleting special:', error);
       throw error;

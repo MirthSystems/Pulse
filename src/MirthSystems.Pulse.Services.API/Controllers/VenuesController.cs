@@ -48,7 +48,6 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<VenueItem>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenues", "Retrieves a paginated list of venues with optional filtering")]
         public async Task<ActionResult<PagedResult<VenueItem>>> GetVenues([FromQuery] GetVenuesRequest request)
         {
@@ -61,10 +60,6 @@ namespace MirthSystems.Pulse.Services.API.Controllers
                 }
                 
                 var venues = await _venueService.GetVenuesAsync(request);
-                if (venues == null || venues.Items.Count == 0)
-                {
-                    return NotFound("No venues found matching the criteria");
-                }
                 return Ok(venues);
             }
             catch (ArgumentException ex)
@@ -170,7 +165,6 @@ namespace MirthSystems.Pulse.Services.API.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SpecialItem>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [OpenApiOperation("GetVenueSpecials", "Retrieves all special promotions offered by a specific venue")]
         public async Task<ActionResult<List<SpecialItem>>> GetVenueSpecials(string id)
         {
@@ -182,11 +176,6 @@ namespace MirthSystems.Pulse.Services.API.Controllers
                 }
 
                 var specials = await _venueService.GetVenueSpecialsAsync(id);
-                if (specials == null || specials.Count == 0)
-                {
-                    return NotFound($"Specials for venue with ID {id} not found");
-                }
-
                 return Ok(specials);
             }
             catch (Exception ex)

@@ -24,7 +24,6 @@
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<SearchSpecialsResult>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [OpenApiOperation("SearchSpecials", "Searches for specials grouped by venue with optional filtering")]
         public async Task<ActionResult<PagedResult<SearchSpecialsResult>>> SearchSpecials([FromQuery] GetSpecialsRequest request)

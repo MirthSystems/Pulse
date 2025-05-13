@@ -9,7 +9,6 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@components': path.resolve(__dirname, './src/components'),
-      '@features': path.resolve(__dirname, './src/features'),
       '@services': path.resolve(__dirname, './src/services'),
       '@models': path.resolve(__dirname, './src/models'),
       '@utils': path.resolve(__dirname, './src/utils'),
@@ -25,7 +24,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_SERVER_URL,
+        target: 'https://localhost:7253',
         changeOrigin: true,
         secure: false
       }

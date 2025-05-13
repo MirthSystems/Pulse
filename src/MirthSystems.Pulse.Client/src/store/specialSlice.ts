@@ -69,6 +69,7 @@ export const searchSpecials = createAsyncThunk<
   { rejectValue: ApiError }
 >('specials/searchSpecials', async (params, { rejectWithValue }) => {
   try {
+    // Using the corrected service method
     return await SpecialService.searchSpecials(params);
   } catch (error) {
     // Handle the error properly to ensure it's serializable

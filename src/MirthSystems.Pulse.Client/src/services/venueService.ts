@@ -54,8 +54,8 @@ export const VenueService = {
   // Get specials for a venue
   getVenueSpecials: async (venueId: string): Promise<SpecialItem[]> => {
     try {
-      // Use the correct API endpoint format
-      const response = await publicApiClient.get<SpecialItem[]>(`/api/specials/venue/${venueId}`);
+      // This is correct according to the SpecialsController endpoint
+      const response = await publicApiClient.get(`/venues/${venueId}/specials`);
       return response.data;
     } catch (error) {
       console.error('Error fetching venue specials:', error);

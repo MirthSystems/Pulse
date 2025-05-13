@@ -23,21 +23,6 @@
     public interface ISpecialService
     {
         /// <summary>
-        /// Retrieves a filtered, paginated list of specials.
-        /// </summary>
-        /// <param name="request">The special search and filter request parameters.</param>
-        /// <returns>A paginated list of special list items.</returns>
-        /// <remarks>
-        /// <para>This method returns specials with filtering based on:</para>
-        /// <para>- Geographic location and radius</para>
-        /// <para>- Special type (food, drink, entertainment)</para>
-        /// <para>- Whether the special is currently running</para>
-        /// <para>- Text search terms</para>
-        /// <para>- Venue ID filtering</para>
-        /// </remarks>
-        Task<PagedResult<SpecialItem>> GetSpecialsAsync(GetSpecialsRequest request);
-
-        /// <summary>
         /// Searches for specials and groups them by venue based on the provided criteria.
         /// </summary>
         /// <param name="request">The request parameters including pagination and filter criteria.</param>

@@ -1,40 +1,39 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Button, 
-  Grid, 
-  Card, 
+import SpecialsList from '@components/specials/SpecialsList';
+import BusinessHoursDisplay from '@components/venues/BusinessHoursDisplay';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  Place as PlaceIcon,
+  Language as WebsiteIcon
+} from '@mui/icons-material';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
   CardContent,
   CardMedia,
-  Tabs,
-  Tab,
-  Divider,
   CircularProgress,
-  Alert,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Grid,
+  Paper,
+  Tab,
+  Tabs,
+  Typography
 } from '@mui/material';
-import { 
-  Edit as EditIcon, 
-  Delete as DeleteIcon, 
-  Add as AddIcon, 
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Language as WebsiteIcon,
-  Place as PlaceIcon
-} from '@mui/icons-material';
 import { useApiClient } from '@services/apiClient';
 import { RootState } from '@store/index';
-import { fetchVenueById, fetchVenueBusinessHours, fetchVenueSpecials, deleteVenue } from '@features/venues/venueSlice';
-import BusinessHoursDisplay from '@components/venues/BusinessHoursDisplay';
-import SpecialsList from '@components/specials/SpecialsList';
+import { deleteVenue, fetchVenueBusinessHours, fetchVenueById, fetchVenueSpecials } from '@store/venueSlice';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,9 +66,9 @@ const VenueManagementPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const apiClient = useApiClient();
-  
+
   const { currentVenue, venueBusinessHours, venueSpecials, loading, error } = useSelector((state: RootState) => state.venues);
-  
+
   const [tabValue, setTabValue] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -92,7 +91,7 @@ const VenueManagementPage = () => {
 
   const handleDeleteVenue = async () => {
     if (!id) return;
-    
+
     setDeleteLoading(true);
     try {
       await dispatch(deleteVenue({ id, apiClient }) as any);
@@ -135,11 +134,11 @@ const VenueManagementPage = () => {
 
   return (
     <Box>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'flex-start',
-        mb: 4 
+        mb: 4
       }}>
         <Box>
           <Typography variant="h4" component="h1">
@@ -149,7 +148,7 @@ const VenueManagementPage = () => {
             {currentVenue.locality}, {currentVenue.region}
           </Typography>
         </Box>
-        
+
         <Box>
           <Button
             variant="outlined"
@@ -181,12 +180,12 @@ const VenueManagementPage = () => {
               sx={{ objectFit: 'cover', borderRadius: 1 }}
             />
           ) : (
-            <Paper 
-              sx={{ 
-                height: 200, 
-                bgcolor: 'grey.200', 
-                display: 'flex', 
-                alignItems: 'center', 
+            <Paper
+              sx={{
+                height: 200,
+                bgcolor: 'grey.200',
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 1
               }}
@@ -202,7 +201,7 @@ const VenueManagementPage = () => {
               <Typography variant="h6" gutterBottom>
                 Contact Information
               </Typography>
-              
+
               {currentVenue.phoneNumber && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <PhoneIcon fontSize="small" sx={{ mr: 1 }} />
@@ -211,7 +210,7 @@ const VenueManagementPage = () => {
                   </Typography>
                 </Box>
               )}
-              
+
               {currentVenue.email && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <EmailIcon fontSize="small" sx={{ mr: 1 }} />
@@ -220,7 +219,7 @@ const VenueManagementPage = () => {
                   </Typography>
                 </Box>
               )}
-              
+
               {currentVenue.website && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <WebsiteIcon fontSize="small" sx={{ mr: 1 }} />
@@ -229,7 +228,7 @@ const VenueManagementPage = () => {
                   </Typography>
                 </Box>
               )}
-              
+
               <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
                 <PlaceIcon fontSize="small" sx={{ mr: 1, mt: 0.3 }} />
                 <Typography variant="body2">
@@ -242,7 +241,7 @@ const VenueManagementPage = () => {
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} md={8}>
           <Paper sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -252,7 +251,7 @@ const VenueManagementPage = () => {
                 <Tab label="Specials" />
               </Tabs>
             </Box>
-            
+
             <TabPanel value={tabValue} index={0}>
               <Typography variant="h6" gutterBottom>
                 Description
@@ -261,33 +260,33 @@ const VenueManagementPage = () => {
                 {currentVenue.description || "No description provided."}
               </Typography>
             </TabPanel>
-            
+
             <TabPanel value={tabValue} index={1}>
               <Typography variant="h6" gutterBottom>
                 Business Hours
               </Typography>
               <BusinessHoursDisplay schedules={venueBusinessHours} />
             </TabPanel>
-            
+
             <TabPanel value={tabValue} index={2}>
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                mb: 2 
+                mb: 2
               }}>
                 <Typography variant="h6">
                   Specials
                 </Typography>
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   startIcon={<AddIcon />}
                   onClick={handleAddSpecial}
                 >
                   Add Special
                 </Button>
               </Box>
-              
+
               {venueSpecials.length > 0 ? (
                 <SpecialsList specials={venueSpecials} showVenueName={false} />
               ) : (
@@ -312,15 +311,15 @@ const VenueManagementPage = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setDeleteDialogOpen(false)} 
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
             disabled={deleteLoading}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleDeleteVenue} 
-            color="error" 
+          <Button
+            onClick={handleDeleteVenue}
+            color="error"
             disabled={deleteLoading}
           >
             {deleteLoading ? <CircularProgress size={24} /> : "Delete"}

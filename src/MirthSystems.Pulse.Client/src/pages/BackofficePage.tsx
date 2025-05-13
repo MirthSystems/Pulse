@@ -19,7 +19,7 @@ import {
 import { Add as AddIcon, Place as PlaceIcon } from '@mui/icons-material';
 
 import { RootState } from '@store/index';
-import { fetchVenues, clearVenueError } from '@features/venues/venueSlice';
+import { fetchVenues, clearVenueError } from '@store/venueSlice';
 import { VenueSearchParams } from '@models/venue';
 
 const BackofficePage = () => {
