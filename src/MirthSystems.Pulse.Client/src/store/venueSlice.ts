@@ -84,11 +84,14 @@ export const fetchVenueBusinessHours = createAsyncThunk<
   try {
     return await VenueService.getVenueBusinessHours(id);
   } catch (error) {
-    // Return empty array for 404s to prevent errors
-    if (error.status === 404) {
-      return [];
+    if (error && typeof error === 'object' && 'status' in error) {
+      // Handle error with status property
+      if (error.status === 404) {
+        return [];
+      }
+      return rejectWithValue(processApiError(error));
     }
-    return rejectWithValue(processApiError(error));
+    return rejectWithValue({ status: 500, message: 'Unknown error occurred' });
   }
 });
 
@@ -101,11 +104,14 @@ export const fetchVenueSpecials = createAsyncThunk<
     // Using the correct service method that calls /specials/venue/{venueId}
     return await VenueService.getVenueSpecials(id);
   } catch (error) {
-    // Return empty array for 404s to prevent errors
-    if (error.status === 404) {
-      return [];
+    if (error && typeof error === 'object' && 'status' in error) {
+      // Handle error with status property
+      if (error.status === 404) {
+        return [];
+      }
+      return rejectWithValue(processApiError(error));
     }
-    return rejectWithValue(processApiError(error));
+    return rejectWithValue({ status: 500, message: 'Unknown error occurred' });
   }
 });
 

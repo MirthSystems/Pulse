@@ -19,12 +19,13 @@ interface SpecialState {
     pageSize: number;
     totalCount: number;
     totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
   };
   loading: boolean;
   error: string | null;
 }
 
-// Initial state
 const initialState: SpecialState = {
   items: [],
   searchResults: {
@@ -34,6 +35,8 @@ const initialState: SpecialState = {
       pageSize: 20,
       totalCount: 0,
       totalPages: 0,
+      hasPreviousPage: false,
+      hasNextPage: false,
     }
   },
   currentSpecial: null,
@@ -42,6 +45,8 @@ const initialState: SpecialState = {
     pageSize: 20,
     totalCount: 0,
     totalPages: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
   },
   loading: false,
   error: null,
@@ -127,7 +132,6 @@ export const deleteSpecial = createAsyncThunk(
   }
 );
 
-// Create the slice
 const specialSlice = createSlice({
   name: 'specials',
   initialState,
@@ -141,7 +145,6 @@ const specialSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // searchSpecials
       .addCase(searchSpecials.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -149,14 +152,16 @@ const specialSlice = createSlice({
       .addCase(searchSpecials.fulfilled, (state, action) => {
         state.loading = false;
         state.searchResults = action.payload;
-        state.pagingInfo = action.payload.pagingInfo;
+        state.pagingInfo = {
+          ...action.payload.pagingInfo,
+          hasPreviousPage: action.payload.pagingInfo.currentPage > 1,
+          hasNextPage: action.payload.pagingInfo.currentPage < action.payload.pagingInfo.totalPages,
+        };
       })
       .addCase(searchSpecials.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to search specials';
+        state.error = action.payload ? (typeof action.payload === 'object' && 'message' in action.payload ? action.payload.message : 'Unknown error') : 'Failed to search specials';
       })
-      
-      // getSpecialById
       .addCase(getSpecialById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -167,10 +172,8 @@ const specialSlice = createSlice({
       })
       .addCase(getSpecialById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to fetch special';
+        state.error = action.payload ? (typeof action.payload === 'object' && 'message' in action.payload ? action.payload.message : 'Unknown error') : 'Failed to fetch special';
       })
-      
-      // createSpecial
       .addCase(createSpecial.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -181,10 +184,8 @@ const specialSlice = createSlice({
       })
       .addCase(createSpecial.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to create special';
+        state.error = action.payload ? (typeof action.payload === 'object' && 'message' in action.payload ? action.payload.message : 'Unknown error') : 'Failed to create special';
       })
-      
-      // updateSpecial
       .addCase(updateSpecial.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -195,7 +196,7 @@ const specialSlice = createSlice({
       })
       .addCase(updateSpecial.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to update special';
+        state.error = action.payload ? (typeof action.payload === 'object' && 'message' in action.payload ? action.payload.message : 'Unknown error') : 'Failed to update special';
       })
       
       // deleteSpecial
@@ -209,7 +210,7 @@ const specialSlice = createSlice({
       })
       .addCase(deleteSpecial.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to delete special';
+        state.error = action.payload ? (typeof action.payload === 'object' && 'message' in action.payload ? action.payload.message : 'Unknown error') : 'Failed to delete special';
       });
   },
 });

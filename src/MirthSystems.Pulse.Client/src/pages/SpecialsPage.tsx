@@ -28,7 +28,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import SpecialsList from '@components/specials/SpecialsList';
-import { clearSpecialsError, searchSpecials } from '@features/specials/specialSlice';
+import { clearSpecialsError, searchSpecials } from '@store/specialSlice';
 import { SpecialSearchParams, SpecialTypes } from '@models/special';
 import { RootState } from '@store/index';
 

@@ -42,7 +42,7 @@ import { deleteVenue, fetchVenueBusinessHours, fetchVenueById, fetchVenueSpecial
 import SpecialsList from '@components/specials/SpecialsList';
 import BusinessHoursDisplay from '@components/venues/BusinessHoursDisplay';
 import VenueMap from '@components/venues/VenueMap';
-import { clearSpecialsError } from '@features/specials/specialSlice';
+import { clearSpecialsError } from '@store/specialSlice';
 import { useApiClient } from '@services/apiClient';
 import { RootState } from '@store/index';
 

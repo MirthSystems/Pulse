@@ -23,7 +23,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import SpecialsList from '@components/specials/SpecialsList';
 import { clearSpecialsError } from '@store/specialSlice';
-import { SpecialSearchParams, SpecialTypes, PagedResult, SearchSpecialsResult } from '@models/special';
+import { SpecialSearchParams, SpecialTypes, SearchSpecialsResult } from '@models/special';
+import { PagedResult } from '@models/common'; // Import from the correct location
 import { RootState } from '@store/index';
 import { SpecialService } from '@services/specialService';
 
@@ -232,13 +233,13 @@ const SearchResultsPage = () => {
         <Box display="flex" justifyContent="center" my={4}>
           <CircularProgress />
         </Box>
-      ) : results?.items?.length > 0 ? (
+      ) : results && results.items && results.items.length > 0 ? (
         <Box>
           <Typography variant="h5" gutterBottom>
             Found {results?.pagingInfo?.totalCount || 0} Results
           </Typography>
 
-          {results.items.map((result) => (
+          {results.items.map((result: SearchSpecialsResult) => (
             <Paper
               key={result.venue?.id || `venue-${Math.random()}`}
               elevation={1}

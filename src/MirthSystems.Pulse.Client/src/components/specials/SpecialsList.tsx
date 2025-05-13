@@ -10,7 +10,7 @@ import {
   Divider,
   Button
 } from '@mui/material';
-import { LocalBar as DrinkIcon, Restaurant as FoodIcon, MusicNote as EntertainmentIcon } from '@mui/icons-material';
+import { LocalBar as DrinkIcon, Restaurant as FoodIcon, MusicNote as EntertainmentIcon, DeviceUnknown as UnknownIcon } from '@mui/icons-material';
 import { SpecialItem, SpecialTypes } from '@models/special';
 import { DateTime } from 'luxon';
 
@@ -39,7 +39,7 @@ const SpecialsList = ({ specials, showVenueName = false }: SpecialsListProps) =>
       case SpecialTypes.Entertainment:
         return <EntertainmentIcon />;
       default:
-        return null;
+        return <UnknownIcon />;
     }
   };
 

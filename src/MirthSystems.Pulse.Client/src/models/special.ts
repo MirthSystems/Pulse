@@ -17,6 +17,7 @@ export interface SpecialItem {
   endTime?: string;
   isCurrentlyRunning: boolean;
   isRecurring: boolean;
+  venueName?: string; // Add this optional property
 }
 
 export interface SpecialItemExtended extends SpecialItem {

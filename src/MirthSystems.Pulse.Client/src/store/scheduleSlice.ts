@@ -84,7 +84,6 @@ const scheduleSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // getScheduleById
       .addCase(getScheduleById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -97,8 +96,6 @@ const scheduleSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Failed to fetch schedule';
       })
-      
-      // createSchedule
       .addCase(createSchedule.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -111,8 +108,6 @@ const scheduleSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Failed to create schedule';
       })
-      
-      // updateSchedule
       .addCase(updateSchedule.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -125,8 +120,6 @@ const scheduleSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Failed to update schedule';
       })
-      
-      // deleteSchedule
       .addCase(deleteSchedule.pending, (state) => {
         state.loading = true;
         state.error = null;
