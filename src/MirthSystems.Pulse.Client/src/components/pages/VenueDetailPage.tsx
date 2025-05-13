@@ -1,54 +1,50 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { useAuth0 } from '@auth0/auth0-react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent,
-  CardMedia,
-  Divider,
-  Button,
-  Chip,
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  Place as PlaceIcon,
+  AccessTime as TimeIcon,
+  Language as WebsiteIcon,
+} from '@mui/icons-material';
+import {
   Alert,
+  Box,
+  Button,
+  CardMedia,
+  Chip,
   CircularProgress,
   Container,
-  Paper,
-  Link,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  IconButton,
+  Grid,
+  Link,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
   Tab,
   Tabs,
+  Typography
 } from '@mui/material';
-import { 
-  Phone as PhoneIcon, 
-  Language as WebsiteIcon,
-  Email as EmailIcon,
-  Place as PlaceIcon,
-  AccessTime as TimeIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
 import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { RootState } from '@store/index';
-import { fetchVenueById, fetchVenueBusinessHours, fetchVenueSpecials, deleteVenue } from '@features/venues/venueSlice';
-import { clearSpecialsError } from '@features/specials/specialSlice';
-import VenueMap from '@components/venues/VenueMap';
-import BusinessHoursDisplay from '@components/venues/BusinessHoursDisplay';
 import SpecialsList from '@components/specials/SpecialsList';
+import BusinessHoursDisplay from '@components/venues/BusinessHoursDisplay';
+import VenueMap from '@components/venues/VenueMap';
+import { clearSpecialsError } from '@features/specials/specialSlice';
+import { deleteVenue, fetchVenueBusinessHours, fetchVenueById, fetchVenueSpecials } from '@features/venues/venueSlice';
 import { useApiClient } from '@services/apiClient';
+import { RootState } from '@store/index';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -82,9 +78,9 @@ const VenueDetailPage = () => {
   const dispatch = useDispatch();
   const apiClient = useApiClient();
   const { isAuthenticated } = useAuth0();
-  
+
   const { currentVenue, venueBusinessHours, venueSpecials, loading, error } = useSelector((state: RootState) => state.venues);
-  
+
   const [tabValue, setTabValue] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
@@ -95,7 +91,7 @@ const VenueDetailPage = () => {
       dispatch(fetchVenueBusinessHours(id) as any);
       dispatch(fetchVenueSpecials(id) as any);
     }
-    
+
     return () => {
       // Cleanup
       dispatch(clearSpecialsError());
@@ -112,7 +108,7 @@ const VenueDetailPage = () => {
 
   const handleDeleteVenue = async () => {
     if (!id) return;
-    
+
     setDeleteInProgress(true);
     try {
       await dispatch(deleteVenue({ id, apiClient }) as any);
@@ -129,6 +125,10 @@ const VenueDetailPage = () => {
     navigate(`/specials/new?venueId=${id}`);
   };
 
+  const handleBack = () => {
+    navigate('/backoffice');
+  };
+
   if (loading && !currentVenue) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -143,9 +143,9 @@ const VenueDetailPage = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           {error}
         </Alert>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/venues')} 
+        <Button
+          variant="outlined"
+          onClick={handleBack}
           sx={{ mt: 2 }}
         >
           Back to Venues
@@ -160,9 +160,9 @@ const VenueDetailPage = () => {
         <Alert severity="warning" sx={{ mt: 2 }}>
           Venue not found
         </Alert>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/venues')} 
+        <Button
+          variant="outlined"
+          onClick={handleBack}
           sx={{ mt: 2 }}
         >
           Back to Venues
@@ -179,20 +179,20 @@ const VenueDetailPage = () => {
             <Typography variant="h4" component="h1" gutterBottom>
               {currentVenue.name}
             </Typography>
-            
+
             <Box sx={{ mb: 2 }}>
               <Typography variant="body1" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
                 <PlaceIcon fontSize="small" sx={{ mr: 0.5 }} />
                 {currentVenue.locality}, {currentVenue.region}
               </Typography>
             </Box>
-            
+
             {currentVenue.description && (
               <Typography variant="body1" paragraph>
                 {currentVenue.description}
               </Typography>
             )}
-            
+
             <List dense sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', mb: 2 }}>
               {currentVenue.phoneNumber && (
                 <ListItem>
@@ -206,7 +206,7 @@ const VenueDetailPage = () => {
                   </ListItemText>
                 </ListItem>
               )}
-              
+
               {currentVenue.website && (
                 <ListItem>
                   <ListItemIcon>
@@ -219,7 +219,7 @@ const VenueDetailPage = () => {
                   </ListItemText>
                 </ListItem>
               )}
-              
+
               {currentVenue.email && (
                 <ListItem>
                   <ListItemIcon>
@@ -232,7 +232,7 @@ const VenueDetailPage = () => {
                   </ListItemText>
                 </ListItem>
               )}
-              
+
               <ListItem>
                 <ListItemIcon>
                   <TimeIcon />
@@ -246,7 +246,7 @@ const VenueDetailPage = () => {
                 </ListItemText>
               </ListItem>
             </List>
-            
+
             {isAuthenticated && (
               <Box sx={{ mt: 2 }}>
                 <Button
@@ -268,7 +268,7 @@ const VenueDetailPage = () => {
               </Box>
             )}
           </Grid>
-          
+
           <Grid item xs={12} md={6}>
             {currentVenue.profileImage ? (
               <CardMedia
@@ -279,12 +279,12 @@ const VenueDetailPage = () => {
                 sx={{ objectFit: 'cover', borderRadius: 2 }}
               />
             ) : (
-              <Paper 
-                sx={{ 
-                  height: 300, 
-                  bgcolor: 'grey.200', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+              <Paper
+                sx={{
+                  height: 300,
+                  bgcolor: 'grey.200',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: 2
                 }}
@@ -294,11 +294,11 @@ const VenueDetailPage = () => {
                 </Typography>
               </Paper>
             )}
-            
+
             {currentVenue.latitude && currentVenue.longitude && (
               <Box sx={{ mt: 2, height: 200 }}>
-                <VenueMap 
-                  latitude={currentVenue.latitude} 
+                <VenueMap
+                  latitude={currentVenue.latitude}
                   longitude={currentVenue.longitude}
                   venueName={currentVenue.name}
                 />
@@ -307,12 +307,12 @@ const VenueDetailPage = () => {
           </Grid>
         </Grid>
       </Box>
-      
+
       <Box sx={{ width: '100%', mb: 4 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={tabValue} 
-            onChange={handleTabChange} 
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
             aria-label="venue information tabs"
             sx={{ mb: 1 }}
           >
@@ -320,7 +320,7 @@ const VenueDetailPage = () => {
             <Tab label="Specials" />
           </Tabs>
         </Box>
-        
+
         <TabPanel value={tabValue} index={0}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
@@ -333,7 +333,7 @@ const VenueDetailPage = () => {
                 <br />
                 {currentVenue.country}
               </Typography>
-              
+
               <Box sx={{ mt: 2 }}>
                 <Button
                   variant="outlined"
@@ -349,20 +349,20 @@ const VenueDetailPage = () => {
                 </Button>
               </Box>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>Business Hours</Typography>
               <BusinessHoursDisplay schedules={venueBusinessHours} />
             </Grid>
           </Grid>
         </TabPanel>
-        
+
         <TabPanel value={tabValue} index={1}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="h6">
               {venueSpecials.length > 0 ? 'Current Specials' : 'No Current Specials'}
             </Typography>
-            
+
             {isAuthenticated && (
               <Button
                 variant="contained"
@@ -374,7 +374,7 @@ const VenueDetailPage = () => {
               </Button>
             )}
           </Box>
-          
+
           {venueSpecials.length > 0 ? (
             <SpecialsList specials={venueSpecials} />
           ) : (
@@ -382,7 +382,7 @@ const VenueDetailPage = () => {
               <Typography color="text.secondary">
                 This venue doesn't have any active specials right now.
               </Typography>
-              
+
               {isAuthenticated && (
                 <Button
                   variant="outlined"
@@ -397,7 +397,7 @@ const VenueDetailPage = () => {
           )}
         </TabPanel>
       </Box>
-      
+
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -405,7 +405,7 @@ const VenueDetailPage = () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the venue "{currentVenue.name}"? 
+            Are you sure you want to delete the venue "{currentVenue.name}"?
             This action cannot be undone, and all associated specials will also be deleted.
           </DialogContentText>
         </DialogContent>
@@ -413,9 +413,9 @@ const VenueDetailPage = () => {
           <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleteInProgress}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleDeleteVenue} 
-            color="error" 
+          <Button
+            onClick={handleDeleteVenue}
+            color="error"
             disabled={deleteInProgress}
             startIcon={deleteInProgress ? <CircularProgress size={20} /> : null}
           >
@@ -430,22 +430,22 @@ const VenueDetailPage = () => {
 // Helper function to check if venue is open now
 function isVenueOpenNow(businessHours: any[]): boolean {
   if (!businessHours || businessHours.length === 0) return false;
-  
+
   const now = DateTime.local();
   const dayOfWeek = now.weekday % 7; // Convert to 0-based (0=Sunday)
   const currentTime = now.toFormat("HH:mm");
-  
-  const todayHours = businessHours.find(schedule => 
+
+  const todayHours = businessHours.find(schedule =>
     schedule.dayOfWeek === dayOfWeek
   );
-  
+
   if (!todayHours || todayHours.isClosed) return false;
-  
+
   // Handle case where venue is open past midnight
   if (todayHours.openTime > todayHours.closeTime) {
     return currentTime >= todayHours.openTime || currentTime <= todayHours.closeTime;
   }
-  
+
   return currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
 }
 

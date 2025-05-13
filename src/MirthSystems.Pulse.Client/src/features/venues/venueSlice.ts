@@ -98,6 +98,7 @@ export const fetchVenueSpecials = createAsyncThunk<
   { rejectValue: ApiError }
 >('venues/fetchVenueSpecials', async (id, { rejectWithValue }) => {
   try {
+    // Fix the API endpoint - the endpoint should be 'specials/venue/{id}' instead of 'venues/{id}/specials'
     return await VenueService.getVenueSpecials(id);
   } catch (error) {
     // Return empty array for 404s to prevent errors

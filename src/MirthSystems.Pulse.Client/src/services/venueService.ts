@@ -1,16 +1,16 @@
-import { AxiosInstance } from 'axios';
-import { publicApiClient, createQueryString } from './apiClient';
-import { 
-  VenueItem, 
-  VenueItemExtended, 
-  CreateVenueRequest, 
-  UpdateVenueRequest,
-  VenueSearchParams,
-  GetVenuesRequest 
-} from '@models/venue';
 import { PagedResult } from '@models/common';
 import { OperatingScheduleItem } from '@models/operatingSchedule';
 import { SpecialItem } from '@models/special';
+import {
+  CreateVenueRequest,
+  GetVenuesRequest,
+  UpdateVenueRequest,
+  VenueItem,
+  VenueItemExtended,
+  VenueSearchParams
+} from '@models/venue';
+import { AxiosInstance } from 'axios';
+import { createQueryString, publicApiClient } from './apiClient';
 
 export const VenueService = {
   // Convert search params to API request format
@@ -52,9 +52,15 @@ export const VenueService = {
   },
 
   // Get specials for a venue
-  getVenueSpecials: async (id: string): Promise<SpecialItem[]> => {
-    const response = await publicApiClient.get(`/venues/${id}/specials`);
-    return response.data;
+  getVenueSpecials: async (venueId: string): Promise<SpecialItem[]> => {
+    try {
+      // Use the correct API endpoint format
+      const response = await publicApiClient.get<SpecialItem[]>(`/api/specials/venue/${venueId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching venue specials:', error);
+      throw error;
+    }
   },
 
   // Create a new venue (requires authentication)

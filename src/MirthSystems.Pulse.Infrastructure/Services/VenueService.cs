@@ -33,7 +33,6 @@
                 Point? searchLocation = null;
                 double? distanceInMeters = null;
 
-                // Convert address to coordinates if provided
                 if (!string.IsNullOrEmpty(request.Address))
                 {
                     try
@@ -44,14 +43,12 @@
                             var result = geocodeResponse.Value.Features[0];
                             searchLocation = new Point(result.Geometry.Coordinates.Longitude, result.Geometry.Coordinates.Latitude) { SRID = 4326 };
                             
-                            // Convert radius from miles to meters if provided
                             if (request.RadiusInMiles.HasValue)
                             {
                                 distanceInMeters = request.RadiusInMiles.Value * 1609.34;
                             }
                             else
                             {
-                                // Default to 5 miles if address is provided but no radius
                                 distanceInMeters = 5 * 1609.34;
                             }
                         }
@@ -66,7 +63,6 @@
                     }
                 }
 
-                // Query the repository with all filters
                 var venues = await _unitOfWork.Venues.GetPagedVenuesAsync(
                     request.Page,
                     request.PageSize,
@@ -78,7 +74,6 @@
                     request.HasActiveSpecials,
                     request.SpecialTypeId);
 
-                // Map to response model
                 return new PagedResult<VenueItem>
                 {
                     Items = venues.Select(v => v.MapToVenueListItem()).ToList(),

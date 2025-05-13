@@ -1,37 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import {
+  Add as AddIcon,
+  MyLocation as MyLocationIcon,
+  Search as SearchIcon
+} from '@mui/icons-material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Pagination,
+  Paper,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
-import { 
-  Box, 
-  Typography, 
-  Container, 
-  Grid, 
-  Paper, 
-  TextField, 
-  Button, 
-  FormControl, 
-  InputLabel, 
-  Select, 
-  MenuItem, 
-  Pagination, 
-  CircularProgress, 
-  Alert, 
-  InputAdornment, 
-  IconButton 
-} from '@mui/material';
-import { 
-  Search as SearchIcon, 
-  Add as AddIcon, 
-  MyLocation as MyLocationIcon 
-} from '@mui/icons-material';
-import { DateTime } from 'luxon';
 
-import { RootState } from '@store/index';
-import { searchSpecials, clearSpecialsError } from '@features/specials/specialSlice';
-import { SpecialTypes } from '@models/special';
-import { SpecialSearchParams } from '@models/special';
 import SpecialsList from '@components/specials/SpecialsList';
+import { clearSpecialsError, searchSpecials } from '@features/specials/specialSlice';
+import { SpecialSearchParams, SpecialTypes } from '@models/special';
+import { RootState } from '@store/index';
 
 const SpecialsPage = () => {
   const navigate = useNavigate();
@@ -74,7 +73,7 @@ const SpecialsPage = () => {
     if (!address) {
       return; // Require address for searching
     }
-    
+
     const params: SpecialSearchParams = {
       address,
       radius,
@@ -85,7 +84,7 @@ const SpecialsPage = () => {
       active: activeOnly,
       dateTime: DateTime.now().toISO()
     };
-    
+
     dispatch(searchSpecials(params) as any);
 
     // Update URL parameters for shareable links
@@ -134,9 +133,9 @@ const SpecialsPage = () => {
           Find Specials
         </Typography>
         {isAuthenticated && (
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             startIcon={<AddIcon />}
             onClick={() => navigate('/specials/new')}
           >
@@ -148,9 +147,9 @@ const SpecialsPage = () => {
       <Paper component="form" onSubmit={handleSearch} elevation={3} sx={{ p: 3, mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
-            <TextField 
+            <TextField
               fullWidth
-              label="Location" 
+              label="Location"
               placeholder="Enter address, city, or ZIP"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
@@ -168,7 +167,7 @@ const SpecialsPage = () => {
           </Grid>
 
           <Grid item xs={12} md={2}>
-            <TextField 
+            <TextField
               fullWidth
               label="Radius (miles)"
               type="number"
@@ -209,10 +208,10 @@ const SpecialsPage = () => {
           </Grid>
 
           <Grid item xs={12} md={2}>
-            <Button 
+            <Button
               fullWidth
               type="submit"
-              variant="contained" 
+              variant="contained"
               color="primary"
               disabled={loading || !address}
               sx={{ height: '56px' }}
@@ -222,9 +221,9 @@ const SpecialsPage = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <TextField 
+            <TextField
               fullWidth
-              label="Search Specials" 
+              label="Search Specials"
               placeholder="Keywords in description"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -250,43 +249,43 @@ const SpecialsPage = () => {
         <Box display="flex" justifyContent="center" my={4}>
           <CircularProgress />
         </Box>
-      ) : searchResults.items.length > 0 ? (
+      ) : searchResults?.items?.length > 0 ? (
         <Box>
           <Typography variant="h5" component="h2" gutterBottom>
-            Found {searchResults.pagingInfo.totalCount} Results
+            Found {searchResults?.pagingInfo?.totalCount || 0} Results
           </Typography>
-          
+
           {searchResults.items.map((result) => (
-            <Paper key={result.venue.id} sx={{ mb: 4, p: 3 }}>
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
+            <Paper key={result.venue?.id || `venue-${Math.random()}`} sx={{ mb: 4, p: 3 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   mb: 2,
                   cursor: 'pointer'
                 }}
-                onClick={() => navigate(`/venues/${result.venue.id}`)}
+                onClick={() => navigate(`/venues/${result.venue?.id || ''}`)}
               >
-                <Typography variant="h5">{result.venue.name}</Typography>
+                <Typography variant="h5">{result.venue?.name || 'Unknown Venue'}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {result.venue.locality}, {result.venue.region}
+                  {result.venue?.locality || ''}{result.venue?.locality && result.venue?.region ? ', ' : ''}{result.venue?.region || ''}
                 </Typography>
               </Box>
-              
+
               <Typography variant="subtitle1" gutterBottom>
-                Current Specials ({result.specials.items.length})
+                Current Specials ({result.specials?.items?.length || 0})
               </Typography>
-              
-              <SpecialsList specials={result.specials.items} showVenueName={false} />
+
+              <SpecialsList specials={result.specials?.items || []} showVenueName={false} />
             </Paper>
           ))}
-          
+
           <Box display="flex" justifyContent="center" my={4}>
-            <Pagination 
-              count={pagingInfo.totalPages} 
-              page={pagingInfo.currentPage} 
-              onChange={handlePageChange} 
+            <Pagination
+              count={pagingInfo.totalPages}
+              page={pagingInfo.currentPage}
+              onChange={handlePageChange}
               color="primary"
               disabled={loading}
             />

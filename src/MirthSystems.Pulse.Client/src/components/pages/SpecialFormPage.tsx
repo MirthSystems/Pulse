@@ -1,39 +1,39 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { useAuth0 } from '@auth0/auth0-react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  TextField, 
-  Button, 
-  Grid, 
-  Container,
-  Alert,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-  FormControlLabel,
-  Switch,
-  FormGroup,
-  Autocomplete
-} from '@mui/material';
-import { 
-  Save as SaveIcon, 
-  ArrowBack as ArrowBackIcon
+import {
+  ArrowBack as ArrowBackIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Switch,
+  TextField,
+  Typography
+} from '@mui/material';
 import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import { RootState } from '@store/index';
-import { VenueService } from '@services/venueService';
-import { getSpecialById, createSpecial, updateSpecial, clearCurrentSpecial, clearSpecialsError } from '@features/specials/specialSlice';
+import { clearCurrentSpecial, clearSpecialsError, createSpecial, getSpecialById, updateSpecial } from '@features/specials/specialSlice';
+import { CreateSpecialRequest, SpecialTypes, UpdateSpecialRequest } from '@models/special';
 import { VenueItem } from '@models/venue';
-import { CreateSpecialRequest, UpdateSpecialRequest, SpecialTypes } from '@models/special';
 import { useApiClient } from '@services/apiClient';
+import { VenueService } from '@services/venueService';
+import { RootState } from '@store/index';
 
 const SpecialFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +42,7 @@ const SpecialFormPage = () => {
   const apiClient = useApiClient();
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
   const [searchParams] = useSearchParams();
-  
+
   const { currentSpecial, loading, error } = useSelector((state: RootState) => state.specials);
 
   // Form state
@@ -54,23 +54,23 @@ const SpecialFormPage = () => {
   const [expirationDate, setExpirationDate] = useState<string>('');
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
   const [cronSchedule, setCronSchedule] = useState<string>('0 17 * * 1-5'); // Weekdays at 5pm
-  
+
   // Venue selection
   const [venueId, setVenueId] = useState<string>('');
   const [venueName, setVenueName] = useState<string>('');
   const [venueOptions, setVenueOptions] = useState<VenueItem[]>([]);
   const [loadingVenues, setLoadingVenues] = useState<boolean>(false);
   const [venueSearchText, setVenueSearchText] = useState<string>('');
-  
+
   // Form submission and error states
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-  
+
   // Load venues
   useEffect(() => {
     const loadVenues = async () => {
       if (!isAuthenticated) return;
-      
+
       try {
         setLoadingVenues(true);
         const result = await VenueService.getVenues({
@@ -86,10 +86,10 @@ const SpecialFormPage = () => {
         setLoadingVenues(false);
       }
     };
-    
+
     loadVenues();
   }, [isAuthenticated, venueSearchText]);
-  
+
   // Fetch special data if in edit mode
   useEffect(() => {
     if (id) {
@@ -98,35 +98,43 @@ const SpecialFormPage = () => {
       // Clear current special if we're in create mode
       dispatch(clearCurrentSpecial());
       dispatch(clearSpecialsError());
-      
+
       // Check for venueId in query parameters
       const queryVenueId = searchParams.get('venueId');
       if (queryVenueId) {
         setVenueId(queryVenueId);
-        
+
         // Fetch venue details to get the name
         const loadVenueDetails = async () => {
           try {
+            setLoadingVenues(true); // Add loading state
             const venue = await VenueService.getVenueById(queryVenueId);
             if (venue) {
-              setVenueName(venue.name);
+              setVenueName(venue.name || ''); // Add fallback for null name
             }
           } catch (error) {
             console.error('Failed to load venue details:', error);
+            // Add error handling
+            setFormErrors(prev => ({
+              ...prev,
+              venueId: 'Failed to load venue details. Please try again.'
+            }));
+          } finally {
+            setLoadingVenues(false); // Ensure loading state is cleared
           }
         };
-        
+
         loadVenueDetails();
       }
     }
-    
+
     return () => {
       // Cleanup
       dispatch(clearCurrentSpecial());
       dispatch(clearSpecialsError());
     };
   }, [id, dispatch, searchParams]);
-  
+
   // Populate form with special data in edit mode
   useEffect(() => {
     if (currentSpecial && id) {
@@ -139,47 +147,51 @@ const SpecialFormPage = () => {
       setIsRecurring(currentSpecial.isRecurring);
       setCronSchedule(currentSpecial.cronSchedule || '');
       setVenueId(currentSpecial.venueId);
-      
+
       if (currentSpecial.venue) {
         setVenueName(currentSpecial.venue.name);
       }
     }
   }, [currentSpecial, id]);
-  
+
   // Validate form data
-  const validateForm = (): boolean => {
+  const validateForm = (): { [key: string]: string } => {
     const errors: { [key: string]: string } = {};
-    
+
     if (!content.trim()) errors.content = "Special description is required";
     else if (content.trim().length < 5) errors.content = "Description must be at least 5 characters";
     else if (content.trim().length > 200) errors.content = "Description cannot exceed 200 characters";
-    
+
     if (!startDate) errors.startDate = "Start date is required";
-    
+
     if (!startTime) errors.startTime = "Start time is required";
-    else if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(startTime)) 
+    else if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(startTime))
       errors.startTime = "Start time must be in format HH:MM (24-hour)";
-    
-    if (endTime && !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(endTime)) 
+
+    if (endTime && !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(endTime))
       errors.endTime = "End time must be in format HH:MM (24-hour)";
-    
-    if (isRecurring && !cronSchedule.trim()) 
+
+    if (isRecurring && !cronSchedule.trim())
       errors.cronSchedule = "CRON schedule is required for recurring specials";
-    
+
     if (!venueId) errors.venueId = "Please select a venue";
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+
+    return errors;
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    
+
+    // Validate form
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
+
       if (id) {
         // Edit mode
         const updateData: UpdateSpecialRequest = {
@@ -192,9 +204,17 @@ const SpecialFormPage = () => {
           isRecurring,
           cronSchedule: isRecurring ? cronSchedule : undefined
         };
-        
-        await dispatch(updateSpecial({ id, specialData: updateData, apiClient }) as any);
-        navigate(`/venues/${venueId}?tab=specials`);
+
+        try {
+          await dispatch(updateSpecial({ id, specialData: updateData, apiClient }) as any);
+          navigate(`/venues/${venueId}?tab=specials`);
+        } catch (error) {
+          console.error('Error updating special:', error);
+          setFormErrors(prev => ({
+            ...prev,
+            general: 'Failed to update special. Please try again.'
+          }));
+        }
       } else {
         // Create mode
         const createData: CreateSpecialRequest = {
@@ -208,17 +228,29 @@ const SpecialFormPage = () => {
           isRecurring,
           cronSchedule: isRecurring ? cronSchedule : undefined
         };
-        
-        await dispatch(createSpecial({ specialData: createData, apiClient }) as any);
-        navigate(`/venues/${venueId}?tab=specials`);
+
+        try {
+          await dispatch(createSpecial({ specialData: createData, apiClient }) as any);
+          navigate(`/venues/${venueId}?tab=specials`);
+        } catch (error) {
+          console.error('Error creating special:', error);
+          setFormErrors(prev => ({
+            ...prev,
+            general: 'Failed to create special. Please try again.'
+          }));
+        }
       }
     } catch (error) {
-      console.error("Error saving special:", error);
+      console.error('Form submission error:', error);
+      setFormErrors(prev => ({
+        ...prev,
+        general: 'An unexpected error occurred. Please try again.'
+      }));
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   // Check if user is authorized
   if (!authLoading && !isAuthenticated) {
     return (
@@ -226,9 +258,9 @@ const SpecialFormPage = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           You must be logged in to manage specials.
         </Alert>
-        <Button 
-          variant="contained" 
-          onClick={() => navigate('/specials')} 
+        <Button
+          variant="contained"
+          onClick={() => navigate('/specials')}
           sx={{ mt: 2 }}
         >
           Back to Specials
@@ -236,7 +268,7 @@ const SpecialFormPage = () => {
       </Container>
     );
   }
-  
+
   if (loading && id) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -260,10 +292,16 @@ const SpecialFormPage = () => {
             Back
           </Button>
         </Box>
-        
+
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
+          </Alert>
+        )}
+
+        {formErrors.general && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {formErrors.general}
           </Alert>
         )}
 
@@ -311,7 +349,7 @@ const SpecialFormPage = () => {
                 />
               </Grid>
             )}
-            
+
             {id && (
               <Grid item xs={12}>
                 <TextField
@@ -357,7 +395,7 @@ const SpecialFormPage = () => {
                 {formErrors.type && <FormHelperText>{formErrors.type}</FormHelperText>}
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} sm={6}>
               <FormGroup>
                 <FormControlLabel
@@ -372,7 +410,7 @@ const SpecialFormPage = () => {
                 />
               </FormGroup>
               <Typography variant="caption" color="text.secondary">
-                {isRecurring 
+                {isRecurring
                   ? "This special repeats on a regular schedule"
                   : "This is a one-time special"
                 }
@@ -452,7 +490,7 @@ const SpecialFormPage = () => {
                 }}
               />
             </Grid>
-            
+
             {isRecurring && (
               <Grid item xs={12}>
                 <TextField

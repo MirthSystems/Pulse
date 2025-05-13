@@ -1,46 +1,43 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  TextField,
-  Button,
-  Slider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
+import { MyLocation as MyLocationIcon, Search as SearchIcon } from '@mui/icons-material';
+import {
   Alert,
-  InputAdornment,
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  FormControl,
+  Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
   Pagination,
-  Divider
+  Paper,
+  Select,
+  TextField,
+  Typography
 } from '@mui/material';
-import { Search as SearchIcon, MyLocation as MyLocationIcon } from '@mui/icons-material';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { RootState } from '@store/index';
-import { searchSpecials, clearSpecialsError } from '@features/specials/specialSlice';
-import { SpecialSearchParams } from '@models/special';
-import { SpecialTypes } from '@models/special';
 import SpecialsList from '@components/specials/SpecialsList';
-import VenueCard from '@components/venues/VenueCard';
+import { clearSpecialsError } from '@features/specials/specialSlice';
+import { SpecialSearchParams, SpecialTypes } from '@models/special';
+import { RootState } from '@store/index';
 
 const SearchResultsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { searchResults, loading, error, pagingInfo } = useSelector((state: RootState) => state.specials);
+  const { searchResults, loading, error } = useSelector((state: RootState) => state.specials);
 
   // Search parameters
   const [address, setAddress] = useState<string>(searchParams.get('address') || '');
   const [radius, setRadius] = useState<number>(Number(searchParams.get('radius')) || 5);
   const [specialType, setSpecialType] = useState<number | string>(searchParams.get('type') || '');
   const [searchTerm, setSearchTerm] = useState<string>(searchParams.get('term') || '');
-  const [activeOnly, setActiveOnly] = useState<boolean>(searchParams.get('active') !== 'false');
+  const [activeOnly] = useState<boolean>(searchParams.get('active') !== 'false');
   const [page, setPage] = useState<number>(Number(searchParams.get('page')) || 1);
 
   useEffect(() => {
@@ -50,22 +47,53 @@ const SearchResultsPage = () => {
     }
   }, []);
 
-  const performSearch = () => {
-    if (!address) {
-      return; // Require address for searching
+  const performSearch = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (!address) {
+        setError('Location is required for searching specials.');
+        setLoading(false);
+        return;
+      }
+
+      const params: SpecialSearchParams = {
+        address,
+        radius,
+        page,
+        pageSize: 6,
+        term: searchTerm || undefined,
+        type: typeof specialType === 'number' ? specialType : undefined,
+        active: activeOnly
+      };
+
+      const response = await apiClient.get('/api/specials', {
+        params: {
+          address: params.address,
+          radius: params.radius || 5,
+          isCurrentlyRunning: params.active === undefined ? true : params.active,
+          searchTerm: params.term,
+          specialTypeId: params.type,
+          page: params.page || 1,
+          pageSize: params.pageSize
+        }
+      });
+
+      setResults(response.data);
+    } catch (error: any) {
+      console.error('Error fetching search results:', error);
+
+      if (error.response?.status === 404) {
+        setError('No results found for your search criteria. Try adjusting your filters.');
+      } else if (error.response?.status === 400) {
+        setError('Invalid search parameters. Please check your inputs and try again.');
+      } else {
+        setError('Failed to load results. Please try again later.');
+      }
+    } finally {
+      setLoading(false);
     }
-    
-    const params: SpecialSearchParams = {
-      address,
-      radius,
-      page,
-      pageSize: 6,
-      term: searchTerm || undefined,
-      type: typeof specialType === 'number' ? specialType : undefined,
-      active: activeOnly
-    };
-    
-    dispatch(searchSpecials(params) as any);
 
     // Update URL parameters for shareable links
     const newSearchParams = new URLSearchParams();
@@ -130,7 +158,7 @@ const SearchResultsPage = () => {
               }}
             />
           </Grid>
-          
+
           <Grid item xs={6} md={2}>
             <TextField
               fullWidth
@@ -141,7 +169,7 @@ const SearchResultsPage = () => {
               inputProps={{ min: 1, max: 50 }}
             />
           </Grid>
-          
+
           <Grid item xs={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Special Type</InputLabel>
@@ -157,7 +185,7 @@ const SearchResultsPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          
+
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
@@ -174,7 +202,7 @@ const SearchResultsPage = () => {
               }}
             />
           </Grid>
-          
+
           <Grid item xs={12} md={2}>
             <Button
               fullWidth
@@ -193,7 +221,7 @@ const SearchResultsPage = () => {
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
-          <Button 
+          <Button
             color="inherit"
             size="small"
             onClick={handleClearError}
@@ -208,19 +236,19 @@ const SearchResultsPage = () => {
         <Box display="flex" justifyContent="center" my={4}>
           <CircularProgress />
         </Box>
-      ) : searchResults.items && searchResults.items.length > 0 ? (
+      ) : searchResults?.items?.length > 0 ? (
         <Box>
           <Typography variant="h5" gutterBottom>
-            Found {searchResults.pagingInfo?.totalCount || 0} Results
+            Found {searchResults?.pagingInfo?.totalCount || 0} Results
           </Typography>
-          
+
           {searchResults.items.map((result) => (
-            <Paper 
-              key={result.venue.id} 
-              elevation={1} 
-              sx={{ 
-                mb: 4, 
-                overflow: 'hidden', 
+            <Paper
+              key={result.venue?.id || `venue-${Math.random()}`}
+              elevation={1}
+              sx={{
+                mb: 4,
+                overflow: 'hidden',
                 cursor: 'pointer',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                 '&:hover': {
@@ -228,51 +256,51 @@ const SearchResultsPage = () => {
                   boxShadow: 3
                 }
               }}
-              onClick={() => navigate(`/venue/${result.venue.id}`)}
+              onClick={() => navigate(`/venue/${result.venue?.id || ''}`)}
             >
               <Grid container>
-                <Grid item xs={12} md={4} sx={{ 
-                  backgroundImage: `url(${result.venue.profileImage || '/img/default-venue.jpg'})`,
+                <Grid item xs={12} md={4} sx={{
+                  backgroundImage: `url(${result.venue?.profileImage || '/img/default-venue.jpg'})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   minHeight: { xs: 150, md: 'auto' }
                 }} />
-                
+
                 <Grid item xs={12} md={8}>
                   <Box sx={{ p: 3 }}>
                     <Typography variant="h5" component="h2">
-                      {result.venue.name}
+                      {result.venue?.name}
                     </Typography>
-                    
+
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {result.venue.locality}, {result.venue.region}
+                      {result.venue?.locality}, {result.venue?.region}
                     </Typography>
-                    
-                    {result.venue.description && (
+
+                    {result.venue?.description && (
                       <Typography variant="body2" sx={{ mb: 2 }}>
-                        {result.venue.description}
+                        {result.venue?.description}
                       </Typography>
                     )}
-                    
+
                     <Divider sx={{ mb: 2 }} />
-                    
+
                     <Typography variant="subtitle1" gutterBottom>
                       Current Specials:
                     </Typography>
-                    
-                    <SpecialsList specials={result.specials.items} showVenueName={false} />
+
+                    <SpecialsList specials={result.specials?.items} showVenueName={false} />
                   </Box>
                 </Grid>
               </Grid>
             </Paper>
           ))}
-          
+
           {searchResults.pagingInfo && searchResults.pagingInfo.totalPages > 1 && (
             <Box display="flex" justifyContent="center" my={4}>
-              <Pagination 
-                count={searchResults.pagingInfo.totalPages} 
-                page={searchResults.pagingInfo.currentPage} 
-                onChange={handlePageChange} 
+              <Pagination
+                count={searchResults.pagingInfo.totalPages}
+                page={searchResults.pagingInfo.currentPage}
+                onChange={handlePageChange}
                 color="primary"
                 disabled={loading}
               />

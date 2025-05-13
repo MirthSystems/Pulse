@@ -1,9 +1,9 @@
-import { Card, CardContent, Typography, Chip, Box, CardActions, Button, IconButton } from '@mui/material';
-import { LocalBar as DrinkIcon, Restaurant as FoodIcon, MusicNote as EntertainmentIcon, Edit as EditIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { DateTime } from 'luxon';
 import { SpecialItem as SpecialItemType, SpecialTypes } from '@models/special';
+import { LocalBar as DrinkIcon, Edit as EditIcon, MusicNote as EntertainmentIcon, Restaurant as FoodIcon } from '@mui/icons-material';
+import { Box, Button, Card, CardActions, CardContent, Chip, Typography } from '@mui/material';
+import { DateTime } from 'luxon';
 import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface SpecialItemProps {
   special: SpecialItemType;
@@ -13,7 +13,7 @@ interface SpecialItemProps {
 
 const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialItemProps) => {
   const navigate = useNavigate();
-  
+
   const getSpecialIcon = () => {
     switch (special.type) {
       case SpecialTypes.Drink:
@@ -23,7 +23,7 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
       case SpecialTypes.Entertainment:
         return <EntertainmentIcon />;
       default:
-        return null;
+        return <DrinkIcon />; // Default icon instead of null
     }
   };
 
@@ -52,7 +52,7 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
   const formatTimeRange = (): string => {
     const start = formatTime(special.startTime);
     const end = special.endTime ? formatTime(special.endTime) : null;
-    
+
     return end ? `${start} - ${end}` : `Starting ${start}`;
   };
 
@@ -79,10 +79,10 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
           <Typography variant="body1" fontWeight="medium">{special.content}</Typography>
           <Typography variant="caption" color="text.secondary">{formatTimeRange()}</Typography>
         </Box>
-        
+
         <Box display="flex" alignItems="center" gap={1}>
-          <Chip 
-            icon={getSpecialIcon()} 
+          <Chip
+            icon={getSpecialIcon()}
             label={special.typeName}
             color={getSpecialColor()}
             size="small"
@@ -96,8 +96,8 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
   }
 
   return (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         mb: 2,
         transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
         '&:hover': {
@@ -109,8 +109,8 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6" component="div">{special.content}</Typography>
-          <Chip 
-            icon={getSpecialIcon()} 
+          <Chip
+            icon={getSpecialIcon()}
             label={special.typeName}
             color={getSpecialColor()}
             size="small"
@@ -122,7 +122,7 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
           <Typography variant="body2">
             <strong>Schedule:</strong> {formatTimeRange()}
           </Typography>
-          
+
           {special.isCurrentlyRunning ? (
             <Chip label="Active Now" color="success" size="small" />
           ) : (
@@ -140,9 +140,9 @@ const SpecialItem = ({ special, allowEdit = false, compact = false }: SpecialIte
 
       {allowEdit && (
         <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
-          <Button 
-            size="small" 
-            startIcon={<EditIcon />} 
+          <Button
+            size="small"
+            startIcon={<EditIcon />}
             onClick={handleEdit}
           >
             Edit

@@ -90,7 +90,6 @@
 
                 var filteredItems = specialListItems.ToList();
 
-                // Additional filtering for runtime conditions not handled at database level
                 if (request.IsCurrentlyRunning.HasValue && request.IsCurrentlyRunning.Value)
                 {
                     filteredItems = filteredItems.Where(s => s.IsCurrentlyRunning).ToList();
@@ -102,10 +101,8 @@
                 }
                 
                 int totalCount = 0;
-                // If we filtered items in memory, we need to adjust the total count accordingly
                 if (filteredItems.Count != specialListItems.Length)
                 {
-                    // Rough approximation of total count based on the filter ratio
                     double filterRatio = (double)filteredItems.Count / specialListItems.Length;
                     totalCount = (int)(specials.TotalCount * filterRatio);
                 }
@@ -130,7 +127,6 @@
         {
             try
             {
-                // Convert address to search point
                 Point? searchLocation = null;
                 double? radiusInMeters = null;
 
@@ -157,7 +153,6 @@
                     };
                 }
 
-                // Parse search datetime
                 Instant searchDateTimeInstant;
                 if (!string.IsNullOrEmpty(request.SearchDateTime))
                 {
@@ -175,7 +170,6 @@
                     searchDateTimeInstant = SystemClock.Instance.GetCurrentInstant();
                 }
 
-                // Get venues with their running specials directly from repository
                 var venuesWithSpecials = await _unitOfWork.Venues.GetVenuesWithRunningSpecialsAsync(
                     searchLocation,
                     radiusInMeters.Value,
@@ -185,7 +179,6 @@
                     request.Page,
                     request.PageSize);
 
-                // Map the results to the expected return format
                 var searchResults = new List<SearchSpecialsResult>();
                 
                 foreach (var venueWithSpecials in venuesWithSpecials)
@@ -193,9 +186,8 @@
                     Venue venue = venueWithSpecials.Venue;
                     List<Special> specials = venueWithSpecials.Specials;
 
-                    // Map specials to SpecialItem objects
                     var specialItems = specials.Select(s => 
-                        s.MapToSpecialListItem(true) // true because we know these specials are currently active
+                        s.MapToSpecialListItem(true)
                     ).ToList();
 
                     searchResults.Add(new SearchSpecialsResult
@@ -205,7 +197,6 @@
                     });
                 }
 
-                // Return the paged results
                 return new PagedResult<SearchSpecialsResult>
                 {
                     Items = searchResults,
