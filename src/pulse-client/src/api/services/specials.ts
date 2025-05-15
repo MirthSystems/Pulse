@@ -8,7 +8,7 @@ import {
   type GetSpecialsRequest,
   type CreateSpecialRequest,
   type UpdateSpecialRequest,
-} from "../../../models";
+} from "../../models";
 
 export interface SpecialsService {
   searchSpecials(

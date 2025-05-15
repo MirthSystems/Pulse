@@ -12,7 +12,7 @@ import {
   type GetVenuesRequest,
   type CreateVenueRequest,
   type UpdateVenueRequest,
-} from "../../../models";
+} from "../../models";
 
 export interface VenuesService {
   getVenues(request: GetVenuesRequest): Promise<PagedResult<VenueItem>>;

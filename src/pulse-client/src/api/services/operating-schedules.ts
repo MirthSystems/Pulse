@@ -4,7 +4,7 @@ import {
   type OperatingScheduleItemExtendedModel,
   type CreateOperatingScheduleRequest,
   type UpdateOperatingScheduleRequest,
-} from "../../../models";
+} from "../../models";
 
 export interface OperatingSchedulesService {
   getOperatingScheduleById(id: string): Promise<OperatingScheduleItemExtended>;
