@@ -37,8 +37,7 @@ export const VenueItemCard = ({ venue, onView, onDelete }: VenueItemCardProps) =
     onDelete(venue.id);
     setDeleteDialogOpen(false);
   };
-  
-  return (
+    return (
     <>
       <Paper 
         sx={{ 
@@ -47,6 +46,7 @@ export const VenueItemCard = ({ venue, onView, onDelete }: VenueItemCardProps) =
           position: 'relative',
           borderRadius: 1,
           overflow: 'hidden',
+          width: '100%',
           transition: 'transform 0.2s, box-shadow 0.2s',
           '&:hover': {
             transform: 'translateY(-2px)',

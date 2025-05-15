@@ -35,7 +35,7 @@ export const VenueList = ({
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       <PaginatedList
         items={venues || []}
         pagingInfo={safePagingInfo}
@@ -43,7 +43,7 @@ export const VenueList = ({
         error={error}
         onPageChange={onPageChange}
         renderItem={(venue) => (
-          <Box key={venue.id} sx={{ mb: 2 }}>
+          <Box key={venue.id} sx={{ width: '100%', mb: 2 }}>
             <VenueItemCard
               venue={venue}
               onView={(id) => console.log(`View venue with id: ${id}`)}

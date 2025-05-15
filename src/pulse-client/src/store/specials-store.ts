@@ -111,7 +111,6 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       const apiClient = useApiStore.getState().apiClient;
       await apiClient.specials.updateSpecial(id, special);
       
-      // Refresh the current special if we're updating the one we're viewing
       if (get().currentSpecial?.id === id) {
         const updatedSpecial = await apiClient.specials.getSpecialById(id);
         set({ currentSpecial: updatedSpecial });
@@ -134,7 +133,6 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       const apiClient = useApiStore.getState().apiClient;
       const result = await apiClient.specials.deleteSpecial(id);
       
-      // Remove from local state if successful
       if (result) {
         set(state => ({
           venueSpecials: state.venueSpecials.filter(s => s.id !== id),

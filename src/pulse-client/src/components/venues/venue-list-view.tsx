@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Paper, Container } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useVenuesStore } from '../../store';
 import { type GetVenuesRequest } from '../../models';
@@ -38,10 +38,10 @@ export const VenueListView = ({ initialFilters }: VenueListViewProps) => {
 
   const handleAddNew = () => {
     navigate('/venues/new');
-  };
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper sx={{ p: 3 }}>        <VenueListHeader 
+  };  return (
+    <Box sx={{ width: '100%', py: 2 }}>
+      <Paper sx={{ p: 3, width: '100%' }}>
+        <VenueListHeader 
           onFilterChange={handleFilterChange} 
           onAddNew={handleAddNew}
           initialFilters={filters}
@@ -49,7 +49,8 @@ export const VenueListView = ({ initialFilters }: VenueListViewProps) => {
           isLoading={isLoading}
         />
         
-        <Box sx={{ mt: 2 }}>          <VenueList 
+        <Box sx={{ mt: 3, width: '100%' }}>
+          <VenueList 
             venues={venues || []}
             isLoading={isLoading}
             error={error}
@@ -58,6 +59,6 @@ export const VenueListView = ({ initialFilters }: VenueListViewProps) => {
           />
         </Box>
       </Paper>
-    </Container>
+    </Box>
   );
 };

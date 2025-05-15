@@ -1,12 +1,14 @@
-import { Container, Typography } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 import { VenueListView } from '../components/venues';
 
 export const BackofficePage = () => {
   return (
-    <Container maxWidth="lg">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Backoffice
-      </Typography>
+    <Container maxWidth="xl">
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" component="h1">
+          Backoffice
+        </Typography>
+      </Box>
       
       <VenueListView />
     </Container>

@@ -44,11 +44,17 @@ export function PaginatedList<T>({
     return (
       <Typography align="center" sx={{ my: 4 }}>{emptyMessage}</Typography>
     );
-  }return (
+  }  return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, width: '100%' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        width: '100%'
+      }}>
         {items.map((item, idx) => renderItem(item, idx))}
-      </Box>      {pagingInfo && (
+      </Box>
+      
+      {pagingInfo && (
         <Pager
           pagingInfo={pagingInfo}
           onPageChange={onPageChange}

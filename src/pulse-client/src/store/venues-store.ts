@@ -116,7 +116,6 @@ export const useVenuesStore = create<VenuesState>()((set, get) => ({
       const apiClient = useApiStore.getState().apiClient!;
       const result = await apiClient.venues.deleteVenue(id);
       
-      // Remove from local state if successful
       if (result) {
         set(state => ({
           venues: state.venues.filter(v => v.id !== id),

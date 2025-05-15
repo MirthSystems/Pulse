@@ -19,13 +19,14 @@ export const VenueListHeader = ({
   isLoading = false
 }: VenueListHeaderProps) => {
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 3, width: '100%' }}>
       <Box 
         sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          mb: 2
+          mb: 3,
+          width: '100%'
         }}
       >
         <Typography variant="h5" component="h2">
