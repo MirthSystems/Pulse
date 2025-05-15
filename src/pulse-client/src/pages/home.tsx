@@ -1,4 +1,5 @@
-import { Box, Container, Typography, Button, Paper, Grid } from '@mui/material';
+import { Box, Container, Typography, Button, Paper } from '@mui/material';
+import { Grid } from '@mui/material';
 
 export const HomePage = () => {
   return (
@@ -20,7 +21,7 @@ export const HomePage = () => {
         </Typography>
         
         <Grid container columns={12} columnSpacing={4} sx={{ mt: 4 }}>
-          <Grid sx={{ gridColumn: 'span 4' }}>
+          <Grid gridSize={{ xs: 12, sm: 4 }}>
             <Paper 
               elevation={2} 
               sx={{ 
@@ -42,7 +43,7 @@ export const HomePage = () => {
             </Paper>
           </Grid>
           
-          <Grid sx={{ gridColumn: 'span 4' }}>
+          <Grid gridSize={{ xs: 12, sm: 4 }}>
             <Paper 
               elevation={2} 
               sx={{ 
@@ -64,7 +65,7 @@ export const HomePage = () => {
             </Paper>
           </Grid>
           
-          <Grid sx={{ gridColumn: 'span 4' }}>
+          <Grid gridSize={{ xs: 12, sm: 4 }}>
             <Paper 
               elevation={2} 
               sx={{ 

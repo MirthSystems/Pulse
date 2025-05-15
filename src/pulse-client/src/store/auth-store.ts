@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ApiClient } from '../api/client';
 import { User } from '@auth0/auth0-react';
+import { useApiStore } from './api-store';
 
 interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
-  apiClient: ApiClient | null;
   setAuthState: (isAuthenticated: boolean, user: User | null, token: string | null) => void;
   logout: () => void;
 }
@@ -15,19 +14,17 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL as string;
       return {
         isAuthenticated: false,
         user: null,
         token: null,
-        apiClient: new ApiClient(apiBaseUrl),
         setAuthState: (isAuthenticated: boolean, user: User | null, token: string | null) => {
-          const apiClient = new ApiClient(apiBaseUrl, token || undefined);
-          set({ isAuthenticated, user, token, apiClient });
+          set({ isAuthenticated, user, token });
+          useApiStore.getState().refreshClient(token);
         },
         logout: () => {
-          const apiClient = new ApiClient(apiBaseUrl);
-          set({ isAuthenticated: false, user: null, token: null, apiClient });
+          set({ isAuthenticated: false, user: null, token: null });
+          useApiStore.getState().refreshClient(null);
         },
       };
     },
@@ -38,12 +35,6 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
       }),
-      onRehydrateStorage: (state) => {
-        if (state) {
-          const apiBaseUrl = import.meta.env.VITE_API_BASE_URL as string;
-          state.apiClient = new ApiClient(apiBaseUrl, state.token || undefined);
-        }
-      },
     }
   )
 );
