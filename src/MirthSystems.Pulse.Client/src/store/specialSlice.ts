@@ -4,10 +4,12 @@ import {
   SpecialItem, 
   SpecialItemExtended,
   SpecialSearchParams, 
-  SearchSpecialsResult
+  SearchSpecialsResult,
+  CreateSpecialRequest,
+  UpdateSpecialRequest
 } from '@models/special';
 import { PagedResult, ApiError } from '@models/common';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosInstance } from 'axios';
 
 // Define the state interface
 interface SpecialState {
@@ -98,24 +100,22 @@ export const getSpecialById = createAsyncThunk<
 
 export const createSpecial = createAsyncThunk(
   'specials/createSpecial',
-  async ({ specialData, apiClient }: { specialData: any; apiClient: any }, { rejectWithValue }) => {
+  async ({ specialData, apiClient }: { specialData: CreateSpecialRequest; apiClient: AxiosInstance }, { rejectWithValue }) => {
     try {
       return await SpecialService.createSpecial(specialData, apiClient);
     } catch (error) {
-      const apiError = processApiError(error);
-      return rejectWithValue(apiError);
+      return rejectWithValue(processApiError(error));
     }
   }
 );
 
 export const updateSpecial = createAsyncThunk(
   'specials/updateSpecial',
-  async ({ id, specialData, apiClient }: { id: string; specialData: any; apiClient: any }, { rejectWithValue }) => {
+  async ({ id, specialData, apiClient }: { id: string; specialData: UpdateSpecialRequest; apiClient: AxiosInstance }, { rejectWithValue }) => {
     try {
       return await SpecialService.updateSpecial(id, specialData, apiClient);
     } catch (error) {
-      const apiError = processApiError(error);
-      return rejectWithValue(apiError);
+      return rejectWithValue(processApiError(error));
     }
   }
 );

@@ -74,16 +74,25 @@ const SearchResultsPage = () => {
         active: activeOnly
       };
 
+      // Add a console log to debug the API URL
+      console.log(`Making request to: ${import.meta.env.VITE_API_SERVER_URL}/specials with params:`, params);
+
       // Use the service method instead of direct API call
       const response = await SpecialService.searchSpecials(params);
       setResults(response);
     } catch (error: any) {
       console.error('Error fetching search results:', error);
 
-      if (error.status === 404) {
-        setError('No results found for your search criteria. Try adjusting your filters.');
-      } else if (error.status === 400) {
-        setError('Invalid search parameters. Please check your inputs and try again.');
+      if (error.response) {
+        if (error.response.status === 404) {
+          setError('No results found for your search criteria. Try adjusting your filters.');
+        } else if (error.response.status === 400) {
+          setError('Invalid search parameters. Please check your inputs and try again.');
+        } else {
+          setError(`Error ${error.response.status}: ${error.response.data?.message || 'Failed to load results'}. Please try again later.`);
+        }
+      } else if (error.request) {
+        setError('No response from server. Please check your internet connection and try again.');
       } else {
         setError('Failed to load results. Please try again later.');
       }
@@ -253,7 +262,7 @@ const SearchResultsPage = () => {
                   boxShadow: 3
                 }
               }}
-              onClick={() => navigate(`/venue/${result.venue?.id || ''}`)}
+              onClick={() => navigate(`/venues/${result.venue?.id || ''}`)}
             >
               <Grid container>
                 <Grid item xs={12} md={4} sx={{

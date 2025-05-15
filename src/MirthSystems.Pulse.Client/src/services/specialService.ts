@@ -1,73 +1,53 @@
 import { AxiosInstance } from 'axios';
-import { publicApiClient, createQueryString } from './apiClient';
 import { 
   SpecialItem, 
   SpecialItemExtended, 
   SpecialSearchParams, 
-  SearchSpecialsResult 
+  CreateSpecialRequest, 
+  UpdateSpecialRequest,
+  SearchSpecialsResult
 } from '@models/special';
 import { PagedResult } from '@models/common';
+import { anonymousClient } from './apiClient';
 
 export class SpecialService {
+  // Anonymous endpoints
   static async searchSpecials(params: SpecialSearchParams): Promise<PagedResult<SearchSpecialsResult>> {
-    try {
-      const queryString = createQueryString({
-        page: params.page,
-        pageSize: params.pageSize,
-        address: params.address,
-        radius: params.radius,
-        searchTerm: params.term,
-        specialTypeId: params.type,
-        isCurrentlyRunning: params.active !== undefined ? params.active.toString() : 'true',
-        venueId: params.venueId,
-        searchDateTime: params.dateTime
-      });
+    // Map frontend params to backend expected format
+    const requestParams: any = {
+      page: params.page,
+      pageSize: params.pageSize,
+      address: params.address,
+      radius: params.radius,
+      searchDateTime: params.dateTime,
+      searchTerm: params.term,
+      venueId: params.venueId,
+      specialTypeId: params.type,
+      isCurrentlyRunning: params.active
+    };
 
-      const response = await publicApiClient.get(`/specials${queryString}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error in searchSpecials:', error);
-      throw error;
-    }
+    const response = await anonymousClient.get('/specials', { params: requestParams });
+    return response.data;
   }
 
   static async getSpecialById(id: string): Promise<SpecialItemExtended> {
-    try {
-      const response = await publicApiClient.get(`/specials/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching special ${id}:`, error);
-      throw error;
-    }
+    const response = await anonymousClient.get(`/specials/${id}`);
+    return response.data;
   }
 
-  static async createSpecial(specialData: any, apiClient: AxiosInstance): Promise<SpecialItemExtended> {
-    try {
-      const response = await apiClient.post('/specials', specialData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating special:', error);
-      throw error;
-    }
+  // Authenticated endpoints
+  static async createSpecial(specialData: CreateSpecialRequest, apiClient: AxiosInstance): Promise<SpecialItemExtended> {
+    const response = await apiClient.post('/specials', specialData);
+    return response.data;
   }
 
-  static async updateSpecial(id: string, specialData: any, apiClient: AxiosInstance): Promise<SpecialItemExtended> {
-    try {
-      const response = await apiClient.put(`/specials/${id}`, specialData);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating special:', error);
-      throw error;
-    }
+  static async updateSpecial(id: string, specialData: UpdateSpecialRequest, apiClient: AxiosInstance): Promise<SpecialItemExtended> {
+    const response = await apiClient.put(`/specials/${id}`, specialData);
+    return response.data;
   }
 
   static async deleteSpecial(id: string, apiClient: AxiosInstance): Promise<boolean> {
-    try {
-      await apiClient.delete(`/specials/${id}`);
-      return true;
-    } catch (error) {
-      console.error('Error deleting special:', error);
-      throw error;
-    }
+    const response = await apiClient.delete(`/specials/${id}`);
+    return response.data;
   }
 }

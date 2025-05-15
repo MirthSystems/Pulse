@@ -12,6 +12,7 @@ import VenueFormPage from '@/pages/VenueFormPage';
 import SpecialFormPage from '@/pages/SpecialFormPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import ProtectedRoute from '@components/auth/ProtectedRoute';
+import AuthStateManager from '@components/auth/AuthStateManager';
 
 const App = () => {
   const { isLoading } = useAuth0();
@@ -25,67 +26,69 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<MainLayout />}>
-        {/* Public routes */}
-        <Route index element={<LandingPage />} />
-        <Route path="results" element={<SearchResultsPage />} />
-        <Route path="venue/:id" element={<VenueDetailsPage />} />
-        
-        {/* Protected routes - Backoffice */}
-        <Route 
-          path="backoffice" 
-          element={
-            <ProtectedRoute>
-              <BackofficePage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="venues/new" 
-          element={
-            <ProtectedRoute>
-              <VenueFormPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="venues/:id" 
-          element={
-            <ProtectedRoute>
-              <VenueManagementPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="venues/:id/edit" 
-          element={
-            <ProtectedRoute>
-              <VenueFormPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="venues/:id/specials/new" 
-          element={
-            <ProtectedRoute>
-              <SpecialFormPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="venues/:venueId/specials/:id/edit" 
-          element={
-            <ProtectedRoute>
-              <SpecialFormPage />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Catch all for 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+    <AuthStateManager>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          {/* Public routes */}
+          <Route index element={<LandingPage />} />
+          <Route path="results" element={<SearchResultsPage />} />
+          <Route path="venues/:id" element={<VenueDetailsPage />} />
+          
+          {/* Protected routes - Backoffice */}
+          <Route 
+            path="backoffice" 
+            element={
+              <ProtectedRoute>
+                <BackofficePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="venues/new" 
+            element={
+              <ProtectedRoute>
+                <VenueFormPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="venues/:id/manage" 
+            element={
+              <ProtectedRoute>
+                <VenueManagementPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="venues/:id/edit" 
+            element={
+              <ProtectedRoute>
+                <VenueFormPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="venues/:id/specials/new" 
+            element={
+              <ProtectedRoute>
+                <SpecialFormPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="venues/:venueId/specials/:id/edit" 
+            element={
+              <ProtectedRoute>
+                <SpecialFormPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Catch all for 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </AuthStateManager>
   );
 };
 

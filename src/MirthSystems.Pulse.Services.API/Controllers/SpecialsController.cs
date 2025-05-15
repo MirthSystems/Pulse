@@ -197,30 +197,5 @@
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
             }
         }
-
-        /// <summary>
-        /// Retrieves specials for a specific venue.
-        /// </summary>
-        /// <param name="venueId">The venue ID.</param>
-        /// <returns>A list of specials for the venue.</returns>
-        [HttpGet("venue/{venueId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<List<SpecialItem>>> GetVenueSpecials(string venueId)
-        {
-            if (string.IsNullOrEmpty(venueId) || !long.TryParse(venueId, out long venueIdLong))
-            {
-                return BadRequest("Invalid venue ID format");
-            }
-
-            var specials = await _venueService.GetVenueSpecialsAsync(venueId);
-
-            if (specials == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(specials);
-        }
     }
 }

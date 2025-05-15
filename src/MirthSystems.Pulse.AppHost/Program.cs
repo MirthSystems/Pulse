@@ -24,4 +24,6 @@ builder.AddNpmApp("client", "../MirthSystems.Pulse.Client", "dev")
     .WithReference(apiService)
     .WaitFor(apiService);
 
+builder.AddProject<Projects.pulse_Server>("pulse-server");
+
 builder.Build().Run();

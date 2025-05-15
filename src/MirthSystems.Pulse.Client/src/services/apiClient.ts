@@ -1,94 +1,65 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
-import { ApiError } from '@models/common';
+import { useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_SERVER_URL || 'https://localhost:7253';
+// Base API URL - you may want to put this in an environment variable
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-// Base axios instance for public (non-authenticated) requests
-const axiosInstance = axios.create({
-  baseURL: `${API_URL}/api`,
+// Create a standard axios instance for anonymous requests
+export const anonymousClient = axios.create({
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Add response interceptor to handle errors consistently
-axiosInstance.interceptors.response.use(
-  response => response,
-  (error: AxiosError) => {
-    const apiError: ApiError = {
-      status: error.response?.status || 500,
-      message: 'An unexpected error occurred',
-      errors: {}
-    };
-
-    // Handle different response formats from the backend
-    if (error.response?.data) {
-      const data = error.response.data as any;
-      
-      // Backend sometimes returns error.message, sometimes just a string
-      if (typeof data === 'string') {
-        apiError.message = data;
-      } else if (data.message) {
-        apiError.message = data.message;
-      } else if (data.title) {
-        // ASP.NET Core validation errors sometimes use 'title'
-        apiError.message = data.title;
-      }
-      
-      // Handle validation errors (ModelState)
-      if (data.errors) {
-        apiError.errors = data.errors;
-      }
-    }
-
-    return Promise.reject(apiError);
-  }
-);
-
-// Custom hook to create an authenticated API client
-export const useApiClient = () => {
+// Hook to get an authenticated API client
+export function useApiClient() {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-  
-  // Create a new request interceptor for authentication
-  const requestInterceptor = axiosInstance.interceptors.request.use(
-    async (config) => {
-      if (isAuthenticated) {
+  const [apiClient, setApiClient] = useState<AxiosInstance>(anonymousClient);
+
+  useEffect(() => {
+    // Only attempt to get a token if the user is authenticated
+    if (isAuthenticated) {
+      const configureClient = async () => {
         try {
           const token = await getAccessTokenSilently();
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-          }
+          
+          const client = axios.create({
+            baseURL: API_BASE_URL,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          // Add response interceptor to handle common errors
+          client.interceptors.response.use(
+            response => response,
+            error => {
+              if (error.response) {
+                // Log auth errors for debugging (you might remove this in production)
+                if (error.response.status === 401) {
+                  console.error('Authentication error:', error.response.data);
+                }
+              }
+              return Promise.reject(error);
+            }
+          );
+          
+          setApiClient(client);
         } catch (error) {
           console.error('Error getting access token:', error);
+          // Fall back to anonymous client if token acquisition fails
+          setApiClient(anonymousClient);
         }
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
+      };
+
+      configureClient();
+    } else {
+      setApiClient(anonymousClient);
     }
-  );
+  }, [getAccessTokenSilently, isAuthenticated]);
 
-  // Clean up interceptor when the component unmounts
-  // This is important to prevent memory leaks
-  return axiosInstance;
-};
-
-// Public API client (no auth required)
-export const publicApiClient = axiosInstance;
-
-// Helper function to create query string from params
-export const createQueryString = (params: Record<string, any>): string => {
-  const query = Object.entries(params)
-    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
-    .map(([key, value]) => {
-      if (typeof value === 'boolean') {
-        return `${encodeURIComponent(key)}=${value}`;
-      }
-      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-    })
-    .join('&');
-    
-  return query ? `?${query}` : '';
-};
+  return apiClient;
+}

@@ -82,11 +82,17 @@ export const fetchVenueBusinessHours = createAsyncThunk<
   { rejectValue: ApiError }
 >('venues/fetchVenueBusinessHours', async (id, { rejectWithValue }) => {
   try {
-    return await VenueService.getVenueBusinessHours(id);
+    console.log(`Fetching business hours for venue ${id}`);
+    const result = await VenueService.getVenueBusinessHours(id);
+    console.log('Business hours fetch result:', result);
+    return result;
   } catch (error) {
+    console.error('Error fetching business hours:', error);
+    
     if (error && typeof error === 'object' && 'status' in error) {
       // Handle error with status property
       if (error.status === 404) {
+        console.log('No business hours found, returning empty array');
         return [];
       }
       return rejectWithValue(processApiError(error));
@@ -196,11 +202,14 @@ const venueSlice = createSlice({
       })
       .addCase(fetchVenueBusinessHours.fulfilled, (state, action) => {
         state.loading = false;
-        state.venueBusinessHours = action.payload;
+        state.venueBusinessHours = action.payload || [];
+        console.log('Updated business hours in state:', state.venueBusinessHours);
       })
       .addCase(fetchVenueBusinessHours.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to fetch business hours';
+        // Initialize with empty array on error to prevent null/undefined issues
+        state.venueBusinessHours = [];
       })
       
       // fetchVenueSpecials

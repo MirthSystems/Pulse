@@ -1,23 +1,23 @@
-import { PagedResult } from '@models/common';
+import { AxiosInstance } from 'axios';
+import { 
+  VenueItem, 
+  VenueItemExtended, 
+  VenueSearchParams, 
+  CreateVenueRequest, 
+  UpdateVenueRequest
+} from '@models/venue';
 import { OperatingScheduleItem } from '@models/operatingSchedule';
 import { SpecialItem } from '@models/special';
-import {
-  CreateVenueRequest,
-  GetVenuesRequest,
-  UpdateVenueRequest,
-  VenueItem,
-  VenueItemExtended,
-  VenueSearchParams
-} from '@models/venue';
-import { AxiosInstance } from 'axios';
-import { createQueryString, publicApiClient } from './apiClient';
+import { PagedResult } from '@models/common';
+import { anonymousClient } from './apiClient';
 
-export const VenueService = {
-  // Convert search params to API request format
-  mapSearchParamsToRequest: (params: VenueSearchParams): GetVenuesRequest => {
-    return {
-      page: params.page || 1,
-      pageSize: params.pageSize || 20,
+export class VenueService {
+  // Anonymous endpoints (no auth required)
+  static async getVenues(params: VenueSearchParams): Promise<PagedResult<VenueItem>> {
+    // Map frontend params to backend expected format
+    const requestParams: any = {
+      page: params.page,
+      pageSize: params.pageSize,
       searchText: params.searchText,
       address: params.address,
       radiusInMiles: params.radius,
@@ -25,59 +25,43 @@ export const VenueService = {
       timeOfDay: params.openTime,
       hasActiveSpecials: params.hasSpecials,
       specialTypeId: params.specialType,
-      includeAddressDetails: params.includeAddress ?? true,
-      includeBusinessHours: params.includeHours ?? false,
-      sortOrder: params.sort ?? 0
+      includeAddressDetails: params.includeAddress !== false, // Default to true
+      includeBusinessHours: params.includeHours === true, // Default to false
+      sortOrder: params.sort || 0
     };
-  },
 
-  // Get venues with filtering and pagination
-  getVenues: async (params: VenueSearchParams): Promise<PagedResult<VenueItem>> => {
-    const request = VenueService.mapSearchParamsToRequest(params);
-    const queryString = createQueryString(request);
-    const response = await publicApiClient.get(`/venues${queryString}`);
+    const response = await anonymousClient.get('/venues', { params: requestParams });
     return response.data;
-  },
+  }
 
-  // Get a specific venue by ID
-  getVenueById: async (id: string): Promise<VenueItemExtended> => {
-    const response = await publicApiClient.get(`/venues/${id}`);
+  static async getVenueById(id: string): Promise<VenueItemExtended> {
+    const response = await anonymousClient.get(`/venues/${id}`);
     return response.data;
-  },
+  }
 
-  // Get business hours for a venue
-  getVenueBusinessHours: async (id: string): Promise<OperatingScheduleItem[]> => {
-    const response = await publicApiClient.get(`/venues/${id}/business-hours`);
+  static async getVenueBusinessHours(id: string): Promise<OperatingScheduleItem[]> {
+    const response = await anonymousClient.get(`/venues/${id}/business-hours`);
     return response.data;
-  },
+  }
 
-  // Get specials for a venue
-  getVenueSpecials: async (venueId: string): Promise<SpecialItem[]> => {
-    try {
-      // This is correct according to the SpecialsController endpoint
-      const response = await publicApiClient.get(`/venues/${venueId}/specials`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching venue specials:', error);
-      throw error;
-    }
-  },
-
-  // Create a new venue (requires authentication)
-  createVenue: async (data: CreateVenueRequest, apiClient: AxiosInstance): Promise<VenueItemExtended> => {
-    const response = await apiClient.post('/venues', data);
+  static async getVenueSpecials(id: string): Promise<SpecialItem[]> {
+    const response = await anonymousClient.get(`/venues/${id}/specials`);
     return response.data;
-  },
+  }
 
-  // Update an existing venue (requires authentication)
-  updateVenue: async (id: string, data: UpdateVenueRequest, apiClient: AxiosInstance): Promise<VenueItemExtended> => {
-    const response = await apiClient.put(`/venues/${id}`, data);
+  // Authenticated endpoints (require auth token)
+  static async createVenue(venueData: CreateVenueRequest, apiClient: AxiosInstance): Promise<VenueItemExtended> {
+    const response = await apiClient.post('/venues', venueData);
     return response.data;
-  },
+  }
 
-  // Delete a venue (requires authentication)
-  deleteVenue: async (id: string, apiClient: AxiosInstance): Promise<boolean> => {
+  static async updateVenue(id: string, venueData: UpdateVenueRequest, apiClient: AxiosInstance): Promise<VenueItemExtended> {
+    const response = await apiClient.put(`/venues/${id}`, venueData);
+    return response.data;
+  }
+
+  static async deleteVenue(id: string, apiClient: AxiosInstance): Promise<boolean> {
     const response = await apiClient.delete(`/venues/${id}`);
     return response.data;
   }
-};
+}
