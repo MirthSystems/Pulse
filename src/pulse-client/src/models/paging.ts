@@ -9,3 +9,8 @@ export interface PagedResult<T> {
         hasNextPage: boolean;
     };
 }
+
+export interface PageQueryParams {
+    page?: number;
+    pageSize?: number;
+}

@@ -13,7 +13,6 @@ interface OperatingSchedulesState {
   isLoading: boolean;
   error: string | null;
   
-  // Actions
   fetchScheduleById: (id: string) => Promise<void>;
   fetchVenueBusinessHours: (venueId: string) => Promise<void>;
   createSchedule: (schedule: CreateOperatingScheduleRequest) => Promise<string | null>;

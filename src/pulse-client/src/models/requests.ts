@@ -1,5 +1,6 @@
 import { type SpecialTypes } from './special';
 import { type DayOfWeek } from './day-of-week';
+import { type PageQueryParams } from './paging';
 
 export interface OperatingHours {
     dayOfWeek: DayOfWeek; // 0-6, Sunday to Saturday
@@ -41,7 +42,7 @@ export interface UpdateSpecialRequest {
     cronSchedule?: string;
 }
 
-export interface GetSpecialsRequest {
+export interface GetSpecialsRequest extends PageQueryParams {
     address: string;
     radius?: number;
     searchDateTime?: string; // ISO 8601
@@ -49,13 +50,9 @@ export interface GetSpecialsRequest {
     venueId?: string;
     specialTypeId?: number;
     isCurrentlyRunning?: boolean;
-    page?: number;
-    pageSize?: number;
 }
 
-export interface GetVenuesRequest {
-    page?: number;
-    pageSize?: number;
+export interface GetVenuesRequest extends PageQueryParams {
     searchText?: string;
     address?: string;
     radiusInMiles?: number;

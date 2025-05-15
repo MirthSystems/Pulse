@@ -22,7 +22,6 @@ interface VenuesState {
     hasNextPage: boolean;
   } | null;
   
-  // Actions
   fetchVenues: (request: GetVenuesRequest) => Promise<void>;
   fetchVenueById: (id: string) => Promise<void>;
   createVenue: (venue: CreateVenueRequest) => Promise<string | null>;

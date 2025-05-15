@@ -1,5 +1,5 @@
 import { Container, Typography } from '@mui/material';
-import { VenueList } from '../components/venues';
+import { VenueListView } from '../components/venues';
 
 export const BackofficePage = () => {
   return (
@@ -8,7 +8,7 @@ export const BackofficePage = () => {
         Backoffice
       </Typography>
       
-      <VenueList />
+      <VenueListView />
     </Container>
   );
 };

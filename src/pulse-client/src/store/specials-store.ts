@@ -24,7 +24,6 @@ interface SpecialsState {
     hasNextPage: boolean;
   } | null;
   
-  // Actions
   searchSpecials: (request: GetSpecialsRequest) => Promise<void>;
   fetchSpecialById: (id: string) => Promise<void>;
   fetchVenueSpecials: (venueId: string) => Promise<void>;

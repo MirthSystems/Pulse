@@ -8,13 +8,15 @@ interface VenueListHeaderProps {
   onAddNew: () => void;
   initialFilters?: GetVenuesRequest;
   totalCount?: number;
+  isLoading?: boolean;
 }
 
 export const VenueListHeader = ({ 
   onFilterChange, 
   onAddNew, 
   initialFilters,
-  totalCount 
+  totalCount,
+  isLoading = false
 }: VenueListHeaderProps) => {
   return (
     <Box sx={{ mb: 3 }}>
@@ -49,10 +51,10 @@ export const VenueListHeader = ({
           New Venue
         </Button>
       </Box>
-      
-      <VenueListFilter 
+        <VenueListFilter 
         onChange={onFilterChange}
         initialFilters={initialFilters}
+        isLoading={isLoading}
       />
     </Box>
   );
