@@ -23,9 +23,11 @@
     "@types/luxon": "^3.6.2",
     "@types/mui-datatables": "^4.3.12",
     "@types/node": "^22.15.18",
+    "@types/react-router-dom": "^5.3.3",
     "luxon": "^3.6.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.0",
     "zustand": "^5.0.4"
   },
   "devDependencies": {
