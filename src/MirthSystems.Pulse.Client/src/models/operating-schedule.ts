@@ -25,12 +25,23 @@ export class OperatingScheduleItem {
 
     constructor(model: OperatingScheduleItemModel) {
         this.id = model.id;
-        this.dayOfWeek = model.dayOfWeek;
+        this.dayOfWeek = model.dayOfWeek as DayOfWeek;
         this.dayName = model.dayName;
-        // Use fromFormat with 'HH:mm' for time strings from API
-        this.openTime = DateTime.fromFormat(model.openTime, 'HH:mm');
-        this.closeTime = DateTime.fromFormat(model.closeTime, 'HH:mm');
+        // Handle cases where openTime or closeTime might be invalid or not set, especially if isClosed is true
+        this.openTime = model.isClosed || !model.openTime ? DateTime.now() : DateTime.fromFormat(model.openTime, 'HH:mm');
+        this.closeTime = model.isClosed || !model.closeTime ? DateTime.now() : DateTime.fromFormat(model.closeTime, 'HH:mm');
         this.isClosed = model.isClosed;
+    }
+
+    public toModel(): OperatingScheduleItemModel {
+        return {
+            id: this.id,
+            dayOfWeek: this.dayOfWeek,
+            dayName: this.dayName,
+            openTime: this.isClosed ? '00:00' : this.openTime.toFormat('HH:mm'),
+            closeTime: this.isClosed ? '00:00' : this.closeTime.toFormat('HH:mm'),
+            isClosed: this.isClosed,
+        };
     }
 }
 

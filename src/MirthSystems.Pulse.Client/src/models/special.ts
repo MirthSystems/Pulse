@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon';
-import { VenueItem, type VenueItemModel } from './venue';
 
-const SpecialTypes = {
+export const SpecialTypes = {
     Food: 0,
     Drink: 1,
     Entertainment: 2,
@@ -13,21 +12,11 @@ export interface SpecialItemModel {
     id: string;
     venueId: string;
     content: string;
-    type: number;
-    typeName: string;
-    startDate: string; // "yyyy-MM-dd"
-    startTime: string; // "HH:mm"
-    endTime?: string; // "HH:mm"
-    isCurrentlyRunning: boolean;
-    isRecurring: boolean;
-}
-
-export interface SpecialItemExtendedModel extends SpecialItemModel {
-    expirationDate?: string; // "yyyy-MM-dd"
-    cronSchedule?: string;
+    type: SpecialTypes;
+    startDate: string; // ISO 8601
+    endDate?: string; // ISO 8601
     createdAt: string; // ISO 8601
     updatedAt?: string; // ISO 8601
-    venue: VenueItemModel;
 }
 
 export class SpecialItem {
@@ -35,40 +24,53 @@ export class SpecialItem {
     venueId: string;
     content: string;
     type: SpecialTypes;
-    typeName: string;
     startDate: DateTime;
-    startTime: DateTime;
-    endTime?: DateTime;
-    isCurrentlyRunning: boolean;
-    isRecurring: boolean;
+    endDate?: DateTime;
+    createdAt: DateTime;
+    updatedAt?: DateTime;
 
     constructor(model: SpecialItemModel) {
         this.id = model.id;
         this.venueId = model.venueId;
         this.content = model.content;
-        this.type = model.type as SpecialTypes;
-        this.typeName = model.typeName;
-        this.startDate = DateTime.fromFormat(model.startDate, 'yyyy-MM-dd');
-        this.startTime = DateTime.fromFormat(model.startTime, 'HH:mm');
-        this.endTime = model.endTime ? DateTime.fromFormat(model.endTime, 'HH:mm') : undefined;
-        this.isCurrentlyRunning = model.isCurrentlyRunning;
-        this.isRecurring = model.isRecurring;
+        this.type = model.type;
+        this.startDate = DateTime.fromISO(model.startDate);
+        this.endDate = model.endDate ? DateTime.fromISO(model.endDate) : undefined;
+        this.createdAt = DateTime.fromISO(model.createdAt);
+        this.updatedAt = model.updatedAt ? DateTime.fromISO(model.updatedAt) : undefined;
+    }
+
+    public toModel(): SpecialItemModel {
+        return {
+            id: this.id,
+            venueId: this.venueId,
+            content: this.content,
+            type: this.type,
+            startDate: this.startDate.toISO() as string,
+            endDate: this.endDate?.toISO() as string | undefined,
+            createdAt: this.createdAt.toISO() as string,
+            updatedAt: this.updatedAt?.toISO() as string | undefined,
+        };
     }
 }
 
+export interface SpecialItemExtendedModel extends SpecialItemModel {
+    venueName: string;
+}
+
 export class SpecialItemExtended extends SpecialItem {
-    expirationDate?: DateTime;
-    cronSchedule?: string;
-    createdAt: DateTime;
-    updatedAt?: DateTime;
-    venue: VenueItem;
+    venueName: string;
 
     constructor(model: SpecialItemExtendedModel) {
         super(model);
-        this.expirationDate = model.expirationDate ? DateTime.fromFormat(model.expirationDate, 'yyyy-MM-dd') : undefined;
-        this.cronSchedule = model.cronSchedule;
-        this.createdAt = DateTime.fromISO(model.createdAt);
-        this.updatedAt = model.updatedAt ? DateTime.fromISO(model.updatedAt) : undefined;
-        this.venue = new VenueItem(model.venue);
+        this.venueName = model.venueName;
+    }
+
+    public override toModel(): SpecialItemExtendedModel {
+        const baseModel = super.toModel();
+        return {
+            ...baseModel,
+            venueName: this.venueName,
+        };
     }
 }

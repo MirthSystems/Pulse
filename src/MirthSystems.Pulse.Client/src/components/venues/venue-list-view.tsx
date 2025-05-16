@@ -1,10 +1,10 @@
-import { Box, Typography, Button } from '@mui/material';
-import { useVenuesStore } from '../../store/venues-store';
-import { VenueListFilter } from './venue-list-filter';
-import { VenueList } from './venue-list';
-import { Pager } from '../pagination';
-import { useUiStore } from '../../store/ui-store';
+import { Box, Button, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useUiStore } from '../../store/ui-store';
+import { useVenuesStore } from '../../store/venues-store';
+import { Pager } from '../pagination';
+import { VenueList } from './venue-list';
+import { VenueListFilter } from './venue-list-filter';
 
 export const VenueListView = () => {
   const { venues, isLoading, pagingInfo, setPage, setPageSize, setFilters, fetchVenues } = useVenuesStore();
@@ -30,7 +30,7 @@ export const VenueListView = () => {
         <Button variant="contained" color="primary" onClick={() => openVenueDialog()}>New Venue</Button>
       </Box>
       <VenueListFilter onChange={setFilters} isLoading={isLoading} />
-      <VenueList venues={venues} isLoading={isLoading} pagingInfo={pagingInfo} onPageChange={setPage} />
+      <VenueList venues={venues} isLoading={isLoading} />
       <Pager
         currentPage={pagingInfo.currentPage}
         totalPages={pagingInfo.totalPages}

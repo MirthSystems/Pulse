@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import { useApiStore } from './api-store';
 import {
   VenueItem,
   VenueItemExtended,
-  type GetVenuesRequest,
   type CreateVenueRequest,
+  type GetVenuesRequest,
   type UpdateVenueRequest
 } from '../models';
 import { PagingInfo } from '../models/paging';
+import { useApiStore } from './api-store';
 
 interface VenuesState {
   venues: VenueItem[];
@@ -16,7 +16,6 @@ interface VenuesState {
   error: string | null;
   pagingInfo: PagingInfo;
   filters: Partial<GetVenuesRequest>;
-  sort: string | null;
   lastRequest: GetVenuesRequest | null;
 
   fetchVenues: () => Promise<void>;
@@ -24,7 +23,6 @@ interface VenuesState {
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
   setFilters: (filters: Partial<GetVenuesRequest>) => void;
-  setSort: (sort: string | null) => void;
   fetchVenueById: (id: string) => Promise<void>;
   createVenue: (venue: CreateVenueRequest) => Promise<string | null>;
   updateVenue: (id: string, venue: UpdateVenueRequest) => Promise<boolean>;
@@ -40,19 +38,17 @@ export const useVenuesStore = create<VenuesState>()((set, get) => ({
   error: null,
   pagingInfo: PagingInfo.default(),
   filters: {},
-  sort: null,
   lastRequest: null,
 
   fetchVenues: async () => {
     try {
       set({ isLoading: true, error: null });
       const apiClient = useApiStore.getState().apiClient!;
-      const { filters, sort, pagingInfo } = get();
+      const { filters, pagingInfo } = get();
       const request: GetVenuesRequest = {
         ...filters,
         page: pagingInfo.currentPage,
-        pageSize: pagingInfo.pageSize,
-        sort: sort || undefined
+        pageSize: pagingInfo.pageSize
       };
       const result = await apiClient.venues.getVenues(request);
       set({
@@ -89,14 +85,6 @@ export const useVenuesStore = create<VenuesState>()((set, get) => ({
 
   setFilters: (filters: Partial<GetVenuesRequest>) => {
     set({ filters });
-    set(state => ({
-      pagingInfo: new PagingInfo({ ...state.pagingInfo, currentPage: 1 })
-    }));
-    get().fetchVenues();
-  },
-
-  setSort: (sort: string | null) => {
-    set({ sort });
     set(state => ({
       pagingInfo: new PagingInfo({ ...state.pagingInfo, currentPage: 1 })
     }));

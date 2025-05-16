@@ -1,6 +1,6 @@
 import { Box, TextField, Button, CircularProgress } from '@mui/material';
-import { useState, useEffect, FormEvent } from 'react';
-import { GetVenuesRequest } from '../../models';
+import { useState, useEffect, type FormEvent } from 'react';
+import { type GetVenuesRequest } from '../../models';
 
 interface VenueListFilterProps {
   onChange: (filters: Partial<GetVenuesRequest>) => void;

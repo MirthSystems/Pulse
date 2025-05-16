@@ -1,17 +1,18 @@
-import { Box, Typography, Button, Grid } from '@mui/material';
+import { Avatar, Box, Card, CardContent, Divider, Grid, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { VenueItemExtended } from '../../models';
 import { useVenuesStore } from '../../store/venues-store';
-import { useState, useEffect } from 'react';
-import { VenueContactInformation } from './venue-contact-information';
-import { VenueAddressComponent } from './venue-address-component';
-import { VenueBusinessHours } from './venue-business-hours';
 import { VenueSpecialsBoard } from '../specials/venue-specials-board';
+import { EditButton } from '../ui/edit';
+import { VenueBusinessHours } from './venue-business-hours';
+import { VenueContactInformation } from './venue-contact-information';
 
 export const VenueView = () => {
     const { id } = useParams<{ id: string }>();
     const { currentVenue, fetchVenueById, isLoading, updateVenue } = useVenuesStore();
+    const [editData, setEditData] = useState<VenueItemExtended | null>(currentVenue);
     const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState(currentVenue);
 
     useEffect(() => {
         if (id) fetchVenueById(id);
@@ -22,46 +23,98 @@ export const VenueView = () => {
     }, [currentVenue]);
 
     const handleEdit = () => setIsEditing(true);
-    const handleCancel = () => {
-        setIsEditing(false);
-        setEditData(currentVenue);
-    };
-    const handleSave = async () => {
-        if (editData && id) {
-            await updateVenue(id, {
-                ...editData,
-            });
-            setIsEditing(false);
+    const handleCancel = () => setIsEditing(false);
+
+    const handleContactChange = (contactUpdates: Partial<Pick<VenueItemExtended, 'phoneNumber' | 'email' | 'website'>>) => {
+        if (editData) {
+            // Create a new VenueItemExtended with the updated properties
+            const updatedVenue = new VenueItemExtended(
+                editData.toModel() // Convert to model
+            );
+
+            // Update the properties
+            if (contactUpdates.phoneNumber !== undefined) {
+                updatedVenue.phoneNumber = contactUpdates.phoneNumber;
+            }
+            if (contactUpdates.email !== undefined) {
+                updatedVenue.email = contactUpdates.email;
+            }
+            if (contactUpdates.website !== undefined) {
+                updatedVenue.website = contactUpdates.website;
+            }
+
+            setEditData(updatedVenue);
         }
+    };
+
+    const handleSave = async () => {
+        if (!editData || !id) return;
+        await updateVenue(id, {
+            name: editData.name,
+            description: editData.description,
+            phoneNumber: editData.phoneNumber,
+            website: editData.website,
+            email: editData.email,
+            profileImage: editData.profileImage,
+            address: {
+                streetAddress: editData.streetAddress,
+                secondaryAddress: editData.secondaryAddress,
+                locality: editData.locality,
+                region: editData.region,
+                postcode: editData.postcode,
+                country: editData.country,
+            },
+        });
+        setIsEditing(false);
     };
 
     if (isLoading || !editData) return <Typography>Loading...</Typography>;
 
     return (
         <Box>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h5">{editData.name}</Typography>
-                {isEditing ? (
-                    <Box>
-                        <Button onClick={handleSave} variant="contained" color="primary" sx={{ mr: 1 }}>Save</Button>
-                        <Button onClick={handleCancel} variant="outlined">Cancel</Button>
-                    </Box>
-                ) : (
-                    <Button onClick={handleEdit} variant="contained">Edit</Button>
-                )}
+            <Box display="flex" justifyContent="flex-end" mb={2}>
+                <EditButton
+                    editing={isEditing}
+                    onEdit={handleEdit}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                />
             </Box>
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                    <VenueContactInformation venue={editData} isEditing={isEditing} onChange={setEditData} />
+            {/* Top Section: Venue Info and Business Hours side by side */}
+            <Grid container spacing={2} sx={{ mb: 4 }}>
+                {/* Left: General Info + Contact Info */}
+                <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 7' } }}>
+                    <Card sx={{ mb: 2 }}>
+                        <CardContent>
+                            <Box display="flex" alignItems="center" gap={2}>
+                                <Avatar src={editData.profileImage} sx={{ width: 64, height: 64 }} />
+                                <Box>
+                                    <Typography variant="h5">{editData.name}</Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {editData.streetAddress}, {editData.secondaryAddress && `${editData.secondaryAddress}, `}{editData.locality}, {editData.region}, {editData.postcode}, {editData.country}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent>
+                            <VenueContactInformation venue={editData} isEditing={isEditing} onChange={handleContactChange} />
+                        </CardContent>
+                    </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <VenueAddressComponent venue={editData} isEditing={isEditing} onChange={setEditData} />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <VenueBusinessHours venueId={id!} isEditing={isEditing} />
+                {/* Right: Business Hours as vertical list */}
+                <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 5' }, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                    <Card sx={{ flex: 1 }}>
+                        <CardContent>
+                            <VenueBusinessHours venueId={id!} isEditing={isEditing} listView />
+                        </CardContent>
+                    </Card>
                 </Grid>
             </Grid>
-            <Box mt={4}>
+            <Divider sx={{ my: 2 }} />
+            {/* Bottom Section: Specials Board */}
+            <Box>
                 <VenueSpecialsBoard venueId={id!} />
             </Box>
         </Box>

@@ -72,4 +72,29 @@ export class VenueItemExtended extends VenueItem {
         this.createdAt = DateTime.fromISO(model.createdAt);
         this.updatedAt = model.updatedAt ? DateTime.fromISO(model.updatedAt) : undefined;
     }
+
+    public toModel(): VenueItemExtendedModel {
+        return {
+            // VenueItemModel properties
+            id: this.id,
+            name: this.name,
+            description: this.description,
+            locality: this.locality,
+            region: this.region,
+            profileImage: this.profileImage,
+            latitude: this.latitude,
+            longitude: this.longitude,
+            // VenueItemExtendedModel specific properties
+            phoneNumber: this.phoneNumber,
+            website: this.website,
+            email: this.email,
+            streetAddress: this.streetAddress,
+            secondaryAddress: this.secondaryAddress,
+            postcode: this.postcode,
+            country: this.country,
+            businessHours: this.businessHours.map(bh => bh.toModel()), // Assuming OperatingScheduleItem has toModel()
+            createdAt: this.createdAt.toISO() as string,
+            updatedAt: this.updatedAt?.toISO() as string | undefined,
+        };
+    }
 }

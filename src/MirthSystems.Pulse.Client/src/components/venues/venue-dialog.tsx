@@ -1,6 +1,6 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { useState } from 'react';
-import { CreateVenueRequest } from '../../models';
+import { type CreateVenueRequest } from '../../models';
 
 interface VenueDialogProps {
     open: boolean;
@@ -12,7 +12,11 @@ export const VenueDialog = ({ open, onClose, onSubmit }: VenueDialogProps) => {
     const [venue, setVenue] = useState<CreateVenueRequest>({
         name: '',
         address: {
-            // Fill with required address fields
+            streetAddress: '',
+            locality: '',
+            region: '',
+            postcode: '',
+            country: '',
         },
         hoursOfOperation: [],
     });

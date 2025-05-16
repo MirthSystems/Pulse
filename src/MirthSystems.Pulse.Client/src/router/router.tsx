@@ -1,7 +1,7 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Layout } from '../components';
-import { HomePage, BackofficePage, VenuePage, NotFoundPage, CallbackPage } from '../pages';
-import { ProtectedRoute } from '../components/identity/protected-route';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { ProtectedRoute as AuthGuard } from '../components/identity';
+import { Layout } from '../components/ui/layout'; // Corrected Layout import path again
+import { BackofficePage, CallbackPage, HomePage, NotFoundPage, SearchResultsPage, VenuePage } from '../pages';
 
 const router = createBrowserRouter([
   {
@@ -14,19 +14,23 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
+        path: 'search-results',
+        element: <SearchResultsPage />,
+      },
+      {
         path: 'backoffice',
         element: (
-          <ProtectedRoute>
+          <AuthGuard>
             <BackofficePage />
-          </ProtectedRoute>
+          </AuthGuard>
         ),
       },
       {
         path: 'backoffice/venues/:id',
         element: (
-          <ProtectedRoute>
+          <AuthGuard>
             <VenuePage />
-          </ProtectedRoute>
+          </AuthGuard>
         ),
       },
     ],
@@ -35,6 +39,10 @@ const router = createBrowserRouter([
     path: '/callback',
     element: <CallbackPage />,
   },
+  {
+    path: '*',
+    element: <Navigate to="/" replace />
+  }
 ]);
 
 export const AppRouter = () => {

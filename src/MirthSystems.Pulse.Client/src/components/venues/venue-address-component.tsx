@@ -1,15 +1,15 @@
-import { Box, Typography, TextField } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import { VenueItemExtended } from '../../models';
 
 interface VenueAddressComponentProps {
   venue: VenueItemExtended;
   isEditing: boolean;
-  onChange: (venue: VenueItemExtended) => void;
+  onChange: (addressUpdates: Partial<Pick<VenueItemExtended, 'streetAddress' | 'secondaryAddress' | 'postcode' | 'locality' | 'region' | 'country'>>) => void;
 }
 
 export const VenueAddressComponent = ({ venue, isEditing, onChange }: VenueAddressComponentProps) => {
-  const handleChange = (field: keyof VenueItemExtended, value: string) => {
-    onChange({ ...venue, [field]: value });
+  const handleChange = (field: keyof Pick<VenueItemExtended, 'streetAddress' | 'secondaryAddress' | 'postcode' | 'locality' | 'region' | 'country'>, value: string) => {
+    onChange({ [field]: value });
   };
 
   return (
