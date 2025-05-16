@@ -1,4 +1,4 @@
-import { Box, Button, FormControlLabel, Switch, Typography } from '@mui/material';
+import { Box, Button, FormControlLabel, Switch, Typography, useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
@@ -16,17 +16,27 @@ export const VenueBusinessHours = ({ venueId, isEditing = false, listView = fals
   const [localSchedules, setLocalSchedules] = useState<OperatingScheduleItem[]>([]);
   const [changedItemIds, setChangedItemIds] = useState<Set<string>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
     if (venueId) {
       fetchVenueBusinessHours(venueId);
     }
   }, [venueId, fetchVenueBusinessHours]);
-
   useEffect(() => {
     const initializedSchedules = venueSchedules.map(s =>
       s instanceof OperatingScheduleItem ? s : new OperatingScheduleItem(s)
     );
+
+    // Ensure we have properly formatted times even for closed days
+    initializedSchedules.forEach(schedule => {
+      if (schedule.isClosed) {
+        // Set consistent "00:00" for closed days
+        schedule.openTime = DateTime.fromFormat('00:00', 'HH:mm');
+        schedule.closeTime = DateTime.fromFormat('00:00', 'HH:mm');
+      }
+    });
+
     setLocalSchedules(initializedSchedules);
     setChangedItemIds(new Set());
   }, [venueSchedules]);
@@ -163,7 +173,14 @@ export const VenueBusinessHours = ({ venueId, isEditing = false, listView = fals
 
   return (
     <Box>
-      <Typography variant="h6">Business Hours</Typography>
+      <Typography variant="h6" sx={{
+        mb: 1,
+        background: 'linear-gradient(90deg, #00E7F2, #FF9255)',
+        backgroundClip: 'text',
+        WebkitBackgroundClip: 'text',
+        color: 'transparent',
+        fontWeight: 700
+      }}>Business Hours</Typography>
       {error && <Typography color="error" gutterBottom>{error}</Typography>}
       <LocalizationProvider dateAdapter={AdapterLuxon}>
         <Grid container spacing={1} direction={listView ? 'column' : 'row'}>
@@ -173,7 +190,11 @@ export const VenueBusinessHours = ({ venueId, isEditing = false, listView = fals
               // Removed `item` prop, relying on `size` for item behavior within container
               <Grid key={idx} size={{ xs: 12 }} sx={listView ? { pb: 1 } : { mb: 1 }}>
                 <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-                  <Typography sx={{ minWidth: 80, fontWeight: 'bold' }}>{dayName}</Typography>
+                  <Typography sx={{
+                    minWidth: 90,
+                    fontWeight: 700,
+                    color: theme => theme.palette.mode === 'dark' ? '#00E7F2' : '#00C2CB',
+                  }}>{dayName}</Typography>
                   {schedule ? (
                     <>
                       <FormControlLabel
@@ -188,8 +209,7 @@ export const VenueBusinessHours = ({ venueId, isEditing = false, listView = fals
                         }
                         label="Closed"
                         sx={{ mr: 1 }}
-                      />
-                      {!schedule.isClosed && (
+                      />                      {isEditing || !schedule.isClosed ? (
                         <>
                           <TimePicker
                             label="Open"
@@ -206,34 +226,73 @@ export const VenueBusinessHours = ({ venueId, isEditing = false, listView = fals
                             slotProps={{ textField: { size: 'small', sx: { minWidth: 90 }, disabled: !isEditing || isSaving || storeIsLoading } }}
                           />
                         </>
+                      ) : (
+                        <>
+                          <Typography sx={{ minWidth: 55, textAlign: 'center', color: theme.palette.mode === 'dark' ? '#FF9255' : '#FF7E45' }}>00:00</Typography>
+                          <Typography sx={{ ml: 1, mr: 1, color: theme.palette.text.secondary }}>-</Typography>
+                          <Typography sx={{ minWidth: 55, textAlign: 'center', color: theme.palette.mode === 'dark' ? '#FF9255' : '#FF7E45' }}>00:00</Typography>
+                          <Typography
+                            sx={{
+                              fontStyle: 'italic',
+                              ml: 2,
+                              color: theme.palette.text.secondary
+                            }}
+                          >
+                            (Closed)
+                          </Typography>
+                        </>
                       )}
-                    </>
-                  ) : (
-                    isEditing ? (
-                      <Button
-                        onClick={() => handleAddHours(idx)}
-                        size="small"
-                        variant="outlined"
-                        disabled={isSaving || storeIsLoading}
-                      >
-                        Add Hours
-                      </Button>
+                    </>) : (
+                    isEditing ? (<Button
+                      onClick={() => handleAddHours(idx)}
+                      size="small"
+                      variant="outlined"
+                      disabled={isSaving || storeIsLoading}
+                      sx={{
+                        borderColor: theme.palette.mode === 'dark' ? '#00E7F2' : '#00C2CB',
+                        color: theme.palette.mode === 'dark' ? '#00E7F2' : '#00C2CB',
+                        '&:hover': {
+                          borderColor: theme.palette.mode === 'dark' ? '#FF9255' : '#FF7E45',
+                          color: theme.palette.mode === 'dark' ? '#FF9255' : '#FF7E45',
+                          backgroundColor: 'rgba(0, 231, 242, 0.05)'
+                        }
+                      }}
+                    >
+                      Add Hours
+                    </Button>
                     ) : (
-                      <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>No hours set</Typography>
+                      <>
+                        <Typography color="text.secondary" sx={{ minWidth: 55, textAlign: 'center' }}>00:00</Typography>
+                        <Typography color="text.secondary" sx={{ ml: 1, mr: 1 }}>-</Typography>
+                        <Typography color="text.secondary" sx={{ minWidth: 55, textAlign: 'center' }}>00:00</Typography>
+                      </>
                     )
                   )}
                 </Box>
               </Grid>
             );
           })}
-        </Grid>
-        {isEditing && (
+        </Grid>        {isEditing && (
           <Box mt={2} display="flex" justifyContent="flex-end">
             <Button
               variant="contained"
-              color="primary"
               onClick={handleSave}
               disabled={isSaving || storeIsLoading || changedItemIds.size === 0}
+              sx={{
+                background: 'linear-gradient(45deg, #00E7F2 30%, #FF9255 90%)',
+                color: 'white',
+                fontWeight: 600,
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #00C2CB 30%, #FF7E45 90%)',
+                  boxShadow: '0 4px 12px rgba(0, 231, 242, 0.3)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: theme.palette.action.disabledBackground,
+                  color: theme.palette.action.disabled
+                },
+                transition: 'all 0.2s ease-in-out'
+              }}
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>

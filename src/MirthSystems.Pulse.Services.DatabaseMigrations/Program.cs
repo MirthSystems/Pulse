@@ -20,7 +20,6 @@ namespace MirthSystems.Pulse.Services.DatabaseMigrations
                     dispose: true
                 );
 
-            builder.Services.AddServiceDefaults();
             builder.Services.AddApplicationDbContext(builder.Configuration.GetConnectionString("PostgresDbConnection"));
 
             builder.Services.AddHostedService<Worker>();
