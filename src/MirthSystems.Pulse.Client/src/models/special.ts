@@ -1,85 +1,74 @@
-import { VenueItem } from './venue';
+import { DateTime } from 'luxon';
+import { VenueItem, type VenueItemModel } from './venue';
 
-export enum SpecialTypes {
-  Food = 0,
-  Drink = 1,
-  Entertainment = 2,
+const SpecialTypes = {
+    Food: 0,
+    Drink: 1,
+    Entertainment: 2,
+} as const;
+
+export type SpecialTypes = typeof SpecialTypes[keyof typeof SpecialTypes];
+
+export interface SpecialItemModel {
+    id: string;
+    venueId: string;
+    content: string;
+    type: number;
+    typeName: string;
+    startDate: string; // "yyyy-MM-dd"
+    startTime: string; // "HH:mm"
+    endTime?: string; // "HH:mm"
+    isCurrentlyRunning: boolean;
+    isRecurring: boolean;
 }
 
-export interface SpecialItem {
-  id?: string;
-  venueId: string;
-  type: SpecialTypes;
-  typeName: string;
-  content: string;
-  startDate: string;
-  startTime: string;
-  endTime?: string;
-  isCurrentlyRunning: boolean;
-  isRecurring: boolean;
-  venueName?: string; // Add this optional property
+export interface SpecialItemExtendedModel extends SpecialItemModel {
+    expirationDate?: string; // "yyyy-MM-dd"
+    cronSchedule?: string;
+    createdAt: string; // ISO 8601
+    updatedAt?: string; // ISO 8601
+    venue: VenueItemModel;
 }
 
-export interface SpecialItemExtended extends SpecialItem {
-  venue: VenueItem;
-  expirationDate?: string;
-  cronSchedule?: string;
-  createdAt: string;
-  updatedAt?: string;
+export class SpecialItem {
+    id: string;
+    venueId: string;
+    content: string;
+    type: SpecialTypes;
+    typeName: string;
+    startDate: DateTime;
+    startTime: DateTime;
+    endTime?: DateTime;
+    isCurrentlyRunning: boolean;
+    isRecurring: boolean;
+
+    constructor(model: SpecialItemModel) {
+        this.id = model.id;
+        this.venueId = model.venueId;
+        this.content = model.content;
+        this.type = model.type as SpecialTypes;
+        this.typeName = model.typeName;
+        this.startDate = DateTime.fromISO(model.startDate);
+        this.startTime = DateTime.fromISO(model.startTime);
+        this.endTime = model.endTime ? DateTime.fromISO(model.endTime) : undefined;
+        this.isCurrentlyRunning = model.isCurrentlyRunning;
+        this.isRecurring = model.isRecurring;
+    }
 }
 
-export interface CreateSpecialRequest {
-  venueId: string;
-  content: string;
-  type: SpecialTypes;
-  startDate: string;
-  startTime: string;
-  endTime?: string;
-  expirationDate?: string;
-  isRecurring: boolean;
-  cronSchedule?: string;
-}
+export class SpecialItemExtended extends SpecialItem {
+    expirationDate?: DateTime;
+    cronSchedule?: string;
+    createdAt: DateTime;
+    updatedAt?: DateTime;
+    venue: VenueItem;
 
-export interface UpdateSpecialRequest {
-  content: string;
-  type: SpecialTypes;
-  startDate: string;
-  startTime: string;
-  endTime?: string;
-  expirationDate?: string;
-  isRecurring: boolean;
-  cronSchedule?: string;
-}
-
-export interface GetSpecialsRequest {
-  page: number;
-  pageSize: number;
-  address: string;
-  radius: number;
-  searchDateTime?: string;
-  searchTerm?: string;
-  venueId?: string;
-  specialTypeId?: number;
-  isCurrentlyRunning?: boolean;
-}
-
-export interface SpecialSearchParams {
-  page: number;
-  pageSize: number;
-  address: string;
-  radius: number;
-  dateTime?: string; // Will map to searchDateTime in the API
-  term?: string; // Will map to searchTerm in the API
-  venueId?: string;
-  type?: number; // Will map to specialTypeId in the API
-  active?: boolean; // Will map to isCurrentlyRunning in the API
-}
-
-export interface SpecialMenu {
-  items: SpecialItem[];
-}
-
-export interface SearchSpecialsResult {
-  venue: VenueItem;
-  specials: SpecialMenu;
+    constructor(model: SpecialItemExtendedModel) {
+        super(model);
+        this.expirationDate = model.expirationDate ? DateTime.fromISO(model.expirationDate) : undefined;
+        this.cronSchedule = model.cronSchedule;
+        this.createdAt = DateTime.fromISO(model.createdAt);
+        this.updatedAt = model.updatedAt ? DateTime.fromISO(model.updatedAt) : undefined;
+        this.venue = new VenueItem(model.venue);
+    }
 }

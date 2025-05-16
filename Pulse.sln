@@ -21,8 +21,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MirthSystems.Pulse.UnitTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MirthSystems.Pulse.Services.DatabaseMigrations", "src\MirthSystems.Pulse.Services.DatabaseMigrations\MirthSystems.Pulse.Services.DatabaseMigrations.csproj", "{D171ECB9-2A5A-40A8-A696-7083E2AB322C}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "pulse-client", "src\pulse-client\pulse-client.esproj", "{02BF9764-10D6-4988-9679-FAF07C80C8E4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +51,12 @@ Global
 		{97A83088-F389-4D07-8D36-F8F962E8C7C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97A83088-F389-4D07-8D36-F8F962E8C7C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97A83088-F389-4D07-8D36-F8F962E8C7C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1CF7D59-C602-8599-E869-4AD1DD5775A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1CF7D59-C602-8599-E869-4AD1DD5775A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1CF7D59-C602-8599-E869-4AD1DD5775A4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A1CF7D59-C602-8599-E869-4AD1DD5775A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1CF7D59-C602-8599-E869-4AD1DD5775A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1CF7D59-C602-8599-E869-4AD1DD5775A4}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{8C5B932A-2EDA-BFE1-88DC-2C89E4E7BB84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8C5B932A-2EDA-BFE1-88DC-2C89E4E7BB84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C5B932A-2EDA-BFE1-88DC-2C89E4E7BB84}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -61,12 +65,6 @@ Global
 		{D171ECB9-2A5A-40A8-A696-7083E2AB322C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D171ECB9-2A5A-40A8-A696-7083E2AB322C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D171ECB9-2A5A-40A8-A696-7083E2AB322C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02BF9764-10D6-4988-9679-FAF07C80C8E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02BF9764-10D6-4988-9679-FAF07C80C8E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02BF9764-10D6-4988-9679-FAF07C80C8E4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{02BF9764-10D6-4988-9679-FAF07C80C8E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02BF9764-10D6-4988-9679-FAF07C80C8E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02BF9764-10D6-4988-9679-FAF07C80C8E4}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
