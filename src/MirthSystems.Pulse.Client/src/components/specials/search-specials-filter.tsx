@@ -3,8 +3,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SearchIcon from '@mui/icons-material/Search';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import { Box, FormControl, FormControlLabel, Grid, InputAdornment, InputLabel, MenuItem, Paper, Select, Slider, Switch, TextField, Typography, useTheme } from '@mui/material';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { DateTimePicker } from '@mui/x-date-pickers';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import type { GetSpecialsRequest } from '../../models';
@@ -69,172 +68,169 @@ export const SearchSpecialsFilter = ({ initialFilters, onFilterChange, isLoading
     };
 
     return (
-        <LocalizationProvider dateAdapter={AdapterLuxon}>
-            <Paper
-                elevation={0}
-                sx={{
-                    p: { xs: 2, sm: 3 },
-                    mb: 0,
-                    borderRadius: 2,
-                    backgroundColor: theme.palette.mode === 'light'
-                        ? 'rgba(255, 255, 255, 0.8)'
-                        : 'rgba(22, 28, 35, 0.8)'
-                }}
-            >
-                {/* Main search row */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
-                        <TextField
-                            placeholder="Address, City, or Zip Code"
-                            fullWidth
-                            value={internalFilters.address || ''}
-                            onChange={(e) => handleChange('address', e.target.value)}
-                            disabled={isLoading}
-                            sx={inputStyles}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LocationOnIcon sx={{
-                                            color: theme.palette.mode === 'light'
-                                                ? 'primary.main'
-                                                : 'primary.light'
-                                        }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
-                    <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
-                        <TextField
-                            placeholder="Search for specials..."
-                            fullWidth
-                            value={internalFilters.searchTerm || ''}
-                            onChange={(e) => handleChange('searchTerm', e.target.value)}
-                            disabled={isLoading}
-                            sx={inputStyles}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{
-                                            color: theme.palette.mode === 'light'
-                                                ? 'primary.main'
-                                                : 'primary.light'
-                                        }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
-                    <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
-                        <FormControl fullWidth disabled={isLoading} sx={inputStyles}>
-                            <InputLabel id="special-type-label">
-                                Special Type
-                            </InputLabel>
-                            <Select
-                                labelId="special-type-label"
-                                label="Special Type"
-                                value={internalFilters.specialTypeId === undefined ? '' : internalFilters.specialTypeId.toString()}
-                                onChange={(e) => handleChange('specialTypeId', e.target.value === '' ? undefined : Number(e.target.value))}
-                                startAdornment={
-                                    <InputAdornment position="start">
-                                        <CategoryIcon sx={{
-                                            color: theme.palette.mode === 'light'
-                                                ? 'primary.main'
-                                                : 'primary.light',
-                                            ml: 1
-                                        }} />
-                                    </InputAdornment>
-                                }
-                            >
-                                <MenuItem value=""><em>Any Type</em></MenuItem>
-                                {Object.entries(SpecialTypes).map(([key, value]) => (
-                                    typeof value === 'number' && <MenuItem key={key} value={value.toString()}>{key}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                </Grid>
-
-                {/* Radius slider */}
-                <Box sx={{ px: 2, mb: 3 }}>
-                    <Typography
-                        variant="subtitle2"
-                        gutterBottom
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            mb: 1,
-                            color: theme.palette.mode === 'light'
-                                ? 'text.secondary'
-                                : 'text.primary',
-                            fontWeight: 500
-                        }}
-                    >
-                        <StraightenIcon
-                            sx={{
-                                mr: 1,
-                                fontSize: 18,
-                                color: theme.palette.mode === 'light'
-                                    ? 'primary.main'
-                                    : 'primary.light'
-                            }}
-                        />
-                        Search Radius: <Box component="span" sx={{ ml: 0.5, fontWeight: 600 }}>
-                            {internalFilters.radius || 5} miles
-                        </Box>
-                    </Typography>
-                    <Slider
-                        value={internalFilters.radius || 5}
-                        onChange={handleSliderChange}
-                        aria-labelledby="radius-slider"
-                        valueLabelDisplay="auto"
-                        step={null}
-                        marks={radiusMarks}
-                        min={1}
-                        max={50}
+        <Paper
+            elevation={0}
+            sx={{
+                p: { xs: 2, sm: 3 },
+                mb: 0,
+                borderRadius: 2,
+                backgroundColor: theme.palette.mode === 'light'
+                    ? 'rgba(255, 255, 255, 0.8)'
+                    : 'rgba(22, 28, 35, 0.8)'
+            }}
+        >
+            {/* Main search row */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
+                    <TextField
+                        placeholder="Address, City, or Zip Code"
+                        fullWidth
+                        value={internalFilters.address || ''}
+                        onChange={(e) => handleChange('address', e.target.value)}
                         disabled={isLoading}
-                        valueLabelFormat={(value) => `${value} mi`}
+                        sx={inputStyles}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <LocationOnIcon sx={{
+                                        color: theme.palette.mode === 'light'
+                                            ? 'primary.main'
+                                            : 'primary.light'
+                                    }} />
+                                </InputAdornment>
+                            ),
+                        }}
                     />
-                </Box>
-
-                {/* Additional filters */}
-                <Grid container spacing={2}>
-                    <Grid sx={{ gridColumn: { xs: 'span 12', sm: 'span 6' } }}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={internalFilters.isCurrentlyRunning || false}
-                                    onChange={(e) => handleChange('isCurrentlyRunning', e.target.checked)}
-                                    disabled={isLoading}
-                                    color="primary"
-                                />
-                            }
-                            label="Only show active specials"
-                            sx={{
-                                '& .MuiFormControlLabel-label': {
-                                    fontWeight: 500
-                                }
-                            }}
-                        />
-                    </Grid>
-                    <Grid sx={{ gridColumn: { xs: 'span 12', sm: 'span 6' } }}>
-                        <DateTimePicker
-                            label="Search Date & Time (Optional)"
-                            value={searchDateTime}
-                            onChange={handleDateTimeChange}
-                            ampm={false}
-                            slotProps={{
-                                textField: {
-                                    fullWidth: true,
-                                    size: "small",
-                                    disabled: isLoading,
-                                    sx: inputStyles
-                                }
-                            }}
-                        />
-                    </Grid>
                 </Grid>
-            </Paper>
-        </LocalizationProvider>
+                <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
+                    <TextField
+                        placeholder="Search for specials..."
+                        fullWidth
+                        value={internalFilters.searchTerm || ''}
+                        onChange={(e) => handleChange('searchTerm', e.target.value)}
+                        disabled={isLoading}
+                        sx={inputStyles}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{
+                                        color: theme.palette.mode === 'light'
+                                            ? 'primary.main'
+                                            : 'primary.light'
+                                    }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                </Grid>
+                <Grid sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
+                    <FormControl fullWidth disabled={isLoading} sx={inputStyles}>
+                        <InputLabel id="special-type-label">
+                            Special Type
+                        </InputLabel>
+                        <Select
+                            labelId="special-type-label"
+                            label="Special Type"
+                            value={internalFilters.specialTypeId === undefined ? '' : internalFilters.specialTypeId.toString()}
+                            onChange={(e) => handleChange('specialTypeId', e.target.value === '' ? undefined : Number(e.target.value))}
+                            startAdornment={
+                                <InputAdornment position="start">
+                                    <CategoryIcon sx={{
+                                        color: theme.palette.mode === 'light'
+                                            ? 'primary.main'
+                                            : 'primary.light',
+                                        ml: 1
+                                    }} />
+                                </InputAdornment>
+                            }
+                        >
+                            <MenuItem value=""><em>Any Type</em></MenuItem>
+                            {Object.entries(SpecialTypes).map(([key, value]) => (
+                                typeof value === 'number' && <MenuItem key={key} value={value.toString()}>{key}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Grid>
+            </Grid>
+
+            {/* Radius slider */}
+            <Box sx={{ px: 2, mb: 3 }}>
+                <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 1,
+                        color: theme.palette.mode === 'light'
+                            ? 'text.secondary'
+                            : 'text.primary',
+                        fontWeight: 500
+                    }}
+                >
+                    <StraightenIcon
+                        sx={{
+                            mr: 1,
+                            fontSize: 18,
+                            color: theme.palette.mode === 'light'
+                                ? 'primary.main'
+                                : 'primary.light'
+                        }}
+                    />
+                    Search Radius: <Box component="span" sx={{ ml: 0.5, fontWeight: 600 }}>
+                        {internalFilters.radius || 5} miles
+                    </Box>
+                </Typography>
+                <Slider
+                    value={internalFilters.radius || 5}
+                    onChange={handleSliderChange}
+                    aria-labelledby="radius-slider"
+                    valueLabelDisplay="auto"
+                    step={null}
+                    marks={radiusMarks}
+                    min={1}
+                    max={50}
+                    disabled={isLoading}
+                    valueLabelFormat={(value) => `${value} mi`}
+                />
+            </Box>
+
+            {/* Additional filters */}
+            <Grid container spacing={2}>
+                <Grid sx={{ gridColumn: { xs: 'span 12', sm: 'span 6' } }}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={internalFilters.isCurrentlyRunning || false}
+                                onChange={(e) => handleChange('isCurrentlyRunning', e.target.checked)}
+                                disabled={isLoading}
+                                color="primary"
+                            />
+                        }
+                        label="Only show active specials"
+                        sx={{
+                            '& .MuiFormControlLabel-label': {
+                                fontWeight: 500
+                            }
+                        }}
+                    />
+                </Grid>
+                <Grid sx={{ gridColumn: { xs: 'span 12', sm: 'span 6' } }}>
+                    <DateTimePicker
+                        label="Search Date & Time (Optional)"
+                        value={searchDateTime}
+                        onChange={handleDateTimeChange}
+                        ampm={false}
+                        slotProps={{
+                            textField: {
+                                fullWidth: true,
+                                disabled: isLoading,
+                                sx: inputStyles
+                            }
+                        }}
+                    />
+                </Grid>
+            </Grid>
+        </Paper>
     );
 };
