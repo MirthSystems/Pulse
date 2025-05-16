@@ -27,8 +27,9 @@ export class OperatingScheduleItem {
         this.id = model.id;
         this.dayOfWeek = model.dayOfWeek;
         this.dayName = model.dayName;
-        this.openTime = DateTime.fromISO(model.openTime);
-        this.closeTime = DateTime.fromISO(model.closeTime);
+        // Use fromFormat with 'HH:mm' for time strings from API
+        this.openTime = DateTime.fromFormat(model.openTime, 'HH:mm');
+        this.closeTime = DateTime.fromFormat(model.closeTime, 'HH:mm');
         this.isClosed = model.isClosed;
     }
 }

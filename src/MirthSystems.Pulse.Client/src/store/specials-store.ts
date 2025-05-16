@@ -8,6 +8,7 @@ import {
   type CreateSpecialRequest,
   type UpdateSpecialRequest
 } from '../models';
+import { PagingInfo } from '../models/paging';
 
 interface SpecialsState {
   searchResults: SearchSpecialsResult[];
@@ -15,16 +16,16 @@ interface SpecialsState {
   venueSpecials: SpecialItem[];
   isLoading: boolean;
   error: string | null;
-  pagingInfo: {
-    currentPage: number;
-    pageSize: number;
-    totalCount: number;
-    totalPages: number;
-    hasPreviousPage: boolean;
-    hasNextPage: boolean;
-  } | null;
-  
-  searchSpecials: (request: GetSpecialsRequest) => Promise<void>;
+  pagingInfo: PagingInfo;
+  filters: Partial<GetSpecialsRequest>;
+  sort: string | null;
+  lastRequest: GetSpecialsRequest | null;
+
+  searchSpecials: () => Promise<void>;
+  setPage: (page: number) => void;
+  setPageSize: (size: number) => void;
+  setFilters: (filters: Partial<GetSpecialsRequest>) => void;
+  setSort: (sort: string | null) => void;
   fetchSpecialById: (id: string) => Promise<void>;
   fetchVenueSpecials: (venueId: string) => Promise<void>;
   createSpecial: (special: CreateSpecialRequest) => Promise<string | null>;
@@ -40,18 +41,28 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
   venueSpecials: [],
   isLoading: false,
   error: null,
-  pagingInfo: null,
-  
-  searchSpecials: async (request: GetSpecialsRequest) => {
+  pagingInfo: PagingInfo.default(),
+  filters: {},
+  sort: null,
+  lastRequest: null,
+
+  searchSpecials: async () => {
     try {
       set({ isLoading: true, error: null });
       const apiClient = useApiStore.getState().apiClient;
+      const { filters, sort, pagingInfo } = get();
+      const request: GetSpecialsRequest = {
+        ...filters,
+        page: pagingInfo.currentPage,
+        pageSize: pagingInfo.pageSize,
+        sort: sort || undefined
+      };
       const result = await apiClient.specials.searchSpecials(request);
-      
       set({ 
         searchResults: result.items, 
-        pagingInfo: result.pagingInfo,
-        isLoading: false 
+        pagingInfo: PagingInfo.fromResult(result),
+        isLoading: false,
+        lastRequest: request
       });
     } catch (error) {
       set({ 
@@ -60,7 +71,37 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       });
     }
   },
-  
+
+  setPage: (page: number) => {
+    set(state => ({
+      pagingInfo: new PagingInfo({ ...state.pagingInfo, currentPage: page })
+    }));
+    get().searchSpecials();
+  },
+
+  setPageSize: (size: number) => {
+    set(state => ({
+      pagingInfo: new PagingInfo({ ...state.pagingInfo, pageSize: size, currentPage: 1 })
+    }));
+    get().searchSpecials();
+  },
+
+  setFilters: (filters: Partial<GetSpecialsRequest>) => {
+    set({ filters });
+    set(state => ({
+      pagingInfo: new PagingInfo({ ...state.pagingInfo, currentPage: 1 })
+    }));
+    get().searchSpecials();
+  },
+
+  setSort: (sort: string | null) => {
+    set({ sort });
+    set(state => ({
+      pagingInfo: new PagingInfo({ ...state.pagingInfo, currentPage: 1 })
+    }));
+    get().searchSpecials();
+  },
+
   fetchSpecialById: async (id: string) => {
     try {
       set({ isLoading: true, error: null });
@@ -74,7 +115,7 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       });
     }
   },
-  
+
   fetchVenueSpecials: async (venueId: string) => {
     try {
       set({ isLoading: true, error: null });
@@ -88,7 +129,7 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       });
     }
   },
-  
+
   createSpecial: async (special: CreateSpecialRequest) => {
     try {
       set({ isLoading: true, error: null });
@@ -104,7 +145,7 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       return null;
     }
   },
-  
+
   updateSpecial: async (id: string, special: UpdateSpecialRequest) => {
     try {
       set({ isLoading: true, error: null });
@@ -126,7 +167,7 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       return false;
     }
   },
-  
+
   deleteSpecial: async (id: string) => {
     try {
       set({ isLoading: true, error: null });
@@ -150,11 +191,11 @@ export const useSpecialsStore = create<SpecialsState>()((set, get) => ({
       return false;
     }
   },
-  
+
   clearCurrentSpecial: () => {
     set({ currentSpecial: null });
   },
-  
+
   setError: (error) => {
     set({ error });
   }

@@ -1,58 +1,34 @@
-import { Box } from '@mui/material';
-import { type VenueItem } from '../../models';
+import { Box, CircularProgress } from '@mui/material';
 import { VenueItemCard } from './venue-item-card';
-import { PaginatedList } from '../ui/paginated-list';
+import { useUiStore } from '../../store/ui-store';
+import { VenueItem } from '../../models';
 
 interface VenueListProps {
   venues: VenueItem[];
   isLoading: boolean;
-  error: string | null;
-  pagingInfo: {
-    currentPage: number;
-    pageSize: number;
-    totalCount: number;
-    totalPages: number;
-    hasPreviousPage: boolean;
-    hasNextPage: boolean;
-  } | null;
-  onPageChange: (page: number) => void;
 }
 
-export const VenueList = ({ 
-  venues, 
-  isLoading, 
-  error, 
-  pagingInfo, 
-  onPageChange 
-}: VenueListProps) => {  // Ensure pagingInfo has default values if null
-  const safePagingInfo = pagingInfo || {
-    currentPage: 1, 
-    totalPages: 1, 
-    totalCount: 0, 
-    pageSize: 12, 
-    hasPreviousPage: false, 
-    hasNextPage: false 
-  };
+export const VenueList = ({ venues, isLoading }: VenueListProps) => {
+  const { openDeleteDialog } = useUiStore();
+
+  if (isLoading) {
+    return <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}><CircularProgress /></Box>;
+  }
+
+  if (!venues.length) {
+    return <Box p={2}>No venues found.</Box>;
+  }
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <PaginatedList
-        items={venues || []}
-        pagingInfo={safePagingInfo}
-        isLoading={isLoading}
-        error={error}
-        onPageChange={onPageChange}
-        renderItem={(venue) => (
-          <Box key={venue.id} sx={{ width: '100%', mb: 2 }}>
-            <VenueItemCard
-              venue={venue}
-              onView={(id) => console.log(`View venue with id: ${id}`)}
-              onDelete={(id) => console.log(`Delete venue with id: ${id}`)}
-            />
-          </Box>
-        )}
-        emptyMessage="No venues found. Try adjusting your search or filters."
-      />
+    <Box>
+      {venues.map((venue) => (
+        <VenueItemCard
+          key={venue.id}
+          venue={venue}
+          onView={() => window.location.href = `/backoffice/venues/${venue.id}`}
+          onDelete={() => openDeleteDialog('venue', venue.id)}
+        />
+      ))}
     </Box>
   );
 };

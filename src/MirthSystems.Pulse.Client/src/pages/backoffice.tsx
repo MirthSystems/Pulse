@@ -9,7 +9,6 @@ export const BackofficePage = () => {
           Backoffice
         </Typography>
       </Box>
-      
       <VenueListView />
     </Container>
   );

@@ -4,3 +4,4 @@ export * from './api-store';
 export * from './venues-store';
 export * from './specials-store';
 export * from './operating-schedules-store';
+export * from './ui-store';

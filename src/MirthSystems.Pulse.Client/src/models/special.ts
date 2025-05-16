@@ -48,9 +48,9 @@ export class SpecialItem {
         this.content = model.content;
         this.type = model.type as SpecialTypes;
         this.typeName = model.typeName;
-        this.startDate = DateTime.fromISO(model.startDate);
-        this.startTime = DateTime.fromISO(model.startTime);
-        this.endTime = model.endTime ? DateTime.fromISO(model.endTime) : undefined;
+        this.startDate = DateTime.fromFormat(model.startDate, 'yyyy-MM-dd');
+        this.startTime = DateTime.fromFormat(model.startTime, 'HH:mm');
+        this.endTime = model.endTime ? DateTime.fromFormat(model.endTime, 'HH:mm') : undefined;
         this.isCurrentlyRunning = model.isCurrentlyRunning;
         this.isRecurring = model.isRecurring;
     }
@@ -65,7 +65,7 @@ export class SpecialItemExtended extends SpecialItem {
 
     constructor(model: SpecialItemExtendedModel) {
         super(model);
-        this.expirationDate = model.expirationDate ? DateTime.fromISO(model.expirationDate) : undefined;
+        this.expirationDate = model.expirationDate ? DateTime.fromFormat(model.expirationDate, 'yyyy-MM-dd') : undefined;
         this.cronSchedule = model.cronSchedule;
         this.createdAt = DateTime.fromISO(model.createdAt);
         this.updatedAt = model.updatedAt ? DateTime.fromISO(model.updatedAt) : undefined;

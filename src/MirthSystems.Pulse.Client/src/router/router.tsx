@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Layout } from '../components';
-import { HomePage, BackofficePage, NotFoundPage, CallbackPage } from '../pages';
+import { HomePage, BackofficePage, VenuePage, NotFoundPage, CallbackPage } from '../pages';
 import { ProtectedRoute } from '../components/identity/protected-route';
 
 const router = createBrowserRouter([
@@ -18,6 +18,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <BackofficePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'backoffice/venues/:id',
+        element: (
+          <ProtectedRoute>
+            <VenuePage />
           </ProtectedRoute>
         ),
       },
