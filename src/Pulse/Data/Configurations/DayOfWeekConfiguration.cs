@@ -12,7 +12,7 @@
 
             builder.HasIndex(d => d.IsoNumber)
                 .IsUnique();
-            builder.HasIndex(d => d.ByteMap)
+            builder.HasIndex(d => d.BitMask)
                 .IsUnique();
 
             builder.HasData(
@@ -22,7 +22,7 @@
                     Name = "Sunday", 
                     ShortName = "SUN", 
                     IsoNumber = 0, 
-                    ByteMap = 1, 
+                    BitMask = 1, 
                     IsWeekday = false, 
                     SortOrder = 1 
                 },
@@ -32,7 +32,7 @@
                     Name = "Monday", 
                     ShortName = "MON", 
                     IsoNumber = 1, 
-                    ByteMap = 2, 
+                    BitMask = 2, 
                     IsWeekday = true, 
                     SortOrder = 2 
                 },
@@ -42,7 +42,7 @@
                     Name = "Tuesday", 
                     ShortName = "TUE", 
                     IsoNumber = 2, 
-                    ByteMap = 4, 
+                    BitMask = 4, 
                     IsWeekday = true, 
                     SortOrder = 3 
                 },
@@ -52,7 +52,7 @@
                     Name = "Wednesday", 
                     ShortName = "WED", 
                     IsoNumber = 3, 
-                    ByteMap = 8, 
+                    BitMask = 8, 
                     IsWeekday = true, 
                     SortOrder = 4 
                 },
@@ -62,7 +62,7 @@
                     Name = "Thursday", 
                     ShortName = "THU", 
                     IsoNumber = 4, 
-                    ByteMap = 16, 
+                    BitMask = 16, 
                     IsWeekday = true, 
                     SortOrder = 5 
                 },
@@ -72,7 +72,7 @@
                     Name = "Friday", 
                     ShortName = "FRI", 
                     IsoNumber = 5, 
-                    ByteMap = 32, 
+                    BitMask = 32, 
                     IsWeekday = true, 
                     SortOrder = 6 
                 },
@@ -82,7 +82,7 @@
                     Name = "Saturday", 
                     ShortName = "SAT", 
                     IsoNumber = 6, 
-                    ByteMap = 64, 
+                    BitMask = 64, 
                     IsWeekday = false, 
                     SortOrder = 7 
                 }

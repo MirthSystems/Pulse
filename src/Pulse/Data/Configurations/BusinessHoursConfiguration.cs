@@ -21,7 +21,8 @@
                    .HasForeignKey(bh => bh.DayOfWeekId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(bh => new { bh.VenueId, bh.DayOfWeekId }).IsUnique();
+            builder.HasIndex(bh => new { bh.VenueId, bh.DayOfWeekId })
+                   .IsUnique();
         }
     }
 }

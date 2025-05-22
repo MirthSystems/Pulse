@@ -18,6 +18,9 @@
         public DbSet<DayOfWeek> DayOfWeeks => Set<DayOfWeek>();
         public DbSet<Venue> Venues => Set<Venue>();
         public DbSet<VenueCategory> VenueCategories => Set<VenueCategory>();
+        public DbSet<Special> Specials => Set<Special>(); 
+        public DbSet<SpecialCategory> SpecialCategories => Set<SpecialCategory>();
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {           
             base.OnModelCreating(modelBuilder);

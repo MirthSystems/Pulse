@@ -1,8 +1,9 @@
-﻿namespace Pulse.Data.Entities
+namespace Pulse.Data.Entities
 {
+    using System.Collections.Generic;
     using NodaTime;
 
-    public class VenueCategory
+    public class SpecialCategory
     {
         #region Identity and primary fields
         public int Id { get; set; }
@@ -11,13 +12,13 @@
         #endregion
 
         #region Metadata properties
-        public string? Icon { get; set; }   
+        public string? Icon { get; set; }
         public int BitMask { get; set; }
         public int SortOrder { get; set; }
         #endregion
 
-        #region  Navigation properties
-        public IList<Venue> Venues { get; set; } = new List<Venue>();
+        #region Navigation properties
+        public IList<Special> Specials { get; set; } = new List<Special>();
         #endregion
     }
 }

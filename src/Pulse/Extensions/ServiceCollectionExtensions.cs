@@ -2,7 +2,7 @@
 {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
-
+    using NodaTime;
     using Pulse.Core.Configurations;
     using Pulse.Data.Context;
 
@@ -10,7 +10,7 @@
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, ApplicationConfiguration configuration)
         {
-            services.AddSingleton(configuration);
+            services.AddSingleton<IClock>(SystemClock.Instance);
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {

@@ -16,8 +16,6 @@
                    .HasForeignKey(v => v.CategoryId)
                    .OnDelete(DeleteBehavior.Restrict)
                    .IsRequired();
-
-            builder.Property(v => v.IsActive).HasDefaultValue(true);
         }
     }
 }
