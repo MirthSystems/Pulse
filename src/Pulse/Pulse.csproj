@@ -29,7 +29,6 @@
 		<Folder Include="Events\Handlers\" />
 		<Folder Include="Events\Consumers\" />
 		<Folder Include="Events\Publishers\" />
-		<Folder Include="Extensions\" />
 		<Folder Include="Infrastructure\Logging\" />
 		<Folder Include="Infrastructure\Caching\" />
 		<Folder Include="Infrastructure\Messaging\" />
