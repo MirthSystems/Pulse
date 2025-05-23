@@ -43,9 +43,7 @@ namespace Pulse.Data.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
             #endregion
 
-            #region Data Seed
-            var createdAt = SystemClock.Instance.GetCurrentInstant();
-            
+            #region Data Seed       
             builder.HasData(
                 #region Bullfrog Brewery Specials
                 new Special
@@ -60,7 +58,7 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(23, 0), // 11:00 PM
                     IsRecurring = true,
                     CronSchedule = "0 21 * * 5,6", // Every Friday and Saturday at 9 PM
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -76,9 +74,10 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(18, 0), // 6:00 PM
                     IsRecurring = true,
                     CronSchedule = "0 16 * * 1-5", // Weekdays at 4 PM
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
-                    IsActive = true                },
+                    IsActive = true
+                },
                 #endregion
                 
                 #region The Brickyard Restaurant & Ale House Specials
@@ -94,7 +93,7 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(22, 0), // 10:00 PM
                     EndDate = new LocalDate(2025, 5, 27), // One week after start
                     IsRecurring = false,
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -110,7 +109,7 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(23, 0), // 11:00 PM
                     IsRecurring = true,
                     CronSchedule = "0 21 * * 3", // Every Wednesday at 9 PM
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -126,7 +125,7 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(23, 0), // 11:00 PM
                     IsRecurring = true,
                     CronSchedule = "0 11 * * 2", // Every Tuesday at 11 AM
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -145,7 +144,7 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(14, 0), // 2:00 PM
                     IsRecurring = true,
                     CronSchedule = "0 10 * * 0", // Every Sunday at 10 AM
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -161,7 +160,7 @@ namespace Pulse.Data.Configurations
                     EndTime = new LocalTime(18, 0), // 6:00 PM
                     IsRecurring = true,
                     CronSchedule = "0 16 * * 2-6", // Tuesday-Saturday at 4 PM
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 }

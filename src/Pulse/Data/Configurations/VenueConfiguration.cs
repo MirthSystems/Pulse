@@ -90,8 +90,6 @@ namespace Pulse.Data.Configurations
             #endregion
 
             #region Data Seed
-            var createdAt = SystemClock.Instance.GetCurrentInstant();
-
             builder.HasData(
                 // Bullfrog Brewery
                 new Venue
@@ -112,7 +110,7 @@ namespace Pulse.Data.Configurations
                     {
                         SRID = 4326
                     },
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -135,7 +133,7 @@ namespace Pulse.Data.Configurations
                     {
                         SRID = 4326
                     },
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 },
@@ -158,7 +156,7 @@ namespace Pulse.Data.Configurations
                     {
                         SRID = 4326
                     },
-                    CreatedAt = createdAt,
+                    CreatedAt = NodaConstants.UnixEpoch,
                     CreatedByUserId = "system-seed",
                     IsActive = true
                 }
