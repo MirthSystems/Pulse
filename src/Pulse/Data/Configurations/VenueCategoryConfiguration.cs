@@ -10,6 +10,7 @@
         public void Configure(EntityTypeBuilder<VenueCategory> builder)
         {
             #region Entity Configuration
+            builder.ToTable("venue_categories");
             builder.HasKey(vc => vc.Id);
 
             builder.Property(vc => vc.Name)

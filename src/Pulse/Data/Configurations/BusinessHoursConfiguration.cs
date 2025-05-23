@@ -11,6 +11,7 @@
         public void Configure(EntityTypeBuilder<BusinessHours> builder)
         {
             #region Entity Configuration
+            builder.ToTable("business_hours");
             builder.HasKey(bh => bh.Id);
 
             builder.Property(bh => bh.VenueId)

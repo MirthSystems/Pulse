@@ -9,6 +9,7 @@ namespace Pulse.Data.Configurations
         public void Configure(EntityTypeBuilder<SpecialCategory> builder)
         {
             #region Entity Configuration
+            builder.ToTable("special_categories");
             builder.HasKey(sc => sc.Id);
 
             builder.Property(sc => sc.Name)

@@ -27,7 +27,7 @@ namespace Pulse.Data.Migrations
                 .Annotation("Npgsql:PostgresExtension:postgis_topology", ",,");
 
             migrationBuilder.CreateTable(
-                name: "day_of_weeks",
+                name: "days_of_week",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -41,7 +41,7 @@ namespace Pulse.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_day_of_weeks", x => x.id);
+                    table.PrimaryKey("pk_days_of_week", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -135,7 +135,7 @@ namespace Pulse.Data.Migrations
                     table.ForeignKey(
                         name: "fk_business_hours_day_of_weeks_day_of_week_id",
                         column: x => x.day_of_week_id,
-                        principalTable: "day_of_weeks",
+                        principalTable: "days_of_week",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -188,7 +188,7 @@ namespace Pulse.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "day_of_weeks",
+                table: "days_of_week",
                 columns: new[] { "id", "bit_mask", "is_weekday", "iso_number", "name", "short_name", "sort_order" },
                 values: new object[,]
                 {
@@ -232,9 +232,9 @@ namespace Pulse.Data.Migrations
                 columns: new[] { "id", "category_id", "country", "created_at", "created_by_user_id", "deactivated_at", "deactivated_by_user_id", "description", "email", "is_active", "locality", "location", "name", "phone_number", "postal_code", "profile_image", "region", "secondary_address", "street_address", "updated_at", "updated_by_user_id", "website" },
                 values: new object[,]
                 {
-                    { 1L, 7, "United States", NodaTime.Instant.FromUnixTimeTicks(17479659016422900L), "system-seed", null, null, "Local craft brewery featuring house-made beers, pub fare, and live entertainment in a cozy atmosphere.", "info@bullfrogbrewery.com", true, "Williamsport", (NetTopologySuite.Geometries.Point)new NetTopologySuite.IO.WKTReader().Read("SRID=4326;POINT (-77.0057192 41.240432)"), "Bullfrog Brewery", "(570) 326-4700", "17701", null, "PA", null, "229 W 4th St", null, null, "https://bullfrogbrewery.com" },
-                    { 2L, 1, "United States", NodaTime.Instant.FromUnixTimeTicks(17479659016422900L), "system-seed", null, null, "Family-friendly restaurant and ale house serving American cuisine with a great selection of craft beers and cocktails.", "info@thebrickyard.net", true, "Williamsport", (NetTopologySuite.Geometries.Point)new NetTopologySuite.IO.WKTReader().Read("SRID=4326;POINT (-77.0037646 41.2409825)"), "The Brickyard Restaurant & Ale House", "(570) 322-3876", "17701", null, "PA", null, "343 Pine St", null, null, "https://thebrickyard.net" },
-                    { 3L, 2, "United States", NodaTime.Instant.FromUnixTimeTicks(17479659016422900L), "system-seed", null, null, "Upscale gastropub featuring craft cocktails, local beers, and elevated bar food in a sophisticated atmosphere.", "info@thecrookedgoose.com", true, "Williamsport", (NetTopologySuite.Geometries.Point)new NetTopologySuite.IO.WKTReader().Read("SRID=4326;POINT (-77.0047521 41.2407201)"), "The Crooked Goose", "(570) 360-7435", "17701", null, "PA", null, "215 W 4th St", null, null, "https://thecrookedgoose.com" }
+                    { 1L, 7, "United States", NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", null, null, "Local craft brewery featuring house-made beers, pub fare, and live entertainment in a cozy atmosphere.", "info@bullfrogbrewery.com", true, "Williamsport", (NetTopologySuite.Geometries.Point)new NetTopologySuite.IO.WKTReader().Read("SRID=4326;POINT (-77.0057192 41.240432)"), "Bullfrog Brewery", "(570) 326-4700", "17701", null, "PA", null, "229 W 4th St", null, null, "https://bullfrogbrewery.com" },
+                    { 2L, 1, "United States", NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", null, null, "Family-friendly restaurant and ale house serving American cuisine with a great selection of craft beers and cocktails.", "info@thebrickyard.net", true, "Williamsport", (NetTopologySuite.Geometries.Point)new NetTopologySuite.IO.WKTReader().Read("SRID=4326;POINT (-77.0037646 41.2409825)"), "The Brickyard Restaurant & Ale House", "(570) 322-3876", "17701", null, "PA", null, "343 Pine St", null, null, "https://thebrickyard.net" },
+                    { 3L, 2, "United States", NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", null, null, "Upscale gastropub featuring craft cocktails, local beers, and elevated bar food in a sophisticated atmosphere.", "info@thecrookedgoose.com", true, "Williamsport", (NetTopologySuite.Geometries.Point)new NetTopologySuite.IO.WKTReader().Read("SRID=4326;POINT (-77.0047521 41.2407201)"), "The Crooked Goose", "(570) 360-7435", "17701", null, "PA", null, "215 W 4th St", null, null, "https://thecrookedgoose.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -281,13 +281,13 @@ namespace Pulse.Data.Migrations
                 columns: new[] { "id", "created_at", "created_by_user_id", "cron_schedule", "deactivated_at", "deactivated_by_user_id", "description", "end_date", "end_time", "is_active", "is_recurring", "special_category_id", "start_date", "start_time", "title", "updated_at", "updated_by_user_id", "venue_id" },
                 values: new object[,]
                 {
-                    { 1L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", "0 21 * * 5,6", null, null, "Live music showcasing the best in local, regional, and national talent. Various genres from rock to jazz.", null, new NodaTime.LocalTime(23, 0), true, true, 3, new NodaTime.LocalDate(2025, 5, 3), new NodaTime.LocalTime(21, 0), "Live Music Friday/Saturday", null, null, 1L },
-                    { 2L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", "0 16 * * 1-5", null, null, "Enjoy $1 off all draft beers and $5 house wines.", null, new NodaTime.LocalTime(18, 0), true, true, 2, new NodaTime.LocalDate(2025, 5, 1), new NodaTime.LocalTime(16, 0), "Happy Hour", null, null, 1L },
-                    { 3L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", null, null, null, "Sweet and spicy chicken sandwich with sweet n spicy sauce, lettuce, and pickles.", new NodaTime.LocalDate(2025, 5, 27), new NodaTime.LocalTime(22, 0), true, false, 1, new NodaTime.LocalDate(2025, 5, 20), new NodaTime.LocalTime(11, 0), "Weekly Burger Special - Sweet & Spicy Chicken Sandwich", null, null, 2L },
-                    { 4L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", "0 21 * * 3", null, null, "Pub Trivia with first and second place prizes. Sponsored by Bacardi Oakheart.", null, new NodaTime.LocalTime(23, 0), true, true, 3, new NodaTime.LocalDate(2025, 5, 22), new NodaTime.LocalTime(21, 0), "Wednesday Night Quizzo", null, null, 2L },
-                    { 5L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", "0 11 * * 2", null, null, "Every Tuesday is Mug Club Night. Our valued Mug club members enjoy their First beer, of their choice, on US!!", null, new NodaTime.LocalTime(23, 0), true, true, 2, new NodaTime.LocalDate(2025, 5, 21), new NodaTime.LocalTime(11, 0), "Mug Club Tuesday", null, null, 2L },
-                    { 6L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", "0 10 * * 0", null, null, "Special brunch menu served from 10am to 2pm every Sunday.", null, new NodaTime.LocalTime(14, 0), true, true, 1, new NodaTime.LocalDate(2025, 5, 18), new NodaTime.LocalTime(10, 0), "Sunday Brunch", null, null, 3L },
-                    { 7L, NodaTime.Instant.FromUnixTimeTicks(17479659016379347L), "system-seed", "0 16 * * 2-6", null, null, "Enjoy our specially crafted cocktails at a reduced price.", null, new NodaTime.LocalTime(18, 0), true, true, 2, new NodaTime.LocalDate(2025, 5, 21), new NodaTime.LocalTime(16, 0), "Cocktail Hour", null, null, 3L }
+                    { 1L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", "0 21 * * 5,6", null, null, "Live music showcasing the best in local, regional, and national talent. Various genres from rock to jazz.", null, new NodaTime.LocalTime(23, 0), true, true, 3, new NodaTime.LocalDate(2025, 5, 3), new NodaTime.LocalTime(21, 0), "Live Music Friday/Saturday", null, null, 1L },
+                    { 2L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", "0 16 * * 1-5", null, null, "Enjoy $1 off all draft beers and $5 house wines.", null, new NodaTime.LocalTime(18, 0), true, true, 2, new NodaTime.LocalDate(2025, 5, 1), new NodaTime.LocalTime(16, 0), "Happy Hour", null, null, 1L },
+                    { 3L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", null, null, null, "Sweet and spicy chicken sandwich with sweet n spicy sauce, lettuce, and pickles.", new NodaTime.LocalDate(2025, 5, 27), new NodaTime.LocalTime(22, 0), true, false, 1, new NodaTime.LocalDate(2025, 5, 20), new NodaTime.LocalTime(11, 0), "Weekly Burger Special - Sweet & Spicy Chicken Sandwich", null, null, 2L },
+                    { 4L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", "0 21 * * 3", null, null, "Pub Trivia with first and second place prizes. Sponsored by Bacardi Oakheart.", null, new NodaTime.LocalTime(23, 0), true, true, 3, new NodaTime.LocalDate(2025, 5, 22), new NodaTime.LocalTime(21, 0), "Wednesday Night Quizzo", null, null, 2L },
+                    { 5L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", "0 11 * * 2", null, null, "Every Tuesday is Mug Club Night. Our valued Mug club members enjoy their First beer, of their choice, on US!!", null, new NodaTime.LocalTime(23, 0), true, true, 2, new NodaTime.LocalDate(2025, 5, 21), new NodaTime.LocalTime(11, 0), "Mug Club Tuesday", null, null, 2L },
+                    { 6L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", "0 10 * * 0", null, null, "Special brunch menu served from 10am to 2pm every Sunday.", null, new NodaTime.LocalTime(14, 0), true, true, 1, new NodaTime.LocalDate(2025, 5, 18), new NodaTime.LocalTime(10, 0), "Sunday Brunch", null, null, 3L },
+                    { 7L, NodaTime.Instant.FromUnixTimeTicks(0L), "system-seed", "0 16 * * 2-6", null, null, "Enjoy our specially crafted cocktails at a reduced price.", null, new NodaTime.LocalTime(18, 0), true, true, 2, new NodaTime.LocalDate(2025, 5, 21), new NodaTime.LocalTime(16, 0), "Cocktail Hour", null, null, 3L }
                 });
 
             migrationBuilder.CreateIndex(
@@ -302,14 +302,14 @@ namespace Pulse.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_day_of_weeks_bit_mask",
-                table: "day_of_weeks",
+                name: "ix_days_of_week_bit_mask",
+                table: "days_of_week",
                 column: "bit_mask",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_day_of_weeks_iso_number",
-                table: "day_of_weeks",
+                name: "ix_days_of_week_iso_number",
+                table: "days_of_week",
                 column: "iso_number",
                 unique: true);
 
@@ -368,7 +368,7 @@ namespace Pulse.Data.Migrations
                 name: "specials");
 
             migrationBuilder.DropTable(
-                name: "day_of_weeks");
+                name: "days_of_week");
 
             migrationBuilder.DropTable(
                 name: "special_categories");

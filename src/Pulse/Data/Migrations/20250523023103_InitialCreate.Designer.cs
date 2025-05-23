@@ -13,7 +13,7 @@ using Pulse.Data.Context;
 namespace Pulse.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250523020502_InitialCreate")]
+    [Migration("20250523023103_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -306,17 +306,17 @@ namespace Pulse.Data.Migrations
                         .HasColumnName("sort_order");
 
                     b.HasKey("Id")
-                        .HasName("pk_day_of_weeks");
+                        .HasName("pk_days_of_week");
 
                     b.HasIndex("BitMask")
                         .IsUnique()
-                        .HasDatabaseName("ix_day_of_weeks_bit_mask");
+                        .HasDatabaseName("ix_days_of_week_bit_mask");
 
                     b.HasIndex("IsoNumber")
                         .IsUnique()
-                        .HasDatabaseName("ix_day_of_weeks_iso_number");
+                        .HasDatabaseName("ix_days_of_week_iso_number");
 
-                    b.ToTable("day_of_weeks", (string)null);
+                    b.ToTable("days_of_week", (string)null);
 
                     b.HasData(
                         new
@@ -491,7 +491,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             CronSchedule = "0 21 * * 5,6",
                             Description = "Live music showcasing the best in local, regional, and national talent. Various genres from rock to jazz.",
@@ -507,7 +507,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             CronSchedule = "0 16 * * 1-5",
                             Description = "Enjoy $1 off all draft beers and $5 house wines.",
@@ -523,7 +523,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 3L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             Description = "Sweet and spicy chicken sandwich with sweet n spicy sauce, lettuce, and pickles.",
                             EndDate = new NodaTime.LocalDate(2025, 5, 27),
@@ -539,7 +539,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 4L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             CronSchedule = "0 21 * * 3",
                             Description = "Pub Trivia with first and second place prizes. Sponsored by Bacardi Oakheart.",
@@ -555,7 +555,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 5L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             CronSchedule = "0 11 * * 2",
                             Description = "Every Tuesday is Mug Club Night. Our valued Mug club members enjoy their First beer, of their choice, on US!!",
@@ -571,7 +571,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 6L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             CronSchedule = "0 10 * * 0",
                             Description = "Special brunch menu served from 10am to 2pm every Sunday.",
@@ -587,7 +587,7 @@ namespace Pulse.Data.Migrations
                         new
                         {
                             Id = 7L,
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016379347L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             CronSchedule = "0 16 * * 2-6",
                             Description = "Enjoy our specially crafted cocktails at a reduced price.",
@@ -811,7 +811,7 @@ namespace Pulse.Data.Migrations
                             Id = 1L,
                             CategoryId = 7,
                             Country = "United States",
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016422900L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             Description = "Local craft brewery featuring house-made beers, pub fare, and live entertainment in a cozy atmosphere.",
                             Email = "info@bullfrogbrewery.com",
@@ -830,7 +830,7 @@ namespace Pulse.Data.Migrations
                             Id = 2L,
                             CategoryId = 1,
                             Country = "United States",
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016422900L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             Description = "Family-friendly restaurant and ale house serving American cuisine with a great selection of craft beers and cocktails.",
                             Email = "info@thebrickyard.net",
@@ -849,7 +849,7 @@ namespace Pulse.Data.Migrations
                             Id = 3L,
                             CategoryId = 2,
                             Country = "United States",
-                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(17479659016422900L),
+                            CreatedAt = NodaTime.Instant.FromUnixTimeTicks(0L),
                             CreatedByUserId = "system-seed",
                             Description = "Upscale gastropub featuring craft cocktails, local beers, and elevated bar food in a sophisticated atmosphere.",
                             Email = "info@thecrookedgoose.com",

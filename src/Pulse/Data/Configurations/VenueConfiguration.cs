@@ -11,6 +11,7 @@ namespace Pulse.Data.Configurations
         public void Configure(EntityTypeBuilder<Venue> builder)
         {
             #region Entity Configuration
+            builder.ToTable("venues");
             builder.HasKey(v => v.Id);
 
             builder.Property(v => v.Name)

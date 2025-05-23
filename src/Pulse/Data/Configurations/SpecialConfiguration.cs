@@ -10,6 +10,7 @@ namespace Pulse.Data.Configurations
         public void Configure(EntityTypeBuilder<Special> builder)
         {
             #region Entity Configuration
+            builder.ToTable("specials");
             builder.HasKey(s => s.Id);
 
             builder.Property(s => s.Title)
