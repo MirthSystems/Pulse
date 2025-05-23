@@ -9,6 +9,7 @@
     {
         public void Configure(EntityTypeBuilder<VenueCategory> builder)
         {
+            #region Entity Configuration
             builder.HasKey(vc => vc.Id);
 
             builder.Property(vc => vc.Name)
@@ -30,7 +31,9 @@
                    .IsUnique();
             builder.HasIndex(vc => vc.BitMask)
                    .IsUnique();
+            #endregion
 
+            #region Data Seed
             builder.HasData(
                 new VenueCategory 
                 { 
@@ -114,6 +117,7 @@
                     BitMask = 256
                 }
             );
+            #endregion
         }
     }
 }

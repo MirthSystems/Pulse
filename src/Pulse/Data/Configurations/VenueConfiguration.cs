@@ -10,6 +10,7 @@ namespace Pulse.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Venue> builder)
         {
+            #region Entity Configuration
             builder.HasKey(v => v.Id);
 
             builder.Property(v => v.Name)
@@ -86,7 +87,9 @@ namespace Pulse.Data.Configurations
             builder.HasIndex(v => v.Name);
             builder.HasIndex(v => v.Location)
                    .HasMethod("GIST");
+            #endregion
 
+            #region Data Seed
             var createdAt = SystemClock.Instance.GetCurrentInstant();
 
             builder.HasData(
@@ -160,6 +163,7 @@ namespace Pulse.Data.Configurations
                     IsActive = true
                 }
             );
+            #endregion
         }
     }
 }
