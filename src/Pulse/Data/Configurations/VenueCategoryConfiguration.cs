@@ -11,6 +11,16 @@
         {
             builder.HasKey(vc => vc.Id);
 
+            builder.Property(vc => vc.Name)
+                   .IsRequired()
+                   .HasMaxLength(50);
+
+            builder.Property(vc => vc.Description)
+                   .HasMaxLength(200);
+                   
+            builder.Property(vc => vc.Icon)
+                   .HasMaxLength(10);
+
             builder.HasMany(vc => vc.Venues)
                    .WithOne(v => v.Category)
                    .HasForeignKey(v => v.CategoryId)
