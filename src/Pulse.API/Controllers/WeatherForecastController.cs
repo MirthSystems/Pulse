@@ -1,4 +1,4 @@
-namespace Pulse.Backoffice.ApiService.Controllers
+namespace Pulse.API.Controllers
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;

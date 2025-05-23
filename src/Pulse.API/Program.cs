@@ -1,6 +1,4 @@
 
-using Microsoft.Extensions.Configuration;
-
 using Pulse.Core.Configurations;
 using Pulse.Extensions;
 
@@ -18,7 +16,7 @@ internal class Program
 
         var appConfig = appConfigSection.Get<ApplicationConfiguration>();
 
-        builder.Services.Configure<ApplicationConfiguration>(appConfigSection);   
+        builder.Services.Configure<ApplicationConfiguration>(appConfigSection);
 
         builder.Services.AddApplicationServices(appConfig);
 

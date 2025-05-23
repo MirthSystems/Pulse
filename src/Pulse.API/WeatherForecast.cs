@@ -1,4 +1,4 @@
-namespace Pulse.Backoffice.ApiService
+namespace Pulse.API
 {
     public class WeatherForecast
     {

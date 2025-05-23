@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 25.0.1706.5
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.Backoffice.ApiService", "Pulse.Backoffice.ApiService.csproj", "{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulse.API", "Pulse.API.csproj", "{BDC30551-669E-4F3C-92D1-7DC6886DE22F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,12 +12,12 @@ Global
 		Default|Any CPU = Default|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}.Default|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A4B36B2-0ED4-42AD-BED8-A10951BCB778}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{BDC30551-669E-4F3C-92D1-7DC6886DE22F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDC30551-669E-4F3C-92D1-7DC6886DE22F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDC30551-669E-4F3C-92D1-7DC6886DE22F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDC30551-669E-4F3C-92D1-7DC6886DE22F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDC30551-669E-4F3C-92D1-7DC6886DE22F}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDC30551-669E-4F3C-92D1-7DC6886DE22F}.Default|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
